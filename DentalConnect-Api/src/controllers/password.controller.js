@@ -1,0 +1,99 @@
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+const { enviarCorreoRecuperacion } = require('../utils/emailService');
+
+// 1. SOLICITAR RESTABLECIMIENTO (Generar y Enviar Token por Correo)
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Verificar si el usuario existe
+        const usuario = await User.findOne({ where: { email } });
+        if (!usuario) {
+            return res.status(404).json({ error: 'No existe una cuenta con este correo' });
+        }
+
+        // Generar un token único (como lo hace Laravel en la tabla password_resets, pero simple)
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        
+        // Encriptar el token para guardarlo en BD (Seguridad adicional)
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+        // Guardar en la DB con expiración (15 minutos)
+        usuario.reset_password_token = hashedToken;
+        usuario.reset_password_expires = Date.now() + 15 * 60 * 1000;
+        await usuario.save();
+
+        // Construir URL de reseteo para el Frontend (React o Laravel Blade)
+        // Ejemplo para apuntar a una vista de laravel: http://localhost:8000/password/reset/{token}
+        const frontendURL = process.env.FRONTEND_URL || 'http://localhost:8000';
+        const resetUrl = `${frontendURL}/reset-password/${resetToken}?email=${email}`;
+
+        // Enviar Correo
+        await enviarCorreoRecuperacion(usuario.email, resetUrl);
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Se ha enviado un correo con las instrucciones para restablecer tu contraseña'
+        });
+
+    } catch (error) {
+        console.error("Error en forgotPassword:", error);
+        res.status(500).json({ error: 'Error al enviar el correo. Por favor, intenta de nuevo.' });
+    }
+};
+
+// 2. APLICAR RESTABLECIMIENTO (Validar Token y Actualizar Password)
+exports.resetPassword = async (req, res) => {
+    try {
+        const { token, email, newPassword } = req.body;
+
+        if(!token || !email || !newPassword) {
+            return res.status(400).json({ error: 'Faltan datos requeridos (token, email, newPassword)'});
+        }
+
+        // Hashear el token recibido para cruzarlo con el de la Base de Datos
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        // Buscar al usuario con ese correo, ese token y verificar que no haya expirado
+        const DateNow = new Date();
+        const usuario = await User.findOne({
+            where: {
+                email: email,
+                reset_password_token: hashedToken,
+                // Validar expiración manualmente en MySQL, o con Sequelize Operators [Op.gt] 
+                // Aquí para simplificar, validamos después
+            }
+        });
+
+        if (!usuario) {
+            return res.status(400).json({ error: 'El token es inválido o el correo no coincide' });
+        }
+
+        // Validar expiración (is expired?)
+        if (usuario.reset_password_expires < DateNow) {
+            return res.status(400).json({ error: 'El token de restablecimiento ha expirado' });
+        }
+
+        // Hashear la NUEVA contraseña (bcrypt)
+        // OJO: Laravel usa Bcrypt con cost factor 12 típicamente ($2y$12$). Bcryptjs usa 10 por default, pero es compatible
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Actualizar y Limpiar Tokens
+        usuario.password = hashedPassword;
+        usuario.reset_password_token = null;
+        usuario.reset_password_expires = null;
+        await usuario.save();
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión.' 
+        });
+
+    } catch (error) {
+        console.error("Error en resetPassword:", error);
+        res.status(500).json({ error: 'Error del servidor al restablecer contraseña.' });
+    }
+};
