@@ -5,6 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Modelo del catálogo de servicios o tratamientos dentales.
+ *
+ * Define los servicios ofrecidos por la clínica y su precio base.
+ *
+ * @property int $id_servicio
+ * @property int $id_clinica
+ * @property string $nombre_servicio
+ * @property float $precio_base
+ * @property string|null $categoria
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Servicio extends Model
 {
     use HasFactory;

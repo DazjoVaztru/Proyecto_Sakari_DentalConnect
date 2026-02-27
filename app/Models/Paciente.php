@@ -4,7 +4,43 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\SignoVital;
+use App\Models\EvolucionTratamiento;
+use App\Models\SeguimientoClinico;
 
+/**
+ * Modelo principal del paciente.
+ *
+ * Centraliza toda la información personal, médica y de contacto del paciente.
+ * Gestiona relaciones con citas, historial médico, odontogramas, archivos y más.
+ *
+ * @property int $id_paciente
+ * @property int $id_usuario
+ * @property string $nombre
+ * @property string $apellido_paterno
+ * @property string|null $apellido_materno
+ * @property string|null $telefono
+ * @property string|null $correo_electronico
+ * @property \Illuminate\Support\Carbon|null $fecha_nacimiento
+ * @property string $sexo
+ * @property string|null $ocupacion
+ * @property string|null $tipo_sangre
+ * @property float|null $peso
+ * @property string|null $calle
+ * @property string|null $num_exterior
+ * @property string|null $num_interior
+ * @property string|null $colonia
+ * @property string|null $municipio
+ * @property string|null $alergias
+ * @property string|null $alergias_criticas
+ * @property string|null $enfermedades_cronicas
+ * @property bool $is_active
+ * @property int|null $id_contacto_emergencia
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * 
+ * @property-read string $nombre_completo
+ */
 class Paciente extends Model
 {
     use HasFactory;
@@ -35,7 +71,8 @@ class Paciente extends Model
         'municipio',
 
         // Datos Médicos Rápidos (Texto libre)
-        'alergias_criticas',
+        'alergias',              // Columna real en BD: texto libre de alergias
+        'alergias_criticas',     // Alias alternativo (por compatibilidad)
         'enfermedades_cronicas',
         'is_active',
 
@@ -78,12 +115,6 @@ class Paciente extends Model
         return $this->hasMany(Cita::class, 'id_paciente', 'id_paciente');
     }
 
-    // Relación: Odontograma (Historial de dientes)
-    public function odontogramas()
-    {
-        return $this->hasMany(Odontograma::class, 'id_paciente', 'id_paciente');
-    }
-
     // Relación: Archivos (PDFs, RX, Fotos)
     public function archivos()
     {
@@ -121,7 +152,7 @@ class Paciente extends Model
             'pacientes_alergias',
             'id_paciente',
             'id_alergia'
-        )->withTimestamps();
+        );
     }
 
     // Relación Muchos a Muchos: Enfermedades Crónicas (Catálogo)
@@ -133,7 +164,45 @@ class Paciente extends Model
             'pacientes_enfermedades_cronicas',
             'id_paciente',
             'id_enfermedad_cronica'
-        )->withTimestamps();
+        );
     }
+
+    // ==========================================================
+    // RELACIONES HISTORIAL CLÍNICO (antes tablas huérfanas)
+    // ==========================================================
+
+    /**
+     * Historial de signos vitales del paciente.
+     * Tabla: historial_signos_vitales | FK: paciente_id
+     */
+    public function signosVitales()
+    {
+        return $this->hasMany(SignoVital::class, 'paciente_id', 'id_paciente')
+            ->orderBy('fecha_registro', 'desc');
+    }
+
+    /**
+     * Evoluciones / notas SOAP del tratamiento.
+     * Tabla: evolucion_tratamiento | FK: id_paciente
+     * ⚠ La tabla NO tiene created_at, se ordena por id_evolucion.
+     */
+    public function evoluciones()
+    {
+        return $this->hasMany(EvolucionTratamiento::class, 'id_paciente', 'id_paciente')
+            ->orderBy('id_evolucion', 'desc');
+    }
+
+    /**
+     * Historial odontograma del paciente.
+     * ⚠ La tabla NO tiene timestamps — PK real es id_odontograma.
+     */
+    public function odontogramas()
+    {
+        return $this->hasMany(Odontograma::class, 'id_paciente', 'id_paciente')
+            ->orderBy('id_odontograma', 'desc');
+    }
+
+    // NOTA: seguimiento_clinico NO tiene id_paciente — tiene FK a id_cita.
+    // Se accede a través de: $paciente->citas->flatMap->seguimientos
 
 }

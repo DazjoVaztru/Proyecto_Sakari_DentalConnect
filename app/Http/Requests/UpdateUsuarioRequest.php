@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
+class UpdateUsuarioRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        if (!Auth::check())
+            return false;
+
+        // Verificar que el usuario a editar pertenece a la misma clínica
+        $idUsuario = $this->input('id_usuario');
+        if (!$idUsuario)
+            return false;
+
+        $usuario = \App\Models\User::find($idUsuario);
+        return $usuario && $usuario->id_clinica === Auth::user()->id_clinica;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'id_usuario' => 'required|exists:usuarios_sistema,id_usuario',
+            'nombre_completo' => 'required|string|max:100',
+            'email' => 'required|email|max:150',
+            'password' => 'nullable|string|min:8|confirmed',
+            // Datos del doctor (opcionales, se ignoran para recepcionistas)
+            'cedula_profesional' => 'nullable|string|max:20',
+            'horario_default' => 'nullable|string|max:100',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nombre_completo.required' => 'El nombre completo es obligatorio.',
+            'email.email' => 'El correo debe tener un formato válido.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+        ];
+    }
+}

@@ -5,198 +5,323 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cita;
 use App\Models\Paciente;
+use App\Models\IngresoCaja;
+use App\Models\Inventario;
+use App\Models\Notificacion;
+use App\Models\Servicio;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    /**
+     * Muestra el dashboard con métricas reales de la clínica.
+     */
     public function index()
     {
-        $proximasCitas = Cita::with(['paciente', 'servicio'])
-            ->where('fecha_hora_inicio', '>=', Carbon::now())
-            ->where('estado_cita', 'pendiente')
-            ->orderBy('fecha_hora_inicio', 'asc')
-            ->take(10)
-            ->get();
-
-        // NOTA: Ya no enviamos datos para el calendario externo porque lo quitaremos.
-        return view('dashboard', compact('proximasCitas'));
-    }
-
-    // --- FUNCIÓN 1: Datos del Modal de Detalle (Actualizada) ---
-    public function obtenerDatosModal($idCita)
-    {
-        // Usamos findOrFail para que si no existe la cita, de error 404 controlado
-        // Quitamos 'paciente.enfermedades' del with por ahora para evitar errores si no hay relación
-        $cita = Cita::with(['paciente', 'servicio', 'ingresos'])->findOrFail($idCita);
-
-        // Usamos costo_estimado si existe, si no el del servicio
-        $costoTotal = $cita->costo_estimado ?? ($cita->servicio ? $cita->servicio->precio_base : 0);
-        $totalAbonado = $cita->ingresos->sum('monto');
-        $restante = max(0, $costoTotal - $totalAbonado);
-        $fecha = Carbon::parse($cita->fecha_hora_inicio);
-
-        // --- BLINDAJE DE DATOS NULOS ---
-        // Si estos campos no existen en la BD, ponemos texto por defecto para que no falle el JSON
-        $sangre = $cita->paciente->tipo_sangre ?? 'S/R'; // Sin Registro
-        $peso = $cita->paciente->peso ?? '0';
-
-        // Simulación de alergias si no hay tabla pivote aun
-        $alergias = $cita->paciente->alergias_criticas ?? 'Ninguna conocida';
-        $enfermedades = $cita->paciente->enfermedades_cronicas ?? 'Ninguna';
-
-        return response()->json([
-            'paciente' => [
-                'nombres' => $cita->paciente->nombre,
-                'paterno' => $cita->paciente->apellido_paterno,
-                'materno' => $cita->paciente->apellido_materno ?? '',
-                'edad' => $cita->paciente->fecha_nacimiento ? Carbon::parse($cita->paciente->fecha_nacimiento)->age . ' años' : 'N/A',
-                'sexo' => $cita->paciente->sexo ?? 'N/A',
-                'telefono' => $cita->paciente->telefono ?? 'Sin número',
-                'tipo_sangre' => $sangre,
-                'peso' => $peso . ' kg',
-                'alergias' => $alergias,
-                'enfermedades' => $enfermedades,
-            ],
-            'fila_tabla' => [
-                'dia' => $fecha->translatedFormat('d M'),
-                'hora' => $fecha->format('h:i A'),
-                'seguimiento' => $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General',
-                'abono' => number_format($totalAbonado, 2),
-            ],
-            'finanzas' => [
-                'total' => number_format($costoTotal, 2),
-                'restante' => number_format($restante, 2)
-            ],
-            'fecha_cita' => [
-                'mes' => $fecha->month,
-                'anio' => $fecha->year,
-                'dia' => $fecha->day
-            ]
-        ]);
-    }
-    // --- FUNCIÓN 2: Disponibilidad del Calendario (NUEVA) ---
-    public function obtenerDisponibilidadMes(Request $request)
-    {
-        $mes = $request->query('mes', Carbon::now()->month);
-        $anio = $request->query('anio', Carbon::now()->year);
-
-        // 1. Contar citas por día en ese mes y año
-        $citasPorDia = Cita::select(DB::raw('DAY(fecha_hora_inicio) as dia'), DB::raw('count(*) as total'))
-            ->whereMonth('fecha_hora_inicio', $mes)
-            ->whereYear('fecha_hora_inicio', $anio)
-            ->groupBy('dia')
-            ->pluck('total', 'dia')
-            ->toArray();
-
-        $disponibilidad = [];
-        $diasEnMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
+        $user = Auth::user();
+        $idClinica = $user->id_clinica;
         $hoy = Carbon::today();
 
-        // 2. Definir colores según ocupación
-        // CRITERIO SIMPLE: 0 citas = Verde, 1-4 citas = Amarillo, 5+ citas = Rojo
-        for ($dia = 1; $dia <= $diasEnMes; $dia++) {
-            $fechaActual = Carbon::createFromDate($anio, $mes, $dia);
-            $totalCitas = $citasPorDia[$dia] ?? 0;
+        // --- Citas pendientes: futuras primero, vencidas al final ---
+        $ahora = Carbon::now();
 
-            $estado = 'verde'; // Por defecto libre
-            $clickable = true;
+        $citasFuturas = Cita::with(['paciente', 'servicio'])
+            ->where('fecha_hora_inicio', '>=', $ahora)
+            ->where('estado_cita', 'pendiente')
+            ->orderBy('fecha_hora_inicio', 'asc')
+            ->get();
 
-            if ($fechaActual->lt($hoy)) {
-                $estado = 'pasado'; // Días pasados en gris
-                $clickable = false;
-            } elseif ($totalCitas >= 5) { // Límite arbitrario para "Lleno"
-                $estado = 'rojo';
-                $clickable = false; // No se puede agendar si está lleno
-            } elseif ($totalCitas > 0) {
-                $estado = 'amarillo';
-                // Se puede agendar pero con precaución
-            }
+        $citasVencidas = Cita::with(['paciente', 'servicio'])
+            ->where('fecha_hora_inicio', '<', $ahora)
+            ->where('estado_cita', 'pendiente')
+            ->orderBy('fecha_hora_inicio', 'desc')
+            ->get();
 
-            $disponibilidad[$dia] = [
-                'estado' => $estado,
-                'clickable' => $clickable,
-                'citas_count' => $totalCitas
+        $proximasCitas = $citasFuturas->concat($citasVencidas)->take(15);
+
+        // --- Citas de hoy ---
+        $citasHoyCount = Cita::whereDate('fecha_hora_inicio', $hoy)
+            ->where('estado_cita', 'pendiente')
+            ->count();
+
+        // --- Total de pacientes activos ---
+        $totalPacientes = Paciente::where('is_active', true)->count();
+
+        // --- Ingresos del mes actual ---
+        $ingresosMes = IngresoCaja::where('id_clinica', $idClinica)
+            ->whereMonth('fecha_ingreso', $hoy->month)
+            ->whereYear('fecha_ingreso', $hoy->year)
+            ->sum('monto');
+
+        // --- Ítems de inventario con stock bajo (< 5 unidades) ---
+        $itemsBajoStock = Inventario::where('id_clinica', $idClinica)
+            ->where('stock', '<', 5)
+            ->orderBy('stock', 'asc')
+            ->take(5)
+            ->get();
+
+        // --- Notificaciones no leídas del usuario actual ---
+        $notificacionesPendientes = Notificacion::where('id_usuario', $user->id_usuario)
+            ->where('estado', 'pendiente')
+            ->count();
+
+        // --- Catálogo de servicios (para el odontograma) ---
+        $servicios = Servicio::orderBy('nombre_servicio')->get();
+
+        return view('dashboard', compact(
+            'proximasCitas',
+            'citasHoyCount',
+            'totalPacientes',
+            'ingresosMes',
+            'itemsBajoStock',
+            'notificacionesPendientes',
+            'servicios'
+        ));
+    }
+
+    // --- FUNCIÓN 1: Datos del Modal de Detalle  ---
+    /**
+     * Obtiene los datos detallados de una cita para el modal.
+     */
+    public function obtenerDatosModal($idCita)
+    {
+        $cita = Cita::with(['paciente', 'servicio', 'ingresos'])->findOrFail($idCita);
+
+        $p = $cita->paciente;
+        $costoTotal = floatval($cita->costo_estimado ?? 0);
+        $totalPagado = $cita->ingresos ? $cita->ingresos->sum('monto') : 0;
+        $saldo = max(0, $costoTotal - $totalPagado);
+
+        // ── Datos Paciente ────────────────────────────────────────────────
+        $pacienteData = null;
+        if ($p) {
+            $edad = $p->fecha_nacimiento ? Carbon::parse($p->fecha_nacimiento)->age : null;
+
+            $sexoMap = ['M' => 'Masculino', 'F' => 'Femenino', 'O' => 'Otro'];
+
+            $pacienteData = [
+                // Keys exactos que el JS del dashboard lee (no cambiar):
+                'id_paciente' => $p->id_paciente,
+                'nombres' => $p->nombre,
+                'paterno' => $p->apellido_paterno,
+                'materno' => $p->apellido_materno,
+                'edad' => $edad ? $edad . ' años' : 'N/A',
+                'edad_numero' => $edad,
+                'sexo' => $sexoMap[$p->sexo] ?? $p->sexo ?? 'N/A',
+                'telefono' => $p->telefono,
+                'tipo_sangre' => $p->tipo_sangre,
+                'peso' => $p->peso ? $p->peso . ' kg' : 'N/A',
+                'alergias' => $p->alergias ?? 'Ninguna registrada',
+                'enfermedades' => $p->enfermedades_cronicas ?? 'Ninguna registrada',
             ];
         }
 
-        return response()->json($disponibilidad);
+        // ── Fila Tabla ────────────────────────────────────────────────────
+        // El JS lee data.fila_tabla.dia / .hora / .seguimiento / .abono
+        $filaTabla = [
+            'dia' => Carbon::parse($cita->fecha_hora_inicio)->format('d/m/Y'),
+            'hora' => Carbon::parse($cita->fecha_hora_inicio)->format('h:i A')
+                . ' – ' . Carbon::parse($cita->fecha_hora_fin)->format('h:i A'),
+            'seguimiento' => $cita->motivo ?? ($cita->servicio?->nombre_servicio ?? 'Consulta'),
+            'abono' => number_format($totalPagado, 2),
+        ];
+
+        // ── Finanzas ──────────────────────────────────────────────────────
+        // El JS usa data.finanzas.total y data.finanzas.restante como strings con coma
+        $finanzas = [
+            'total' => number_format($costoTotal, 2),
+            'pagado' => number_format($totalPagado, 2),
+            'restante' => number_format($saldo, 2),
+        ];
+
+        // ── Fecha para calendario ─────────────────────────────────────────
+        $fechaCita = [
+            'mes' => (int) Carbon::parse($cita->fecha_hora_inicio)->format('m'),
+            'anio' => (int) Carbon::parse($cita->fecha_hora_inicio)->format('Y'),
+        ];
+
+        // ── Historial odontograma ─────────────────────────────────────────
+        $odontograma = \App\Models\Odontograma::where('id_paciente', $p?->id_paciente)
+            ->orderBy('id_odontograma', 'desc')
+            ->get();
+
+        // ── Historial completo de citas del paciente ──────────────────────
+        $todasLasCitas = Cita::with(['ingresos', 'servicio'])
+            ->where('id_paciente', $p?->id_paciente)
+            ->orderBy('fecha_hora_inicio', 'desc')
+            ->get()
+            ->map(function ($c) use ($idCita) {
+                $abonadoEnCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
+                $estadoBadge = match ($c->estado_cita) {
+                    'completada' => '✅ Completada',
+                    'cancelada' => '❌ Cancelada',
+                    'pendiente' => '🕐 Pendiente',
+                    default => ucfirst($c->estado_cita),
+                };
+                return [
+                    'id' => $c->id_cita,
+                    'dia' => Carbon::parse($c->fecha_hora_inicio)->format('d/m/Y'),
+                    'hora' => Carbon::parse($c->fecha_hora_inicio)->format('h:i A')
+                        . ' – ' . Carbon::parse($c->fecha_hora_fin)->format('h:i A'),
+                    'servicio' => $c->servicio?->nombre_servicio ?? 'Consulta General',
+                    'seguimiento' => $c->motivo ?? ($c->servicio?->nombre_servicio ?? 'Consulta'),
+                    'abono' => number_format($abonadoEnCita, 2),
+                    'estado' => $estadoBadge,
+                    'es_actual' => $c->id_cita == $idCita,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'paciente' => $pacienteData,
+            'fila_tabla' => $filaTabla,
+            'finanzas' => $finanzas,
+            'fecha_cita' => $fechaCita,
+            'odontograma' => $odontograma,
+            'ingresos' => $cita->ingresos,
+            'historial_citas' => $todasLasCitas,
+        ]);
     }
 
-    // --- FUNCIÓN 3: Actualizar Cita (Pago, Seguimiento, Reprogramación) ---
-    public function actualizarCita(Request $request, $id)
+    // --- FUNCIÓN 2: Actualizar estado de cita ---
+    /**
+     * Actualiza el estado o notas de una cita desde el modal del dashboard.
+     */
+    public function actualizarCita(Request $request, $idCita)
     {
-        try {
-            DB::beginTransaction();
+        $cita = Cita::findOrFail($idCita);
 
-            $cita = Cita::findOrFail($id);
+        $validated = $request->validate([
+            'estado_cita' => 'nullable|in:pendiente,confirmada,cancelada,completada',
+            'costo_estimado' => 'nullable|numeric|min:0',
+            'nueva_fecha' => 'nullable|date',
+            'nueva_hora' => 'nullable|date_format:H:i',
+            'notas_seguimiento' => 'nullable|string|max:1000',
+            'monto_abono' => 'nullable|numeric|min:0'
+        ]);
 
-            // 1. Reprogramación (Horario)
-            if ($request->has('nueva_fecha') && $request->has('nueva_hora')) {
-                // Combina fecha y hora
-                $fechaHora = Carbon::parse($request->nueva_fecha . ' ' . $request->nueva_hora);
-                $cita->fecha_hora_inicio = $fechaHora;
-            }
+        // 1. Estados y costo bases
+        if ($request->filled('estado_cita'))
+            $cita->estado_cita = $request->estado_cita;
+        if ($request->filled('costo_estimado'))
+            $cita->costo_estimado = $request->costo_estimado;
 
-            // 2. Seguimiento (Notas y Servicio)
-            if ($request->filled('notas_seguimiento')) {
-                // Buscar o crear seguimiento
-                \App\Models\SeguimientoClinico::updateOrCreate(
-                    ['id_cita' => $cita->id_cita],
-                    [
-                        'id_servicio' => $cita->id_servicio, // Mantiene el servicio original por ahora
-                        'postratamiento' => 'no',
-                        'observaciones' => $request->notas_seguimiento
-                    ]
-                );
-
-                // IMPORTANTE: Si hay seguimiento, asumimos que la cita ocurrió
-                if ($cita->estado_cita != 'completada') {
-                    $cita->estado_cita = 'completada';
-                }
-            }
-
-            // 3. Registrar Pago
-            if ($request->filled('monto_abono') && $request->monto_abono > 0) {
-                \App\Models\IngresoCaja::create([
-                    'id_clinica' => 1, // Default por ahora
-                    'id_cita' => $cita->id_cita,
-                    'monto' => $request->monto_abono,
-                    'metodo' => 'efectivo', // Podrías agregar un select en el modal
-                    'descripcion' => 'Abono desde Dashboard',
-                    'fecha_ingreso' => now()
-                ]);
-            }
-
-            // Guardar cambios en la cita
-            $cita->save();
-
-            // 4. Recalcular Totales para respuesta JSON
-            $totalAbonado = \App\Models\IngresoCaja::where('id_cita', $cita->id_cita)->sum('monto');
-            $costoTotal = $cita->costo_estimado ?? ($cita->servicio ? $cita->servicio->precio_base : 0);
-            $restante = max(0, $costoTotal - $totalAbonado);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cita actualizada correctamente',
-                'data' => [
-                    'total_abonado' => '$' . number_format($totalAbonado, 2),
-                    'restante' => '$' . number_format($restante, 2),
-                    'abono_fila' => '$' . number_format($totalAbonado, 2), // Update the table cell too
-                    'nueva_fecha' => $cita->fecha_hora_inicio->format('d M'),
-                    'nueva_hora' => $cita->fecha_hora_inicio->format('h:i A'),
-                    'seguimiento' => $cita->seguimiento ? $cita->seguimiento->observaciones : 'Sin seguimiento'
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar: ' . $e->getMessage()
-            ], 500);
+        // 2. Reprogramación de fecha y hora
+        if ($request->filled('nueva_fecha')) {
+            $fecha = $request->nueva_fecha;
+            $hora = $request->filled('nueva_hora') ? $request->nueva_hora : Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
+            $cita->fecha_hora_inicio = $fecha . ' ' . $hora;
+            $cita->fecha_hora_fin = Carbon::parse($cita->fecha_hora_inicio)->addMinutes(30);
         }
+
+        $cita->save();
+
+        // 3. Seguimiento Médico 
+        if ($request->filled('notas_seguimiento')) {
+            \App\Models\SeguimientoClinico::create([
+                'id_cita' => $cita->id_cita,
+                'observaciones' => $request->notas_seguimiento
+            ]);
+            // Opcional: Podríamos actualizar el "motivo" para que se vea reflejado rápido
+            $cita->motivo = "Seguimiento añadido: " . substr($request->notas_seguimiento, 0, 30) . "...";
+            $cita->save();
+        }
+
+        // 4. Pago / Ingresos Caja
+        if ($request->filled('monto_abono') && $request->monto_abono > 0) {
+            \App\Models\IngresoCaja::create([
+                'id_clinica' => Auth::user()->id_clinica ?? 1,
+                'id_cita' => $cita->id_cita,
+                'monto' => $request->monto_abono,
+                'fecha_ingreso' => now(),
+                'metodo_pago' => 'efectivo',
+                'descripcion' => 'Abono en cita: ' . $cita->motivo
+            ]);
+        }
+
+        // 5. Cálculos para responder al front-end 
+        $costoTotal = floatval($cita->costo_estimado ?? 0);
+        $totalPagado = $cita->ingresos ? $cita->ingresos->sum('monto') : 0;
+        $saldo = max(0, $costoTotal - $totalPagado);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cita y pagos actualizados correctamente.',
+            'data' => [
+                'costo_total' => '$' . number_format($costoTotal, 2),
+                'restante' => '$' . number_format($saldo, 2),
+                'abono_fila' => '$' . number_format($request->filled('monto_abono') ? $request->monto_abono : 0, 2),
+                'nueva_fecha' => Carbon::parse($cita->fecha_hora_inicio)->format('d/m/Y'),
+                'nueva_hora' => Carbon::parse($cita->fecha_hora_inicio)->format('h:i A'),
+                'seguimiento' => $cita->motivo ?? ($cita->servicio->nombre_servicio ?? 'Consulta')
+            ]
+        ]);
+    }
+
+    // --- FUNCIÓN 3: Marcar cita como completada (AJAX) ---
+    public function completarCita($idCita)
+    {
+        $cita = Cita::findOrFail($idCita);
+        $cita->estado_cita = 'completada';
+        $cita->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cita marcada como completada.'
+        ]);
+    }
+
+    // --- FUNCIÓN 4: Disponibilidad del mes para el calendario ---
+    /**
+     * Retorna los días del mes con citas agendadas para colorear el calendario.
+     */
+    public function obtenerDisponibilidadMes(Request $request)
+    {
+        $mes = $request->input('mes', Carbon::now()->month);
+        $anio = $request->input('anio', Carbon::now()->year);
+
+        $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
+
+        $citasPorDia = Cita::whereMonth('fecha_hora_inicio', $mes)
+            ->whereYear('fecha_hora_inicio', $anio)
+            ->where('estado_cita', '!=', 'cancelada')
+            ->select(DB::raw('DAY(fecha_hora_inicio) as dia'), DB::raw('COUNT(*) as total'))
+            ->groupBy(DB::raw('DAY(fecha_hora_inicio)'))
+            ->pluck('total', 'dia')
+            ->toArray();
+
+        $eventos = [];
+        for ($i = 1; $i <= $diasDelMes; $i++) {
+            $total = $citasPorDia[$i] ?? 0;
+
+            if ($total == 0) {
+                $estado = 'verde';
+                $clickable = true;
+            } elseif ($total < 8) { // Límite de ejemplo: 8 citas por día
+                $estado = 'amarillo';
+                $clickable = true;
+            } else {
+                $estado = 'rojo';
+                $clickable = false;
+            }
+
+            // Días pasados en gris y no clickeables
+            $fechaCiclo = Carbon::createFromDate($anio, $mes, $i)->endOfDay();
+            if ($fechaCiclo->isPast() && !$fechaCiclo->isToday()) {
+                $estado = 'gris';
+                $clickable = false;
+            }
+
+            $eventos[$i] = [
+                'estado' => $estado,
+                'clickable' => $clickable,
+                'total' => $total
+            ];
+        }
+
+        // El frontend espera directamente el mapa de días
+        return response()->json($eventos);
     }
 }

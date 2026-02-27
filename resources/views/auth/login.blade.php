@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - DentalConnect</title>
+    <title>Acceso</title>
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
@@ -102,9 +104,9 @@
             box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
             position: relative;
             overflow: hidden;
-            width: 768px;
+            width: 850px;
             max-width: 100%;
-            min-height: 480px;
+            min-height: 600px;
             z-index: 10;
         }
 
@@ -256,19 +258,75 @@
     <div class="container" id="container">
 
         <div class="form-container sign-up-container">
-            <form action="{{ route('register.post') }}" method="POST">
+            <form action="{{ route('register.post') }}" method="POST" style="padding: 20px 25px; overflow-y: auto;">
                 @csrf
-                <h1>Crear Cuenta</h1>
-                <div class="social-container" style="margin: 10px 0;">
-                    <i class="fa-solid fa-tooth" style="font-size: 20px; color: #00b4d8;"></i>
-                </div>
-                <span>Registra tu clínica gratis</span>
+                <h1 style="font-size: 1.4rem; margin-bottom: 5px;">Crear Cuenta</h1>
+                <span style="color: #888; font-size: 11px; margin-bottom: 10px; display: block;">Registra tu clínica
+                    dental gratis</span>
 
-                <input type="text" name="nombre_completo" placeholder="Nombre Completo" required />
-                <input type="email" name="email" placeholder="Correo Electrónico" required />
-                <input type="password" name="password" placeholder="Contraseña" required />
+                {{-- Mostrar TODOS los errores de validación --}}
+                @if(session('show_register') && $errors->any())
+                    <div class="alert alert-danger" style="font-size: 11px; margin-bottom: 8px; text-align: left;">
+                        <strong>Por favor corrige los siguientes errores:</strong>
+                        <ul style="margin: 4px 0 0 16px; padding: 0;">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-                <button type="submit" style="margin-top: 10px;">Registrarse</button>
+                {{-- Datos del Doctor --}}
+                <div
+                    style="font-size: 10px; font-weight: 700; color: #00b4d8; text-transform: uppercase; margin: 8px 0 4px; text-align: left; width: 100%;">
+                    Datos del Doctor</div>
+                {{-- Solo letras, sin espacios ni caracteres especiales --}}
+                <input type="text" name="nombre" placeholder="Nombre(s)" required
+                    value="{{ old('nombre') }}"
+                    pattern="[A-Za-zÀ-ÿÑñ]+"
+                    title="Solo letras, sin espacios ni caracteres especiales"
+                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')"
+                    style="margin: 3px 0;" />
+                <input type="text" name="apellido_paterno" placeholder="Apellido Paterno" required
+                    value="{{ old('apellido_paterno') }}"
+                    pattern="[A-Za-zÀ-ÿÑñ]+"
+                    title="Un solo apellido paterno, solo letras, sin caracteres especiales"
+                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')"
+                    style="margin: 3px 0;" />
+                <input type="text" name="apellido_materno" placeholder="Apellido Materno"
+                    value="{{ old('apellido_materno') }}"
+                    pattern="[A-Za-zÀ-ÿÑñ]*"
+                    title="Un solo apellido materno, solo letras, sin caracteres especiales"
+                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')"
+                    style="margin: 3px 0;" />
+                <input type="email" name="email" placeholder="Correo Electrónico" required
+                    value="{{ old('email') }}"
+                    style="margin: 3px 0;" />
+                <input type="password" name="password" placeholder="Contraseña (mín. 6 caracteres)" required
+                    style="margin: 3px 0;" />
+                <input type="password" name="password_confirmation" placeholder="Confirmar Contraseña" required
+                    style="margin: 3px 0;" />
+
+                {{-- Datos de la Clínica --}}
+                <div style="font-size: 10px;
+                    font-weight: 700; color: #00b4d8;
+                    text-transform: uppercase;
+                    margin: 8px 0 4px;
+                    text-align: left;
+                    width: 100%;">
+                    Datos de la Clínica</div>
+                <input type="text" name="nombre_clinica" placeholder="Nombre Comercial de la Clínica" required
+                    value="{{ old('nombre_clinica') }}"
+                    style="margin: 3px 0;" />
+                <input type="text" name="rfc_clinica" placeholder="RFC de la Clínica (ej. XAXX010101000)" required
+                    value="{{ old('rfc_clinica') }}"
+                    maxlength="13" style="margin: 3px 0; text-transform: uppercase;"
+                    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" />
+                <input type="tel" name="telefono_clinica" placeholder="Teléfono de la Clínica (opcional)"
+                    value="{{ old('telefono_clinica') }}"
+                    style="margin: 3px 0;" />
+
+                <button type="submit" style="margin-top: 12px; padding: 10px 30px;">Registrarse</button>
             </form>
         </div>
 
@@ -286,7 +344,7 @@
                 @if(session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
-                @if($errors->any())
+                @if(!session('show_register') && $errors->any())
                     <div class="alert alert-danger">{{ $errors->first() }}</div>
                 @endif
 
@@ -305,8 +363,8 @@
                     <button class="ghost" id="signIn">Ingresar</button>
                 </div>
                 <div class="overlay-panel overlay-right">
-                    <h1>¡Hola, Doctor!</h1>
-                    <p>Ingresa tus datos personales y comienza tu viaje con DentalConnect.</p>
+                    <h1>¡Hola!</h1>
+                    <p>Ingresa tus datos personales</p>
                     <button class="ghost" id="signUp">Registrarse</button>
                 </div>
             </div>
@@ -328,6 +386,11 @@
         signInButton.addEventListener('click', () => {
             container.classList.remove("right-panel-active");
         });
+
+        // Si hay errores de registro, abrir automáticamente el panel de registro
+        @if(session('show_register') && $errors->any())
+            container.classList.add("right-panel-active");
+        @endif
 
         // Animación de Dientes (Tu código original)
         const canvas = document.getElementById("canvas1");

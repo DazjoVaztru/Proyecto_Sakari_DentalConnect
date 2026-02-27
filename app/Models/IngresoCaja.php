@@ -5,6 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Modelo para el registro de ingresos económicos (caja).
+ *
+ * Registra los pagos realizados por citas o servicios.
+ *
+ * @property int $id_ingreso
+ * @property int $id_clinica
+ * @property int $id_cita
+ * @property float $monto
+ * @property string $metodo
+ * @property string|null $descripcion
+ * @property \Illuminate\Support\Carbon $fecha_ingreso
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class IngresoCaja extends Model
 {
     use HasFactory;

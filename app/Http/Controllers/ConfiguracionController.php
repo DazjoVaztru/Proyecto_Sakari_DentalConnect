@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateClinicaRequest;
+use App\Http\Requests\UpdateUsuarioRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,107 +13,104 @@ use App\Models\Doctor;
 
 class ConfiguracionController extends Controller
 {
+    /**
+     * Muestra la vista de configuración con datos del usuario autenticado y su clínica.
+     */
     public function index()
     {
         $user = Auth::user();
         $clinica = Clinica::find($user->id_clinica);
+        abort_if(!$clinica, 403, 'No tienes una clínica asignada.');
 
-        // 1. Datos del Doctor (Buscamos al usuario con rol doctor de esta clínica)
+        // Datos del doctor principal de la clínica
         $doctorUser = User::where('id_clinica', $user->id_clinica)
             ->where('rol', 'doctor')
             ->first();
 
-        // Obtenemos sus datos extendidos (cédula, etc) si existen
-        $doctorPerfil = $doctorUser ? Doctor::where('id_usuario', $doctorUser->id_usuario)->first() : null;
+        $doctorPerfil = $doctorUser
+            ? Doctor::where('id_usuario', $doctorUser->id_usuario)->first()
+            : null;
 
-        // 2. Datos de Recepcionistas (Lista)
+        // Lista de recepcionistas de la misma clínica
         $recepcionistas = User::where('id_clinica', $user->id_clinica)
             ->where('rol', 'recepcionista')
             ->get();
 
-        return view('configuracion.index', compact('user', 'clinica', 'doctorUser', 'doctorPerfil', 'recepcionistas'));
+        return view('configuracion.index', compact(
+            'user',
+            'clinica',
+            'doctorUser',
+            'doctorPerfil',
+            'recepcionistas'
+        ));
     }
 
-    // Actualizar datos de la Clínica
-    public function updateClinica(Request $request)
+    /**
+     * Actualiza la información de la clínica.
+     * Usa UpdateClinicaRequest para todas las validaciones.
+     */
+    public function updateClinica(UpdateClinicaRequest $request)
     {
         $clinica = Clinica::find(Auth::user()->id_clinica);
+        abort_if(!$clinica, 403, 'No tienes permiso para modificar esta clínica.');
 
-        $clinica->update($request->validate([
-            'nombre_comercial' => 'required|string|max:150',
-            'numero_telefono' => 'nullable|string|max:15',
-            'localidad' => 'nullable|string|max:100',
-            'estado' => 'nullable|string|max:50',
-        ]));
+        $clinica->update($request->validated());
 
-        return back()->with('success', 'Datos de la clínica actualizados.');
+        return back()->with('success', 'Datos de la clínica actualizados correctamente.');
     }
 
-    // Actualizar datos del Usuario (Doctor o Recepcionista)
-    public function updateUsuario(Request $request)
+    /**
+     * Actualiza la información de un usuario (doctor o recepcionista).
+     * La autorización de tenant está garantizada por UpdateUsuarioRequest::authorize().
+     */
+    public function updateUsuario(UpdateUsuarioRequest $request)
     {
-        $request->validate([
-            'id_usuario' => 'required|exists:usuarios_sistema,id_usuario',
-            'nombre_completo' => 'required|string|max:100',
-            'email' => 'required|email',
-            'password' => 'nullable|min:6' // Opcional cambiar contraseña
-        ]);
-
-        $usuario = User::find($request->id_usuario);
-
-        // Seguridad: Solo permitir editar usuarios de MI propia clínica
-        if ($usuario->id_clinica != Auth::user()->id_clinica) {
-            return back()->with('error', 'No tienes permiso para editar este usuario.');
-        }
+        $usuario = User::findOrFail($request->id_usuario);
 
         $data = [
             'nombre_completo' => $request->nombre_completo,
             'email' => $request->email,
         ];
 
-        // Si escribió contraseña, la actualizamos
+        // Actualizar contraseña solo si se proporcionó una nueva
         if ($request->filled('password')) {
-            // Usamos password_hash ya que es el atributo real en BD,
-            // aunque el Mutator del modelo podría manejar 'password', 
-            // la lógica directa aquí es segura. El modelo User usa User::create 
-            // con password_hash en AuthController, mantengamos consistencia.
-            // Pero User::update ignora $fillable y $guarded dependiendo del metodo.
-            // Lo ideal es asignar el atributo correcto.
-            $data['password_hash'] = Hash::make($request->password);
+            $data['password'] = Hash::make($request->password);
         }
 
         $usuario->update($data);
 
-        // Si es doctor, actualizamos datos extra
-        if ($usuario->rol == 'doctor') {
+        // Si es doctor, actualizar datos profesionales
+        if ($usuario->rol === 'doctor') {
             Doctor::updateOrCreate(
                 ['id_usuario' => $usuario->id_usuario],
                 [
                     'cedula_profesional' => $request->cedula_profesional,
-                    'horario_default' => $request->horario_default
+                    'horario_default' => $request->horario_default,
                 ]
             );
         }
 
-        return back()->with('success', 'Perfil actualizado correctamente.');
+        return back()->with('success', 'Perfil de usuario actualizado correctamente.');
     }
 
-    // Crear nueva Recepcionista
+    /**
+     * Crea una nueva cuenta de recepcionista para la clínica del usuario autenticado.
+     */
     public function storeRecepcionista(Request $request)
     {
         $request->validate([
-            'nombre_completo' => 'required',
+            'nombre_completo' => 'required|string|max:100',
             'email' => 'required|email|unique:usuarios_sistema,email',
-            'password' => 'required|min:6'
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         User::create([
             'id_clinica' => Auth::user()->id_clinica,
             'nombre_completo' => $request->nombre_completo,
             'email' => $request->email,
-            'password_hash' => Hash::make($request->password),
+            'password' => Hash::make($request->password),
             'rol' => 'recepcionista',
-            'is_active' => 1
+            'is_active' => true,
         ]);
 
         return back()->with('success', 'Recepcionista agregada correctamente.');

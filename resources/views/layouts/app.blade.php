@@ -1,8 +1,20 @@
+{{--
+Layout Principal de la Aplicación (Dashboard)
+
+Este archivo define la estructura base de toda la interfaz administrativa.
+Incluye:
+- Barra de navegación lateral (Sidebar) con efectos de vidrio (Glassmorphism).
+- Contenedor principal para el contenido dinámico (@yield('contenido')).
+- Scripts globales para modales, tabs y lógica del odontograma.
+- Estilos CSS para el tema visual.
+--}}
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dental Connect - @yield('titulo')</title>
 
@@ -672,6 +684,8 @@
     <main>
         @yield('contenido')
     </main>
+
+    @yield('modales')
 
     <script>
         // --- Modal System ---

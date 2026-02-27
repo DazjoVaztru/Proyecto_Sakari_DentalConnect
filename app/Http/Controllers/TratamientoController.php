@@ -7,12 +7,25 @@ use App\Models\Servicio;
 
 class TratamientoController extends Controller
 {
+    /**
+     * Muestra la lista de tratamientos/servicios disponibles.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $servicios = Servicio::all();
         return view('tratamientos.index', compact('servicios'));
     }
 
+    /**
+     * Almacena un nuevo tratamiento/servicio.
+     *
+     * Valida los datos y crea un nuevo registro de servicio asociado a la clínica.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -31,6 +44,13 @@ class TratamientoController extends Controller
         return redirect()->back()->with('success', 'Tratamiento creado correctamente.');
     }
 
+    /**
+     * Actualiza la información de un tratamiento existente.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, $id)
     {
         // OJO: Usamos 'id_servicio' porque así definimos la primaryKey en el modelo
@@ -45,6 +65,12 @@ class TratamientoController extends Controller
         return redirect()->back()->with('success', 'Tratamiento actualizado.');
     }
 
+    /**
+     * Elimina un tratamiento.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy($id)
     {
         $servicio = Servicio::findOrFail($id);

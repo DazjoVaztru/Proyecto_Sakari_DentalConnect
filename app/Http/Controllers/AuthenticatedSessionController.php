@@ -10,6 +10,11 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
+    /**
+     * Muestra la vista de inicio de sesión.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create()
     {
         return view('auth.login');
@@ -17,6 +22,12 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     */
+    /**
+     * Procesa una solicitud de autenticación entrante.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -32,12 +43,18 @@ class AuthenticatedSessionController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+            'email' => 'Correo o contraseña incorrectos. Intente de nuevo.',
         ])->onlyInput('email');
     }
 
     /**
      * Destroy an authenticated session.
+     */
+    /**
+     * Destruye una sesión autenticada (Cierra sesión).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Request $request)
     {

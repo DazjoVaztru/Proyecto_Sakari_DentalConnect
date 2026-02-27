@@ -5,6 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Modelo para los detalles adicionales de una cita.
+ *
+ * Permite agregar múltiples servicios o tratamientos a una sola cita.
+ *
+ * @property int $id
+ * @property int $cita_id
+ * @property int $servicio_id
+ * @property float $precio_cobrado
+ * @property int $cantidad
+ * @property string|null $observaciones
+ */
 class CitaDetalle extends Model
 {
     use HasFactory;

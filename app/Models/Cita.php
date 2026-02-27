@@ -5,6 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Modelo que representa una cita médica en el sistema.
+ *
+ * Administra la información de las citas, incluyendo paciente, doctor, servicio, horario y estado.
+ * También gestiona las relaciones con los detalles de la cita y los pagos (ingresos).
+ *
+ * @property int $id_cita
+ * @property int $id_clinica
+ * @property int $id_paciente
+ * @property int $id_doctor
+ * @property int $id_servicio
+ * @property \Illuminate\Support\Carbon $fecha_hora_inicio
+ * @property \Illuminate\Support\Carbon $fecha_hora_fin
+ * @property string $estado_cita
+ * @property float|null $costo_estimado
+ * @property string|null $motivo
+ * @property string|null $notas
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Cita extends Model
 {
     use HasFactory;
@@ -28,7 +48,7 @@ class Cita extends Model
     // Relación: Paciente
     public function paciente()
     {
-        return $this->belongsTo(Paciente::class, 'id_paciente');
+        return $this->belongsTo(Paciente::class, 'id_paciente', 'id_paciente');
     }
 
     // Relación: Doctor (Usuario)

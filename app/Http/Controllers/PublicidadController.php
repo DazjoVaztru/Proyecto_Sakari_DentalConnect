@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Storage;
 
 class PublicidadController extends Controller
 {
+    /**
+     * Muestra la lista de anuncios publicitarios ordenados por fecha.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         // Traemos las publicidades ordenadas por las más nuevas
@@ -15,6 +20,15 @@ class PublicidadController extends Controller
         return view('publicidad.index', compact('anuncios'));
     }
 
+    /**
+     * Almacena una nueva promoción publicitaria.
+     *
+     * Valida la imagen y los datos, guarda la imagen en disco y crea el registro
+     * en la base de datos asociado al usuario actual.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -43,6 +57,14 @@ class PublicidadController extends Controller
         }
     }
 
+    /**
+     * Elimina una promoción publicitaria.
+     *
+     * Borra el registro de la base de datos y el archivo de imagen asociado del disco.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy($id)
     {
         $anuncio = Publicidad::findOrFail($id);
