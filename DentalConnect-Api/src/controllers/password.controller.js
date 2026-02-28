@@ -77,9 +77,14 @@ exports.resetPassword = async (req, res) => {
         }
 
         // Hashear la NUEVA contraseña (bcrypt)
-        // OJO: Laravel usa Bcrypt con cost factor 12 típicamente ($2y$12$). Bcryptjs usa 10 por default, pero es compatible
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        let hashedPassword = await bcrypt.hash(newPassword, salt);
+        
+        // CORRECCIÓN CRÍTICA DE BCRYPT ENTRE NODE Y LARAVEL:
+        // bcryptjs de Node a veces devuelve un hash que empieza con "$2a$" o "$2b$"
+        // Laravel usa nativamente "$2y$". Como son del mismo algoritmo, 
+        // simplemente reemplazamos la cabecera para que Laravel lo acepte sin explotar.
+        hashedPassword = hashedPassword.replace(/^\$2[ab]\$/, '$2y$');
 
         // Actualizar y Limpiar Tokens
         usuario.password = hashedPassword;

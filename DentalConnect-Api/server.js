@@ -27,8 +27,10 @@ const startServer = async () => {
         await testConnection();
 
         // B) Sincronización de Modelos
-        // await sequelize.sync({ force: false });
-        // console.log('Tablas sincronizadas correctamente.');
+        // Usamos alter: true para que agrgeue las columnas nuevas (tokens de password)
+        // a la tabla que ya existe de Laravel sin borrar sus datos.
+        await sequelize.sync({ alter: true });
+        console.log('Tablas sincronizadas correctamente. Columnas nuevas añadidas si faltaban.');
 
         // C) Levantar el servidor Express
         app.listen(PORT, () => {

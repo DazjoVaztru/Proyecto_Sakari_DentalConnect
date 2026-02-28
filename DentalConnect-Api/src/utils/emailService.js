@@ -3,7 +3,10 @@ const nodemailer = require('nodemailer');
 const enviarCorreoRecuperacion = async (email, resetUrl) => {
     // 1. Configurar el transportador (SMTP)
     const transporter = nodemailer.createTransport({
-        service: 'gmail', // O usa host/port si es otro SMTP
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
