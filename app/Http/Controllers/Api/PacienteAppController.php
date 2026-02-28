@@ -130,7 +130,10 @@ class PacienteAppController extends Controller
     {
         $fecha = Carbon::parse($request->input('fecha', now()));
 
-        $citasDiasMes = Cita::whereMonth('fecha_hora_inicio', $fecha->month)
+        $idClinica = Auth::user()->id_clinica ?? 1;
+
+        $citasDiasMes = Cita::where('id_clinica', $idClinica)
+            ->whereMonth('fecha_hora_inicio', $fecha->month)
             ->whereYear('fecha_hora_inicio', $fecha->year)
             ->where('estado_cita', '!=', 'cancelada')
             ->selectRaw('DAY(fecha_hora_inicio) as dia, count(*) as c')
@@ -174,7 +177,12 @@ class PacienteAppController extends Controller
      */
     public function publicidad()
     {
-        $promociones = Publicidad::where('is_active', true)
+        $idClinica = Auth::user()->id_clinica ?? 1;
+
+        $promociones = Publicidad::whereHas('usuario', function ($q) use ($idClinica) {
+            $q->where('id_clinica', $idClinica);
+        })
+            ->where('activo', 1)
             ->where(function ($q) {
                 $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', now());
             })

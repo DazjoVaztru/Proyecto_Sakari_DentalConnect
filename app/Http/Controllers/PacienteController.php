@@ -20,11 +20,16 @@ class PacienteController extends Controller
      */
     public function index()
     {
-        $pacientes = Paciente::where('is_active', true)
+        $idClinica = Auth::user()->id_clinica;
+
+        $pacientes = Paciente::whereHas('usuario', function ($query) use ($idClinica) {
+            $query->where('id_clinica', $idClinica);
+        })
+            ->where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $servicios = Servicio::orderBy('nombre_servicio')->get();
+        $servicios = Servicio::where('id_clinica', $idClinica)->orderBy('nombre_servicio')->get();
         return view('pacientes.index', compact('pacientes', 'servicios'));
     }
 

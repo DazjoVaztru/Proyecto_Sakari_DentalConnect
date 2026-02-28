@@ -28,12 +28,14 @@ class DashboardController extends Controller
         $ahora = Carbon::now();
 
         $citasFuturas = Cita::with(['paciente', 'servicio'])
+            ->where('id_clinica', $idClinica)
             ->where('fecha_hora_inicio', '>=', $ahora)
             ->where('estado_cita', 'pendiente')
             ->orderBy('fecha_hora_inicio', 'asc')
             ->get();
 
         $citasVencidas = Cita::with(['paciente', 'servicio'])
+            ->where('id_clinica', $idClinica)
             ->where('fecha_hora_inicio', '<', $ahora)
             ->where('estado_cita', 'pendiente')
             ->orderBy('fecha_hora_inicio', 'desc')
@@ -42,12 +44,15 @@ class DashboardController extends Controller
         $proximasCitas = $citasFuturas->concat($citasVencidas)->take(15);
 
         // --- Citas de hoy ---
-        $citasHoyCount = Cita::whereDate('fecha_hora_inicio', $hoy)
+        $citasHoyCount = Cita::where('id_clinica', $idClinica)
+            ->whereDate('fecha_hora_inicio', $hoy)
             ->where('estado_cita', 'pendiente')
             ->count();
 
         // --- Total de pacientes activos ---
-        $totalPacientes = Paciente::where('is_active', true)->count();
+        $totalPacientes = Paciente::whereHas('usuario', function ($q) use ($idClinica) {
+            $q->where('id_clinica', $idClinica);
+        })->where('is_active', true)->count();
 
         // --- Ingresos del mes actual ---
         $ingresosMes = IngresoCaja::where('id_clinica', $idClinica)
@@ -68,7 +73,7 @@ class DashboardController extends Controller
             ->count();
 
         // --- Catálogo de servicios (para el odontograma) ---
-        $servicios = Servicio::orderBy('nombre_servicio')->get();
+        $servicios = Servicio::where('id_clinica', $idClinica)->orderBy('nombre_servicio')->get();
 
         return view('dashboard', compact(
             'proximasCitas',
@@ -284,7 +289,8 @@ class DashboardController extends Controller
 
         $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
 
-        $citasPorDia = Cita::whereMonth('fecha_hora_inicio', $mes)
+        $citasPorDia = Cita::where('id_clinica', Auth::user()->id_clinica)
+            ->whereMonth('fecha_hora_inicio', $mes)
             ->whereYear('fecha_hora_inicio', $anio)
             ->where('estado_cita', '!=', 'cancelada')
             ->select(DB::raw('DAY(fecha_hora_inicio) as dia'), DB::raw('COUNT(*) as total'))
