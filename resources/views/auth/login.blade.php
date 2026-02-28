@@ -16,7 +16,7 @@
         }
 
         body {
-            background: #f6f5f7;
+            /* Se remueve el background opaco fijo para que el canvas se muestre */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -242,93 +242,54 @@
         }
 
         #canvas1 {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             z-index: -1;
-            background: linear-gradient(to right, #ece9e6, #ffffff);
+            background: linear-gradient(135deg, #f6f5f7 0%, #eef7fb 100%);
+            pointer-events: none;
+        }
+
+        #page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to right, #90e0ef, #0077b6);
+            z-index: 9999;
+            transform: translateX(0);
+            /* Empieza cubriendo la pantalla */
+            transition: transform 0.6s ease-in-out;
+            pointer-events: none;
         }
     </style>
 </head>
 
 <body>
+    <!-- Cortina de Transición a Pantalla Completa -->
+    <div id="page-transition"></div>
 
     <div class="container" id="container">
 
         <div class="form-container sign-up-container">
-            <form action="{{ route('register.post') }}" method="POST" style="padding: 20px 25px; overflow-y: auto;">
-                @csrf
-                <h1 style="font-size: 1.4rem; margin-bottom: 5px;">Crear Cuenta</h1>
-                <span style="color: #888; font-size: 11px; margin-bottom: 10px; display: block;">Registra tu clínica
-                    dental gratis</span>
-
-                {{-- Mostrar TODOS los errores de validación --}}
-                @if(session('show_register') && $errors->any())
-                    <div class="alert alert-danger" style="font-size: 11px; margin-bottom: 8px; text-align: left;">
-                        <strong>Por favor corrige los siguientes errores:</strong>
-                        <ul style="margin: 4px 0 0 16px; padding: 0;">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                {{-- Datos del Doctor --}}
-                <div
-                    style="font-size: 10px; font-weight: 700; color: #00b4d8; text-transform: uppercase; margin: 8px 0 4px; text-align: left; width: 100%;">
-                    Datos del Doctor</div>
-                {{-- Solo letras, sin espacios ni caracteres especiales --}}
-                <input type="text" name="nombre" placeholder="Nombre(s)" required
-                    value="{{ old('nombre') }}"
-                    pattern="[A-Za-zÀ-ÿÑñ]+"
-                    title="Solo letras, sin espacios ni caracteres especiales"
-                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')"
-                    style="margin: 3px 0;" />
-                <input type="text" name="apellido_paterno" placeholder="Apellido Paterno" required
-                    value="{{ old('apellido_paterno') }}"
-                    pattern="[A-Za-zÀ-ÿÑñ]+"
-                    title="Un solo apellido paterno, solo letras, sin caracteres especiales"
-                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')"
-                    style="margin: 3px 0;" />
-                <input type="text" name="apellido_materno" placeholder="Apellido Materno"
-                    value="{{ old('apellido_materno') }}"
-                    pattern="[A-Za-zÀ-ÿÑñ]*"
-                    title="Un solo apellido materno, solo letras, sin caracteres especiales"
-                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')"
-                    style="margin: 3px 0;" />
-                <input type="email" name="email" placeholder="Correo Electrónico" required
-                    value="{{ old('email') }}"
-                    style="margin: 3px 0;" />
-                <input type="password" name="password" placeholder="Contraseña (mín. 6 caracteres)" required
-                    style="margin: 3px 0;" />
-                <input type="password" name="password_confirmation" placeholder="Confirmar Contraseña" required
-                    style="margin: 3px 0;" />
-
-                {{-- Datos de la Clínica --}}
-                <div style="font-size: 10px;
-                    font-weight: 700; color: #00b4d8;
-                    text-transform: uppercase;
-                    margin: 8px 0 4px;
-                    text-align: left;
-                    width: 100%;">
-                    Datos de la Clínica</div>
-                <input type="text" name="nombre_clinica" placeholder="Nombre Comercial de la Clínica" required
-                    value="{{ old('nombre_clinica') }}"
-                    style="margin: 3px 0;" />
-                <input type="text" name="rfc_clinica" placeholder="RFC de la Clínica (ej. XAXX010101000)" required
-                    value="{{ old('rfc_clinica') }}"
-                    maxlength="13" style="margin: 3px 0; text-transform: uppercase;"
-                    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" />
-                <input type="tel" name="telefono_clinica" placeholder="Teléfono de la Clínica (opcional)"
-                    value="{{ old('telefono_clinica') }}"
-                    style="margin: 3px 0;" />
-
-                <button type="submit" style="margin-top: 12px; padding: 10px 30px;">Registrarse</button>
-            </form>
+            {{-- El formulario de registro fue movido a /register para mejor experiencia --}}
+            <div
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding: 40px; text-align:center;">
+                <i class="fas fa-clinic-medical" style="font-size: 3rem; color: #00b4d8; margin-bottom: 20px;"></i>
+                <h2 style="font-size: 1.3rem; color: #333; font-weight: 800; margin-bottom: 8px;">Registra tu Clínica
+                </h2>
+                <p style="font-size: 13px; color: #888; margin-bottom: 24px; line-height: 1.6;">Crea tu cuenta de doctor
+                    con todos los datos de tu clínica dental.</p>
+                <a href="{{ route('register') }}"
+                    style="background: linear-gradient(90deg, #00b4d8, #0077b6); color: white; padding: 12px 36px; border-radius: 25px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; box-shadow: 0 4px 14px rgba(0,119,182,0.3);">
+                    <i class="fas fa-user-plus"></i> Registrarse ahora
+                </a>
+            </div>
         </div>
+
 
         <div class="form-container sign-in-container">
             <form action="{{ route('login.post') }}" method="POST">
@@ -342,7 +303,12 @@
                 <span>usa tu cuenta registrada</span>
 
                 @if(session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
+                    <div class="alert alert-success" style="display:flex; flex-direction:column; align-items:center;">
+                        {{ session('success') }}
+                        <button type="button" class="ghost" onclick="document.getElementById('signIn').click();"
+                            style="margin-top: 10px; background-color: #28a745; border-color: #28a745; color: white;">Ir a
+                            Inicio de Sesión</button>
+                    </div>
                 @endif
                 @if(!session('show_register') && $errors->any())
                     <div class="alert alert-danger">{{ $errors->first() }}</div>
@@ -364,8 +330,9 @@
                 </div>
                 <div class="overlay-panel overlay-right">
                     <h1>¡Hola!</h1>
-                    <p>Ingresa tus datos personales</p>
-                    <button class="ghost" id="signUp">Registrarse</button>
+                    <p>¿Aún no tienes cuenta? Registra tu clínica dental gratis.</p>
+                    <a href="{{ route('register') }}" class="ghost"
+                        style="display:inline-block; padding: 12px 36px; border-radius: 25px; text-decoration:none; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; border: 1px solid white; color:white; margin-top:4px;">Registrarse</a>
                 </div>
             </div>
         </div>
@@ -379,13 +346,17 @@
         const signInButton = document.getElementById('signIn');
         const container = document.getElementById('container');
 
-        signUpButton.addEventListener('click', () => {
-            container.classList.add("right-panel-active");
-        });
+        if (signUpButton) {
+            signUpButton.addEventListener('click', () => {
+                container.classList.add("right-panel-active");
+            });
+        }
 
-        signInButton.addEventListener('click', () => {
-            container.classList.remove("right-panel-active");
-        });
+        if (signInButton) {
+            signInButton.addEventListener('click', () => {
+                container.classList.remove("right-panel-active");
+            });
+        }
 
         // Si hay errores de registro, abrir automáticamente el panel de registro
         @if(session('show_register') && $errors->any())
@@ -432,6 +403,35 @@
             particlesArray.forEach(p => p.update());
         }
         init(); animate();
+
+        // Lógica de transición animada de página completa (de Login a Register)
+        document.addEventListener('DOMContentLoaded', () => {
+            const transitionEl = document.getElementById('page-transition');
+            if (transitionEl) {
+                // Al inicio, la cortina está cubriendo (0). La deslizamos hacia la derecha (100%) para revelar el Login
+                setTimeout(() => {
+                    transitionEl.style.transform = 'translateX(100%)';
+                }, 50);
+            }
+
+            // Seleccionar todos los enlaces que van a /register
+            const registerLinks = document.querySelectorAll('a[href="{{ route("register") }}"]');
+            registerLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const href = link.href;
+                    if (transitionEl) {
+                        transitionEl.style.transition = 'transform 0.6s ease-in-out';
+                        transitionEl.style.transform = 'translateX(0)'; // La traemos de regreso a cubrir
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 550); // Redirigimos un pelín antes de que acabe para optimizar el flasheo blanco
+                    } else {
+                        window.location.href = href;
+                    }
+                });
+            });
+        });
     </script>
 </body>
 
