@@ -76,14 +76,12 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ error: 'El token de restablecimiento ha expirado' });
         }
 
-        // Hashear la NUEVA contraseña (bcrypt)
+        // Aqui encriptamos la NUEVA contraseña (bcrypt)
         const salt = await bcrypt.genSalt(10);
         let hashedPassword = await bcrypt.hash(newPassword, salt);
         
-        // CORRECCIÓN CRÍTICA DE BCRYPT ENTRE NODE Y LARAVEL:
-        // bcryptjs de Node a veces devuelve un hash que empieza con "$2a$" o "$2b$"
-        // Laravel usa nativamente "$2y$". Como son del mismo algoritmo, 
-        // simplemente reemplazamos la cabecera para que Laravel lo acepte sin explotar.
+//aqui le decimos a la base de datos que la ecriptacion de la contraseña que fue cambiada
+//sea compatible con la ecriptacion de la contraseña que fue cambiada en laravel
         hashedPassword = hashedPassword.replace(/^\$2[ab]\$/, '$2y$');
 
         // Actualizar y Limpiar Tokens

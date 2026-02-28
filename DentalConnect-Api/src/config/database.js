@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Crear la instancia de conexión
+
 const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
@@ -9,11 +9,11 @@ const sequelize = new Sequelize(
     {
         host: process.env.DB_HOST,
         dialect: process.env.DB_DIALECT || 'mysql',
-        logging: false // Cambiar a true para ver las consultas SQL en la consola
+        logging: false 
     }
 );
 
-// Función asíncrona para verificar la conexión
+
 const testConnection = async () => {
     try {
         await sequelize.authenticate();
@@ -23,5 +23,5 @@ const testConnection = async () => {
     }
 };
 
-// Exportamos la instancia y la función de prueba
+
 module.exports = { sequelize, testConnection };
