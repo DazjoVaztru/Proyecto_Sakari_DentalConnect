@@ -27,7 +27,7 @@ const User = sequelize.define('User', {
         allowNull: false
     },
     rol: {
-        type: DataTypes.ENUM('administrador', 'doctor', 'recepcionista'),
+        type: DataTypes.ENUM('administrador', 'doctor', 'recepcionista', 'paciente'),
         defaultValue: 'doctor'
     },
     // Añadimos campos para el token de recuperación (Laravel passwords_resets o directo aquí)

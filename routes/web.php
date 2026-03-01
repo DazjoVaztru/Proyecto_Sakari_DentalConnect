@@ -30,6 +30,15 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Rutas de Recuperación de Contraseña
+Route::get('/olvide-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+Route::get('/recuperar-password', function () {
+    return view('auth.reset-password');
+})->name('password.reset');
+
 // Redirigir la raíz al dashboard o login según corresponda
 Route::get('/', function () {
     return redirect()->route('dashboard');

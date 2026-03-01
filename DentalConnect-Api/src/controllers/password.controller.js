@@ -16,7 +16,7 @@ exports.forgotPassword = async (req, res) => {
 
         // Generar un token único (como lo hace Laravel en la tabla password_resets, pero simple)
         const resetToken = crypto.randomBytes(32).toString('hex');
-        
+
         // Encriptar el token para guardarlo en BD (Seguridad adicional)
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
@@ -26,15 +26,15 @@ exports.forgotPassword = async (req, res) => {
         await usuario.save();
 
         // Construir URL de reseteo para el Frontend (React o Laravel Blade)
-        // Ejemplo para apuntar a una vista de laravel: http://localhost:8000/password/reset/{token}
+        // Obtenemos FRONTEND_URL de las variables de entorno o usamos auth/restablecer-password por defecto
         const frontendURL = process.env.FRONTEND_URL || 'http://localhost:8000';
-        const resetUrl = `${frontendURL}/reset-password/${resetToken}?email=${email}`;
+        const resetUrl = `${frontendURL}/recuperar-password?token=${resetToken}&email=${email}`;
 
         // Enviar Correo
         await enviarCorreoRecuperacion(usuario.email, resetUrl);
 
-        res.status(200).json({ 
-            success: true, 
+        res.status(200).json({
+            success: true,
             message: 'Se ha enviado un correo con las instrucciones para restablecer tu contraseña'
         });
 
@@ -49,21 +49,19 @@ exports.resetPassword = async (req, res) => {
     try {
         const { token, email, newPassword } = req.body;
 
-        if(!token || !email || !newPassword) {
-            return res.status(400).json({ error: 'Faltan datos requeridos (token, email, newPassword)'});
+        if (!token || !email || !newPassword) {
+            return res.status(400).json({ error: 'Faltan datos requeridos (token, email, newPassword)' });
         }
 
         // Hashear el token recibido para cruzarlo con el de la Base de Datos
         const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-        // Buscar al usuario con ese correo, ese token y verificar que no haya expirado
+        // Buscar al usuario con ese correo, ese token
         const DateNow = new Date();
         const usuario = await User.findOne({
             where: {
                 email: email,
-                reset_password_token: hashedToken,
-                // Validar expiración manualmente en MySQL, o con Sequelize Operators [Op.gt] 
-                // Aquí para simplificar, validamos después
+                reset_password_token: hashedToken
             }
         });
 
@@ -79,9 +77,9 @@ exports.resetPassword = async (req, res) => {
         // Aqui encriptamos la NUEVA contraseña (bcrypt)
         const salt = await bcrypt.genSalt(10);
         let hashedPassword = await bcrypt.hash(newPassword, salt);
-        
-//aqui le decimos a la base de datos que la ecriptacion de la contraseña que fue cambiada
-//sea compatible con la ecriptacion de la contraseña que fue cambiada en laravel
+
+        //aqui le decimos a la base de datos que la ecriptacion de la contraseña que fue cambiada
+        //sea compatible con la ecriptacion de la contraseña que fue cambiada en laravel
         hashedPassword = hashedPassword.replace(/^\$2[ab]\$/, '$2y$');
 
         // Actualizar y Limpiar Tokens
@@ -90,9 +88,9 @@ exports.resetPassword = async (req, res) => {
         usuario.reset_password_expires = null;
         await usuario.save();
 
-        res.status(200).json({ 
-            success: true, 
-            message: 'Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión.' 
+        res.status(200).json({
+            success: true,
+            message: 'Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión.'
         });
 
     } catch (error) {

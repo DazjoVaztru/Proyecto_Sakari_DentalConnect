@@ -316,7 +316,7 @@
 
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Contraseña" required />
-                <a href="#">¿Olvidaste tu contraseña?</a>
+                <a href="/olvide-password">¿Olvidaste tu contraseña?</a>
                 <button type="submit">Ingresar</button>
             </form>
         </div>
