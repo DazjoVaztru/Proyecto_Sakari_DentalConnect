@@ -294,7 +294,7 @@
 
             try {
                 // Actualizado para apuntar a tu API en producción en Railway
-                const response = await fetch('https://dentalconnect-api-production.up.railway.app/api/reset-password', {
+                const response = await fetch('https://dentalconnect-api-production.up.railway.app/api/auth/reset-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
