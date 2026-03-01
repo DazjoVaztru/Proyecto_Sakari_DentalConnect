@@ -55,6 +55,10 @@ class AuthController extends Controller
             'rfc_clinica.max' => 'El RFC no puede exceder 13 caracteres.',
             'telefono_clinica.regex' => 'El teléfono solo puede contener números (sin espacios, letras ni caracteres especiales).',
             'telefono_clinica.max' => 'El teléfono no puede exceder 12 dígitos.',
+            'codigo_postal.regex' => 'El código postal solo puede contener números (sin espacios, letras ni caracteres especiales).',
+            'codigo_postal.max' => 'El código postal no puede exceder 5 dígitos.',
+
+
         ];
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
