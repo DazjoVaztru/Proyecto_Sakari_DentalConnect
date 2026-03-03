@@ -110,7 +110,6 @@ class ConfiguracionController extends Controller
             'email' => $request->email,
             'password' => $request->password,  // El cast 'hashed' del modelo User lo hashea automáticamente
             'rol' => 'recepcionista',
-            'is_active' => true,
         ]);
 
         return back()->with('success', 'Recepcionista agregada correctamente.');
