@@ -26,11 +26,12 @@ class AuthController extends Controller
     // Procesa el REGISTRO de nuevo usuario (Doctor + Clínica en transacción)
     public function register(Request $request)
     {
-        // Capitalizar automáticamente la primera letra de cada campo de nombre
+        // Capitalizar automáticamente la primera letra de cada palabra (Title Case)
         $request->merge([
-            'nombre' => $request->nombre ? ucwords(strtolower(trim($request->nombre))) : null,
-            'apellido_paterno' => $request->apellido_paterno ? ucfirst(strtolower(trim($request->apellido_paterno))) : null,
-            'apellido_materno' => $request->apellido_materno ? ucfirst(strtolower(trim($request->apellido_materno))) : null,
+            'nombre' => $request->nombre ? ucwords(mb_strtolower(trim($request->nombre))) : null,
+            'apellido_paterno' => $request->apellido_paterno ? ucwords(mb_strtolower(trim($request->apellido_paterno))) : null,
+            'apellido_materno' => $request->apellido_materno ? ucwords(mb_strtolower(trim($request->apellido_materno))) : null,
+            'nombre_clinica' => $request->nombre_clinica ? ucwords(mb_strtolower(trim($request->nombre_clinica))) : null,
             'rfc_clinica' => $request->rfc_clinica ? strtoupper(trim($request->rfc_clinica)) : null,
         ]);
 
@@ -49,6 +50,8 @@ class AuthController extends Controller
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener mínimo 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
+            'password.regex' => 'La contraseña debe contener al menos una letra mayúscula y un carácter especial (ej. @, #, $, !).',
+            'password.not_regex' => 'La contraseña no puede contener secuencias numéricas como 123.',
             'nombre_clinica.required' => 'El nombre de la clínica es obligatorio.',
             'rfc_clinica.required' => 'El RFC de la clínica es obligatorio.',
             'rfc_clinica.regex' => 'El RFC solo puede contener letras y números (sin caracteres especiales), exactamente 12 o 13 caracteres.',
@@ -64,11 +67,18 @@ class AuthController extends Controller
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             // Letras, acentos y ñ, incluyendo espacios simples, sin caracteres especiales
             'nombre' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            // Apellidos: solo una palabra, sin espacios
-            'apellido_paterno' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1}]+$/u'],
-            'apellido_materno' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1}]+$/u'],
+            // Apellidos: letras y espacios (para apellidos compuestos como "De La Cruz")
+            'apellido_paterno' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'apellido_materno' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
             'email' => 'required|email|max:100|unique:usuarios_sistema,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*[\W_]).+$/',   // Al menos 1 mayúscula y 1 carácter especial
+                'not_regex:/123/',                        // No permitir secuencias como 123
+            ],
             'nombre_clinica' => 'required|string|max:150',
             // RFC: solo letras y números, entre 12 y 13 caracteres. Removido unique para sucursales de la misma clínica.
             'rfc_clinica' => ['required', 'string', 'max:13', 'regex:/^[A-Z0-9]{12,13}$/'],
@@ -87,18 +97,28 @@ class AuthController extends Controller
 
         DB::transaction(function () use ($request) {
 
-            // 1. Crear la clínica primero (sin ella no existe el id_clinica)
-            $clinicaId = DB::table('clinicas')->insertGetId([
-                'nombre_comercial' => $request->nombre_clinica,
-                'rfc_clinica' => $request->rfc_clinica,
-                'numero_telefono' => $request->telefono_clinica,
-                'localidad' => $request->localidad,
-                'estado' => $request->estado_clinica,
-                'codigo_postal' => $request->codigo_postal,
-                'config_anticipo_pct' => 0.00,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // 1. Buscar si ya existe una clínica con el mismo RFC
+            $clinicaExistente = DB::table('clinicas')
+                ->where('rfc_clinica', $request->rfc_clinica)
+                ->first();
+
+            if ($clinicaExistente) {
+                // Si la clínica ya existe, usamos su ID para vincular al nuevo doctor
+                $clinicaId = $clinicaExistente->id_clinica;
+            } else {
+                // Si no existe, crear la clínica
+                $clinicaId = DB::table('clinicas')->insertGetId([
+                    'nombre_comercial' => $request->nombre_clinica,
+                    'rfc_clinica' => $request->rfc_clinica,
+                    'numero_telefono' => $request->telefono_clinica,
+                    'localidad' => $request->localidad,
+                    'estado' => $request->estado_clinica,
+                    'codigo_postal' => $request->codigo_postal,
+                    'config_anticipo_pct' => 0.00,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             // 2. Crear el usuario en usuarios_sistema referenciando la clínica creada
             $nombreCompleto = trim(

@@ -295,12 +295,7 @@
             <form action="{{ route('login.post') }}" method="POST">
                 @csrf
                 <h1>Iniciar Sesión</h1>
-                <div class="social-container" style="margin: 20px 0;">
-                    <a href="#"
-                        style="border: 1px solid #ddd; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; height: 40px; width: 40px; color: #333;"><i
-                            class="fab fa-google"></i></a>
-                </div>
-                <span>usa tu cuenta registrada</span>
+                <span style="margin-top: 12px;">usa tu cuenta registrada</span>
 
                 @if(session('success'))
                     <div class="alert alert-success" style="display:flex; flex-direction:column; align-items:center;">
