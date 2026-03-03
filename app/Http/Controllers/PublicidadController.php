@@ -15,8 +15,10 @@ class PublicidadController extends Controller
      */
     public function index()
     {
-        // Traemos las publicidades ordenadas por las más nuevas
-        $anuncios = Publicidad::orderBy('created_at', 'desc')->get();
+        $idClinica = \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1;
+        $anuncios = Publicidad::whereHas('usuario', function ($q) use ($idClinica) {
+            $q->where('id_clinica', $idClinica);
+        })->orderBy('created_at', 'desc')->get();
         return view('publicidad.index', compact('anuncios'));
     }
 

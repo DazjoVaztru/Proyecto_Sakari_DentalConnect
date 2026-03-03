@@ -13,7 +13,10 @@ class CitaController extends Controller
 {
     public function index()
     {
-        $citas = Cita::with(['paciente', 'servicio'])->get();
+        $idClinica = Auth::user()->id_clinica;
+        $citas = Cita::with(['paciente', 'servicio'])
+            ->where('id_clinica', $idClinica)
+            ->get();
         if (request()->wantsJson()) {
             return response()->json($citas);
         }

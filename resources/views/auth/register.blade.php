@@ -259,7 +259,7 @@
                     <input type="text" id="apellido_paterno" name="apellido_paterno"
                         value="{{ old('apellido_paterno') }}" placeholder="Ej. Ramírez"
                         class="{{ $errors->has('apellido_paterno') ? 'is-invalid' : '' }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')" required>
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')" required>
                     @error('apellido_paterno')<span class="error-text">{{ $message }}</span>@enderror
                 </div>
 
@@ -268,7 +268,7 @@
                     <input type="text" id="apellido_materno" name="apellido_materno"
                         value="{{ old('apellido_materno') }}" placeholder="Ej. González"
                         class="{{ $errors->has('apellido_materno') ? 'is-invalid' : '' }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ]/g,'')">
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     @error('apellido_materno')<span class="error-text">{{ $message }}</span>@enderror
                 </div>
 
@@ -282,8 +282,12 @@
 
                 <div class="form-group">
                     <label for="password">Contraseña <span style="color:red">*</span></label>
-                    <input type="password" id="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8"
+                    <input type="password" id="password" name="password" placeholder="Contraseña segura" minlength="8"
                         class="{{ $errors->has('password') ? 'is-invalid' : '' }}" required>
+                    <span style="font-size:10px; color:#888; margin-top:3px; line-height:1.4;">
+                        <i class="fas fa-shield-alt" style="color:#00b4d8;"></i>
+                        Mínimo 8 caracteres, 1 mayúscula, 1 carácter especial (@#$!), sin secuencias (123).
+                    </span>
                     @error('password')<span class="error-text">{{ $message }}</span>@enderror
                 </div>
 
@@ -363,12 +367,29 @@
             const confirmInput = document.getElementById('password_confirmation');
             const form = document.querySelector('form');
 
+            // ===== Title Case automático al salir del campo =====
+            function toTitleCase(str) {
+                return str.toLowerCase().replace(/(?:^|\s)\S/g, function (match) {
+                    return match.toUpperCase();
+                });
+            }
+
+            ['nombre', 'apellido_paterno', 'apellido_materno', 'nombre_clinica'].forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('blur', function () {
+                        if (this.value.trim()) {
+                            this.value = toTitleCase(this.value.trim());
+                        }
+                    });
+                }
+            });
+
+            // ===== Validación de coincidencia de contraseñas =====
             function validatePasswordMatch() {
-                // Solo validar si ambos inputs tienen algún valor introducido
                 if (passwordInput.value && confirmInput.value) {
                     if (passwordInput.value !== confirmInput.value) {
                         confirmInput.classList.add('is-invalid');
-                        // Si no existe un mensaje de error, lo creamos
                         if (!confirmInput.nextElementSibling || !confirmInput.nextElementSibling.classList.contains('error-text')) {
                             const errorSpan = document.createElement('span');
                             errorSpan.className = 'error-text';
@@ -377,7 +398,6 @@
                         }
                     } else {
                         confirmInput.classList.remove('is-invalid');
-                        // Eliminar el mensaje de error si existía
                         if (confirmInput.nextElementSibling && confirmInput.nextElementSibling.classList.contains('error-text')) {
                             confirmInput.nextElementSibling.remove();
                         }

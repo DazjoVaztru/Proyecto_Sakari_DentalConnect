@@ -74,7 +74,7 @@ class ConfiguracionController extends Controller
 
         // Actualizar contraseña solo si se proporcionó una nueva
         if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = $request->password;  // El cast 'hashed' del modelo User lo hashea automáticamente
         }
 
         $usuario->update($data);
@@ -108,9 +108,8 @@ class ConfiguracionController extends Controller
             'id_clinica' => Auth::user()->id_clinica,
             'nombre_completo' => $request->nombre_completo,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,  // El cast 'hashed' del modelo User lo hashea automáticamente
             'rol' => 'recepcionista',
-            'is_active' => true,
         ]);
 
         return back()->with('success', 'Recepcionista agregada correctamente.');

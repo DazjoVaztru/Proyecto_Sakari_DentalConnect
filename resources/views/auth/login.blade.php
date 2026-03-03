@@ -295,19 +295,11 @@
             <form action="{{ route('login.post') }}" method="POST">
                 @csrf
                 <h1>Iniciar Sesión</h1>
-                <div class="social-container" style="margin: 20px 0;">
-                    <a href="#"
-                        style="border: 1px solid #ddd; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; height: 40px; width: 40px; color: #333;"><i
-                            class="fab fa-google"></i></a>
-                </div>
-                <span>usa tu cuenta registrada</span>
+                <span style="margin-top: 12px;">usa tu cuenta registrada</span>
 
                 @if(session('success'))
-                    <div class="alert alert-success" style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="alert alert-success">
                         {{ session('success') }}
-                        <button type="button" class="ghost" onclick="document.getElementById('signIn').click();"
-                            style="margin-top: 10px; background-color: #28a745; border-color: #28a745; color: white;">Ir a
-                            Inicio de Sesión</button>
                     </div>
                 @endif
                 @if(!session('show_register') && $errors->any())
@@ -316,7 +308,7 @@
 
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Contraseña" required />
-                <a href="#">¿Olvidaste tu contraseña?</a>
+                <a href="/olvide-password">¿Olvidaste tu contraseña?</a>
                 <button type="submit">Ingresar</button>
             </form>
         </div>

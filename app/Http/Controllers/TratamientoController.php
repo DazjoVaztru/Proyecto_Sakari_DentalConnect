@@ -14,7 +14,8 @@ class TratamientoController extends Controller
      */
     public function index()
     {
-        $servicios = Servicio::all();
+        $idClinica = \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1;
+        $servicios = Servicio::where('id_clinica', $idClinica)->get();
         return view('tratamientos.index', compact('servicios'));
     }
 
@@ -35,7 +36,7 @@ class TratamientoController extends Controller
         ]);
 
         Servicio::create([
-            'id_clinica' => 1,
+            'id_clinica' => \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1,
             'nombre_servicio' => $request->nombre,
             'precio_base' => $request->precio,
             'categoria' => $request->categoria ?? 'General' // Valor por defecto si lo dejan vacío
