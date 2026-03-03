@@ -210,8 +210,7 @@
             <div class="overlay">
                 <div class="overlay-panel">
                     <h1>¡No te preocupes!</h1>
-                    <p>Revisa tu bandeja de entrada después de enviar el formulario. Estarás de vuelta en tu clínica en
-                        poco tiempo.</p>
+                    <p>Una vez des click en enviar tu correo, solo tendras que revisar tu bandeja de entrada</p>
                 </div>
             </div>
         </div>
