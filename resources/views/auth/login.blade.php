@@ -298,11 +298,8 @@
                 <span style="margin-top: 12px;">usa tu cuenta registrada</span>
 
                 @if(session('success'))
-                    <div class="alert alert-success" style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="alert alert-success">
                         {{ session('success') }}
-                        <button type="button" class="ghost" onclick="document.getElementById('signIn').click();"
-                            style="margin-top: 10px; background-color: #28a745; border-color: #28a745; color: white;">Ir a
-                            Inicio de Sesión</button>
                     </div>
                 @endif
                 @if(!session('show_register') && $errors->any())
