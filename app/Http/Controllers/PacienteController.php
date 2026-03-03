@@ -87,7 +87,7 @@ class PacienteController extends Controller
                 'id_clinica' => $idClinica,
                 'nombre_completo' => $nombreCompleto,
                 'email' => $request->email,
-                'password' => Hash::make('dental123'),
+                'password' => 'dental123',   // El cast 'hashed' del modelo User lo hashea automáticamente
                 'rol' => 'paciente',
                 'is_active' => true,
             ]);

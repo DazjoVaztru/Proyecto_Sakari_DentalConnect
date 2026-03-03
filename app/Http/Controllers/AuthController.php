@@ -131,7 +131,7 @@ class AuthController extends Controller
                 'id_clinica' => $clinicaId,
                 'nombre_completo' => $nombreCompleto,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => $request->password,  // El cast 'hashed' del modelo User lo hashea automáticamente
                 'rol' => 'doctor',
             ]);
 
