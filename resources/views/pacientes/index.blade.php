@@ -628,7 +628,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                    <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -674,12 +674,12 @@
                 list.innerHTML = json.data.map(ev => {
                     const fecha = new Date(ev.fecha_evolucion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                        <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                    </div>
-                                    <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                    ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                </div>`;
+                                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                            <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                        </div>
+                                        <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                        ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                    </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -730,5 +730,10 @@
                 btn.style.cursor = 'not-allowed';
             }
         });
+
+        // ─── Auto-abrir modal si hay errores de validación ──────────────
+        @if($errors->any())
+            openModal('modal-new-patient');
+        @endif
     </script>
 @endsection
