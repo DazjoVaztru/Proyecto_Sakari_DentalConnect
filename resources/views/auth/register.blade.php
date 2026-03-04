@@ -314,15 +314,6 @@
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="rfc_clinica">RFC de la Clínica <span style="color:red">*</span></label>
-                    <input type="text" id="rfc_clinica" name="rfc_clinica" value="{{ old('rfc_clinica') }}"
-                        placeholder="Ej. XAXX010101000" maxlength="13"
-                        class="{{ $errors->has('rfc_clinica') ? 'is-invalid' : '' }}"
-                        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" required>
-                    @error('rfc_clinica')<span class="error-text">{{ $message }}</span>@enderror
-                </div>
-
-                <div class="form-group">
                     <label for="telefono_clinica">Teléfono</label>
                     <input type="tel" id="telefono_clinica" name="telefono_clinica"
                         value="{{ old('telefono_clinica') }}" placeholder="Ej. 5512345678" maxlength="12"

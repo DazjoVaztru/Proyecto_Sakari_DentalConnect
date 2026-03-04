@@ -14,7 +14,6 @@ class DatosInicialesSeeder extends Seeder
         // 1. Crear la Clínica
         $idClinica = DB::table('clinicas')->insertGetId([
             'nombre_comercial' => 'Dental Connect Pro',
-            'rfc_clinica' => 'DCP240206XYZ',
             'numero_telefono' => '5551234567',
             'localidad' => 'Ciudad de México',
             'estado' => 'CDMX',

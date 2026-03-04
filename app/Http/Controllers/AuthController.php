@@ -33,7 +33,6 @@ class AuthController extends Controller
             'apellido_paterno' => StringHelper::capitalizeName($request->apellido_paterno),
             'apellido_materno' => StringHelper::capitalizeName($request->apellido_materno),
             'nombre_clinica' => StringHelper::capitalizeName($request->nombre_clinica),
-            'rfc_clinica' => $request->rfc_clinica ? strtoupper(trim($request->rfc_clinica)) : null,
             'localidad' => StringHelper::capitalizeName($request->localidad),
             'estado_clinica' => StringHelper::capitalizeName($request->estado_clinica),
         ]);
@@ -56,9 +55,6 @@ class AuthController extends Controller
             'password.regex' => 'La contraseña debe contener al menos una letra mayúscula y un carácter especial (ej. @, #, $, !).',
             'password.not_regex' => 'La contraseña no puede contener secuencias numéricas como 123.',
             'nombre_clinica.required' => 'El nombre de la clínica es obligatorio.',
-            'rfc_clinica.required' => 'El RFC de la clínica es obligatorio.',
-            'rfc_clinica.regex' => 'El RFC solo puede contener letras y números (sin caracteres especiales), exactamente 12 o 13 caracteres.',
-            'rfc_clinica.max' => 'El RFC no puede exceder 13 caracteres.',
             'telefono_clinica.regex' => 'El teléfono solo puede contener números (sin espacios, letras ni caracteres especiales).',
             'telefono_clinica.max' => 'El teléfono no puede exceder 12 dígitos.',
             'codigo_postal.regex' => 'El código postal solo puede contener números (sin espacios, letras ni caracteres especiales).',
@@ -83,8 +79,6 @@ class AuthController extends Controller
                 'not_regex:/123/',                        // No permitir secuencias como 123
             ],
             'nombre_clinica' => ['required', 'string', 'max:150', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
-            // RFC: solo letras y números, entre 12 y 13 caracteres. Removido unique para sucursales de la misma clínica.
-            'rfc_clinica' => ['required', 'string', 'max:13', 'regex:/^[A-Z0-9]{12,13}$/'],
             // Teléfono: solo dígitos, sin espacios ni letras. Máximo 12 dígitos.
             'telefono_clinica' => ['nullable', 'regex:/^[0-9]{1,12}$/', 'max:12'],
             'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
@@ -100,9 +94,9 @@ class AuthController extends Controller
 
         DB::transaction(function () use ($request) {
 
-            // 1. Buscar si ya existe una clínica con el mismo RFC
+            // 1. Buscar si ya existe una clínica con el mismo nombre comercial
             $clinicaExistente = DB::table('clinicas')
-                ->where('rfc_clinica', $request->rfc_clinica)
+                ->where('nombre_comercial', $request->nombre_clinica)
                 ->first();
 
             if ($clinicaExistente) {
@@ -112,7 +106,6 @@ class AuthController extends Controller
                 // Si no existe, crear la clínica
                 $clinicaId = DB::table('clinicas')->insertGetId([
                     'nombre_comercial' => $request->nombre_clinica,
-                    'rfc_clinica' => $request->rfc_clinica,
                     'numero_telefono' => $request->telefono_clinica,
                     'localidad' => $request->localidad,
                     'estado' => $request->estado_clinica,

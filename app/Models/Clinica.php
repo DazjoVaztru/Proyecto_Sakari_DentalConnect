@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int $id_clinica
  * @property string $nombre_comercial
- * @property string|null $rfc_clinica
  * @property string|null $numero_telefono
  * @property string|null $localidad
  * @property string|null $estado
@@ -30,7 +29,6 @@ class Clinica extends Model
 
     protected $fillable = [
         'nombre_comercial',
-        'rfc_clinica',
         'numero_telefono',
         'localidad',
         'estado',
