@@ -27,7 +27,7 @@ class UpdateClinicaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre_comercial' => 'required|string|max:150',
+            'nombre_comercial' => ['required', 'string', 'max:150', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'numero_telefono' => 'nullable|string|max:20|regex:/^[0-9]+$/',
             'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'estado' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],

@@ -82,7 +82,7 @@ class AuthController extends Controller
                 'regex:/^(?=.*[A-Z])(?=.*[\W_]).+$/',   // Al menos 1 mayúscula y 1 carácter especial
                 'not_regex:/123/',                        // No permitir secuencias como 123
             ],
-            'nombre_clinica' => 'required|string|max:150',
+            'nombre_clinica' => ['required', 'string', 'max:150', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             // RFC: solo letras y números, entre 12 y 13 caracteres. Removido unique para sucursales de la misma clínica.
             'rfc_clinica' => ['required', 'string', 'max:13', 'regex:/^[A-Z0-9]{12,13}$/'],
             // Teléfono: solo dígitos, sin espacios ni letras. Máximo 12 dígitos.

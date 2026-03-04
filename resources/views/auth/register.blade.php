@@ -306,7 +306,8 @@
                     <label for="nombre_clinica">Nombre Comercial <span style="color:red">*</span></label>
                     <input type="text" id="nombre_clinica" name="nombre_clinica" value="{{ old('nombre_clinica') }}"
                         placeholder="Ej. Clínica Dental Sonrisas"
-                        class="{{ $errors->has('nombre_clinica') ? 'is-invalid' : '' }}" required>
+                        class="{{ $errors->has('nombre_clinica') ? 'is-invalid' : '' }}" required
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     @error('nombre_clinica')<span class="error-text">{{ $message }}</span>@enderror
                 </div>
             </div>

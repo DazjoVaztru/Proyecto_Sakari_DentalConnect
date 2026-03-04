@@ -26,7 +26,7 @@
                 <div style="margin-bottom: 15px;">
                     <label>Nombre Comercial</label>
                     <input type="text" name="nombre_comercial" value="{{ $clinica->nombre_comercial }}" class="modern-input"
-                        required>
+                        required oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
