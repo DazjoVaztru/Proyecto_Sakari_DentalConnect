@@ -54,7 +54,6 @@ class CitaController extends Controller
             $idDoctor = DB::table('doctores')
                 ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
                 ->where('usuarios_sistema.id_clinica', $idClinica)
-                ->where('usuarios_sistema.is_active', true)
                 ->value('doctores.id_doctor') ?? 1;
 
             // ── Verificar duplicado exacto ────────────────────────────────
