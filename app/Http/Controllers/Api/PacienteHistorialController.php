@@ -66,7 +66,7 @@ class PacienteHistorialController extends Controller
     {
         try {
             $request->validate([
-                'descripcion_avance' => 'required|string|max:100',
+                'descripcion_avance' => 'required|string|max:500',
                 'plan_tratamiento' => 'nullable|string',
                 'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // máximo 5MB
             ]);
