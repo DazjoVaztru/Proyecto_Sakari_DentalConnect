@@ -4,7 +4,7 @@
 
 @section('contenido')
     <div class="header-section" style="margin-bottom: 30px;">
-        <h2 class="page-title">Configuración de la Clínica</h2>
+        <h2 class="page-title">Configuración de la Clínica Prueva FGGBPD</h2>
         <p style="color: #666;">Gestiona la información de tu consultorio y equipo de trabajo.</p>
     </div>
 
