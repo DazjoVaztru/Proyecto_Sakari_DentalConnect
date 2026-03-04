@@ -31,7 +31,8 @@ class AuthController extends Controller
         $request->merge([
             'nombre' => StringHelper::capitalizeName($request->nombre),
             'apellido_paterno' => StringHelper::capitalizeName($request->apellido_paterno),
-            'apellido_materno' => StringHelper::capitalizeName($request->apellido_materno),,
+            'apellido_materno' => StringHelper::capitalizeName($request->apellido_materno),
+            'nombre_clinica' => StringHelper::capitalizeName($request->nombre_clinica),
             'rfc_clinica' => $request->rfc_clinica ? strtoupper(trim($request->rfc_clinica)) : null,
             'localidad' => StringHelper::capitalizeName($request->localidad),
             'estado_clinica' => StringHelper::capitalizeName($request->estado_clinica),
