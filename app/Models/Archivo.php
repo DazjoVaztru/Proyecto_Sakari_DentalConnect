@@ -25,6 +25,8 @@ class Archivo extends Model
     protected $table = 'archivos';
     protected $primaryKey = 'id_archivo';
 
+    public $timestamps = false; // La tabla no tiene created_at ni updated_at
+
     protected $fillable = [
         'id_paciente',
         'id_cita',

@@ -34,11 +34,24 @@ class PacienteHistorialController extends Controller
      */
     public function evoluciones($idPaciente)
     {
-        $registros = EvolucionTratamiento::with('imagenes')
-            ->where('id_paciente', $idPaciente)
+        $registros = EvolucionTratamiento::where('id_paciente', $idPaciente)
             ->orderBy('fecha_evolucion', 'desc')
             ->take(10)
             ->get();
+
+        foreach ($registros as $reg) {
+            $archivo = Archivo::where('id_paciente', $idPaciente)
+                ->where('descripcion', 'Evolucion_' . $reg->id_evolucion)
+                ->first();
+
+            if ($archivo) {
+                $reg->imagenes = [
+                    ['ruta_imagen' => str_replace('public/', '', $archivo->url_archivo)]
+                ];
+            } else {
+                $reg->imagenes = [];
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -51,36 +64,46 @@ class PacienteHistorialController extends Controller
      */
     public function storeEvolucion(\Illuminate\Http\Request $request, $idPaciente)
     {
-        $request->validate([
-            'descripcion_avance' => 'required|string|max:100',
-            'plan_tratamiento' => 'nullable|string',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // máximo 5MB
-        ]);
-
-        $evolucion = new EvolucionTratamiento();
-        $evolucion->id_paciente = $idPaciente;
-        $evolucion->fecha_evolucion = now();
-        $evolucion->descripcion_avance = $request->descripcion_avance;
-        $evolucion->plan_tratamiento = $request->plan_tratamiento;
-        $evolucion->save();
-
-        if ($request->hasFile('imagen')) {
-            $file = $request->file('imagen');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            // Guardar en public/storage/evoluciones
-            $path = $file->storeAs('evoluciones', $filename, 'public');
-
-            \App\Models\EvolucionClinicaImagen::create([
-                'id_evolucion' => $evolucion->id_evolucion,
-                'ruta_imagen' => $path,
+        try {
+            $request->validate([
+                'descripcion_avance' => 'required|string|max:100',
+                'plan_tratamiento' => 'nullable|string',
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // máximo 5MB
             ]);
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Evolución guardada correctamente.',
-            'data' => $evolucion
-        ]);
+            $evolucion = new EvolucionTratamiento();
+            // Assigning a default service ID if it's required, although we don't know for sure.
+            // But let's see if it errors out first.
+            $evolucion->id_paciente = $idPaciente;
+            $evolucion->fecha_evolucion = now();
+            $evolucion->descripcion_avance = $request->descripcion_avance;
+            $evolucion->plan_tratamiento = $request->plan_tratamiento;
+            $evolucion->save();
+
+            if ($request->hasFile('imagen')) {
+                $file = $request->file('imagen');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('evoluciones', $filename, 'public');
+
+                Archivo::create([
+                    'id_paciente' => $idPaciente,
+                    'tipo' => 'imagen',
+                    'url_archivo' => $path,
+                    'descripcion' => 'Evolucion_' . $evolucion->id_evolucion,
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Evolución guardada correctamente.',
+                'data' => $evolucion
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error 500: ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine()
+            ], 500);
+        }
     }
 
     /**

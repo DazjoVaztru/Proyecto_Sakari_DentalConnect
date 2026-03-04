@@ -44,12 +44,4 @@ class EvolucionTratamiento extends Model
         'plan_tratamiento',
         'estado_paciente',
     ];
-
-    /**
-     * Relación con las imágenes anexas a la evolución.
-     */
-    public function imagenes()
-    {
-        return $this->hasMany(EvolucionClinicaImagen::class, 'id_evolucion', 'id_evolucion');
-    }
 }
