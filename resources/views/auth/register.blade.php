@@ -333,13 +333,17 @@
                 <div class="form-group">
                     <label for="localidad">Ciudad / Localidad</label>
                     <input type="text" id="localidad" name="localidad" value="{{ old('localidad') }}"
-                        placeholder="Ej. Ciudad de México">
+                        placeholder="Ej. Ciudad de México" class="{{ $errors->has('localidad') ? 'is-invalid' : '' }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    @error('localidad')<span class="error-text">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
                     <label for="estado_clinica">Estado</label>
                     <input type="text" id="estado_clinica" name="estado_clinica" value="{{ old('estado_clinica') }}"
-                        placeholder="Ej. Puebla">
+                        placeholder="Ej. Puebla" class="{{ $errors->has('estado_clinica') ? 'is-invalid' : '' }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    @error('estado_clinica')<span class="error-text">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="form-group">
@@ -374,7 +378,7 @@
                 });
             }
 
-            ['nombre', 'apellido_paterno', 'apellido_materno', 'nombre_clinica'].forEach(function (id) {
+            ['nombre', 'apellido_paterno', 'apellido_materno', 'nombre_clinica', 'localidad', 'estado_clinica'].forEach(function (id) {
                 const el = document.getElementById(id);
                 if (el) {
                     el.addEventListener('blur', function () {

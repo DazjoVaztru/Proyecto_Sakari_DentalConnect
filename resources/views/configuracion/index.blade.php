@@ -33,17 +33,19 @@
                     <div>
                         <label>Teléfono</label>
                         <input type="text" name="numero_telefono" value="{{ $clinica->numero_telefono }}"
-                            class="modern-input">
+                            class="modern-input" maxlength="12" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                     </div>
                     <div>
                         <label>Ciudad / Localidad</label>
-                        <input type="text" name="localidad" value="{{ $clinica->localidad }}" class="modern-input">
+                        <input type="text" name="localidad" value="{{ $clinica->localidad }}" class="modern-input"
+                            oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     </div>
                 </div>
 
                 <div style="margin-top: 15px;">
                     <label>Estado / Provincia</label>
-                    <input type="text" name="estado" value="{{ $clinica->estado }}" class="modern-input">
+                    <input type="text" name="estado" value="{{ $clinica->estado }}" class="modern-input"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                 </div>
 
                 <button type="submit" class="ghost-btn"
@@ -66,7 +68,8 @@
                     <div style="margin-bottom: 15px;">
                         <label>Nombre Completo</label>
                         <input type="text" name="nombre_completo" value="{{ $doctorUser->nombre_completo }}"
-                            class="modern-input" required>
+                            class="modern-input"
+                            oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')" required>
                     </div>
 
                     <div style="margin-bottom: 15px;">
@@ -147,7 +150,8 @@
                 @csrf
                 <label style="display:block; margin-bottom:5px;">Nombre</label>
                 <input type="text" name="nombre_completo" class="modern-input" required
-                    style="width:100%; margin-bottom:10px;">
+                    style="width:100%; margin-bottom:10px;"
+                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
 
                 <label style="display:block; margin-bottom:5px;">Email</label>
                 <input type="email" name="email" class="modern-input" required style="width:100%; margin-bottom:10px;">
@@ -176,7 +180,8 @@
 
                 <label style="display:block; margin-bottom:5px;">Nombre</label>
                 <input type="text" name="nombre_completo" id="edit_nombre" class="modern-input" required
-                    style="width:100%; margin-bottom:10px;">
+                    style="width:100%; margin-bottom:10px;"
+                    oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
 
                 <label style="display:block; margin-bottom:5px;">Email</label>
                 <input type="email" name="email" id="edit_email" class="modern-input" required

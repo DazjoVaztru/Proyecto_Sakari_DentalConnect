@@ -289,15 +289,18 @@
                         <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales
                     </div>
                     <input type="text" name="nombre" class="modern-input" placeholder="Nombre(s)*" required
-                        value="{{ old('nombre') }}">
+                        value="{{ old('nombre') }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="text" name="apellido_paterno" class="modern-input" placeholder="Apellido Paterno*" required
-                        value="{{ old('apellido_paterno') }}">
+                        value="{{ old('apellido_paterno') }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="text" name="apellido_materno" class="modern-input" placeholder="Apellido Materno"
-                        value="{{ old('apellido_materno') }}">
+                        value="{{ old('apellido_materno') }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="email" name="email" class="modern-input" placeholder="Email (Usuario App)*" required
                         value="{{ old('email') }}">
-                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono*" required
-                        value="{{ old('telefono') }}">
+                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono*" required maxlength="12"
+                        value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
 
                     <div style="position:relative; padding-top: 18px;">
                         <label
@@ -331,13 +334,17 @@
                         <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
                     </div>
                     <input type="text" name="emergencia_nombre" class="modern-input" placeholder="Nombre Contacto"
-                        value="{{ old('emergencia_nombre') }}">
+                        value="{{ old('emergencia_nombre') }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="text" name="emergencia_apellido_paterno" class="modern-input"
-                        placeholder="Apellido Paterno" value="{{ old('emergencia_apellido_paterno') }}">
+                        placeholder="Apellido Paterno" value="{{ old('emergencia_apellido_paterno') }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="text" name="emergencia_apellido_materno" class="modern-input"
-                        placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}">
+                        placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}"
+                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="text" name="emergencia_telefono" class="modern-input" placeholder="Teléfono Emergencia"
-                        value="{{ old('emergencia_telefono') }}">
+                        maxlength="12" value="{{ old('emergencia_telefono') }}"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
 
                     {{-- Salud --}}
                     <div class="full-width"
@@ -628,7 +635,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                    <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -674,12 +681,12 @@
                 list.innerHTML = json.data.map(ev => {
                     const fecha = new Date(ev.fecha_evolucion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                            <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                        </div>
-                                        <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                        ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                    </div>`;
+                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                            </div>
+                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                        </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
