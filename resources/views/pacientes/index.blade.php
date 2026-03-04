@@ -223,7 +223,7 @@
     <div class="patients-grid" id="patients-grid">
         @forelse($pacientes as $paciente)
             <div class="patient-card"
-                onclick="verPerfil({{ json_encode($paciente->load(['usuario', 'contactoEmergencia'])) }})">
+                onclick="verPerfil({{ json_encode($paciente->load(['usuario', 'contactoEmergencia', 'archivos'])) }})">
                 <div class="avatar-circle">
                     <i class="fa-solid fa-user"></i>
                 </div>
@@ -299,8 +299,8 @@
                         oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="email" name="email" class="modern-input" placeholder="Email (Usuario App)*" required
                         value="{{ old('email') }}">
-                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono*" required maxlength="12"
-                        value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono (+codigo)*" required
+                        maxlength="15" value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
 
                     <div style="position:relative; padding-top: 18px;">
                         <label
@@ -323,8 +323,12 @@
                         @endforeach
                     </select>
 
-                    <input type="number" name="peso" class="modern-input" placeholder="Peso (kg)" step="0.1"
-                        value="{{ old('peso') }}">
+                    <input type="number" name="peso" class="modern-input" placeholder="Peso (kg enteros)" step="1" min="0"
+                        max="500" value="{{ old('peso') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
+                    <input type="text" name="direccion" class="modern-input" placeholder="Dirección Completa"
+                        value="{{ old('direccion') }}" style="grid-column: span 1;">
+
                     <input type="text" name="ocupacion" class="modern-input" placeholder="Ocupación"
                         value="{{ old('ocupacion') }}">
 
@@ -342,9 +346,9 @@
                     <input type="text" name="emergencia_apellido_materno" class="modern-input"
                         placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}"
                         oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_telefono" class="modern-input" placeholder="Teléfono Emergencia"
-                        maxlength="12" value="{{ old('emergencia_telefono') }}"
-                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="text" name="emergencia_telefono" class="modern-input"
+                        placeholder="Teléfono Emergencia (+codigo)" maxlength="15" value="{{ old('emergencia_telefono') }}"
+                        oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
 
                     {{-- Salud --}}
                     <div class="full-width"
@@ -362,10 +366,12 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 25px;">
-                    <button type="submit" class="ghost-btn"
+                    <button type="button" class="ghost-btn" id="btn-registrar-paciente"
                         style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 12px; font-weight: 800;">
                         <i class="fa-solid fa-floppy-disk"></i> Registrar Paciente
                     </button>
+                    <!-- Actual submit button is hidden -->
+                    <button type="submit" id="btn-submit-real-paciente" style="display: none;"></button>
                 </div>
             </form>
         </div>
@@ -380,9 +386,13 @@
             <div
                 style="background: linear-gradient(135deg, #e0fbfc 0%, #caf0f8 100%); padding: 35px 45px; border-bottom: 1px solid #b0e0f5;">
                 <div style="display: flex; align-items: center; gap: 25px;">
-                    <div
-                        style="background: white; border-radius: 50%; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,180,216,0.25);">
-                        <i class="fa-solid fa-circle-user" style="font-size: 3.5rem; color: var(--primary-color);"></i>
+                    <div style="position: relative; width: 85px; height: 85px;" title="Clic para subir/cambiar foto de progreso">
+                        <img id="p-foto" src="" alt="Foto Paciente" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 15px rgba(0,180,216,0.25); display: none; cursor: pointer;" onclick="document.getElementById('foto-upload').click()">
+                        <div id="p-foto-placeholder"
+                            style="background: white; border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,180,216,0.25); cursor: pointer;" onclick="document.getElementById('foto-upload').click()">
+                            <i class="fa-solid fa-camera" style="font-size: 2.5rem; color: var(--primary-color);"></i>
+                        </div>
+                        <input type="file" id="foto-upload" style="display: none;" accept="image/jpeg, image/png, image/webp" onchange="uploadFoto(this)">
                     </div>
                     <div>
                         <h2 id="p-name" style="color: #2b2d42; margin: 0; font-size: 1.8em; font-weight: 800;">Nombre</h2>
@@ -402,6 +412,9 @@
                 </button>
                 <button onclick="showTab('tab-evolucion')" id="btn-tab-evolucion" class="tab-btn">
                     <i class="fa-solid fa-notes-medical"></i> Evolución Clínica
+                </button>
+                <button onclick="showTab('tab-historial')" id="btn-tab-historial" class="tab-btn">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Historial y Tratamientos
                 </button>
             </div>
 
@@ -506,10 +519,19 @@
                                     style="margin: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">Ninguna</p>
                             </div>
 
-                            <button class="btn-pill" style="width: 100%; justify-content: center; padding: 18px;"
+                            <button class="btn-pill" style="width: 100%; justify-content: center; padding: 18px; margin-bottom: 12px;"
                                 onclick="abrirModalCita()">
                                 <i class="fa-solid fa-calendar-plus"></i> AGENDAR NUEVA CITA
                             </button>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="abrirModalEdit()" style="flex: 1; padding: 12px; border-radius: 12px; background: #f59e0b; color: white; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <i class="fa-solid fa-pen-to-square"></i> Editar Datos
+                                </button>
+                                <button onclick="eliminarPaciente()" style="flex: 1; padding: 12px; border-radius: 12px; background: #ef4444; color: white; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <i class="fa-solid fa-trash-can"></i> Eliminar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -534,6 +556,15 @@
                     <div id="evolucion-list" style="display: flex; flex-direction: column; gap: 12px;">
                         <div style="text-align: center; color: #888; padding: 20px;">
                             <i class="fa-solid fa-spinner fa-spin"></i> Cargando evoluciones...
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-historial" style="display: none;">
+                    <h4 style="color: var(--secondary-color); font-size: 1.1em; margin-bottom: 15px;"><i class="fa-solid fa-clipboard-list"></i> Historial de Citas y Tratamientos</h4>
+                    <div id="historial-citas-list" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="text-align: center; color: #888; padding: 20px;">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Cargando historial...
                         </div>
                     </div>
                 </div>
@@ -587,12 +618,95 @@
             </form>
         </div>
     </div>
+    {{-- Modal de Edición (Readonly: Nombre, Apellidos, Fecha Nac, Tipo Sangre) --}}
+    <div id="modal-edit-patient" class="modal-overlay">
+        <div class="modal-glass modal-lg" style="width: 820px; max-width: 95vw; max-height: 90vh; overflow-y: auto;">
+            <button class="close-modal" onclick="closeModal('modal-edit-patient')">&times;</button>
+            <h3 style="color: #f59e0b; margin-bottom: 20px; text-align: left; font-weight: 800; font-size: 1.6rem;">
+                <i class="fa-solid fa-user-pen" style="margin-right: 8px;"></i> Editar Datos del Paciente
+            </h3>
+
+            <form id="form-edit-patient" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="form-grid">
+                    <div class="full-width" style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-bottom: 5px;">
+                        <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales (Bloqueados)
+                    </div>
+                    
+                    <input type="text" id="edit-nombre" class="modern-input" placeholder="Nombre(s)" readonly style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
+                    <input type="text" id="edit-apellidos" class="modern-input" placeholder="Apellidos" readonly style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
+                    <input type="text" id="edit-fecha-nac" class="modern-input" placeholder="Fecha Nacimiento" readonly style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
+                    <input type="text" id="edit-tipo-sangre" class="modern-input" placeholder="Tipo Sangre" readonly style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
+
+                    <div class="full-width" style="font-size: 0.78em; font-weight: 700; color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid #e0fbfc; padding-bottom: 6px; margin-top: 15px; margin-bottom: 5px;">
+                        <i class="fa-solid fa-pen" style="margin-right: 5px;"></i> Datos Editables
+                    </div>
+
+                    <input type="email" name="email" id="edit-email" class="modern-input" placeholder="Email (Usuario App)*" required>
+                    <input type="text" name="telefono" id="edit-telefono" class="modern-input" placeholder="Teléfono (+codigo)*" required maxlength="15" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+                    <input type="number" name="peso" id="edit-peso" class="modern-input" placeholder="Peso (kg enteros)" step="1" min="0" max="500" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="text" name="direccion" id="edit-direccion" class="modern-input" placeholder="Dirección Completa" style="grid-column: span 1;">
+                    <input type="text" name="ocupacion" id="edit-ocupacion" class="modern-input" placeholder="Ocupación">
+
+                    <div class="full-width" style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
+                        <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
+                    </div>
+                    <input type="text" name="emergencia_nombre" id="edit-em-nombre" class="modern-input" placeholder="Nombre Contacto" oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    <input type="text" name="emergencia_apellido_paterno" id="edit-em-paterno" class="modern-input" placeholder="Apellido Paterno" oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    <input type="text" name="emergencia_apellido_materno" id="edit-em-materno" class="modern-input" placeholder="Apellido Materno" oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    <input type="text" name="emergencia_telefono" id="edit-em-telefono" class="modern-input" placeholder="Teléfono Emergencia (+codigo)" maxlength="15" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+
+                    <div class="full-width" style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
+                        <i class="fa-solid fa-notes-medical" style="margin-right: 5px;"></i> Información de Salud
+                    </div>
+                    <div class="full-width">
+                        <textarea name="enfermedades_cronicas" id="edit-enfermedades" class="modern-input" rows="2" placeholder="Enfermedades Crónicas (Texto libre)"></textarea>
+                    </div>
+                    <div class="full-width">
+                        <textarea name="alergias" id="edit-alergias" class="modern-input" rows="2" placeholder="Alergias a Medicamentos (Texto libre)"></textarea>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <button type="submit" class="ghost-btn" style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 12px; font-weight: 800; background: #f59e0b; color: white; border: none;">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Formulario para Delete (oculto) --}}
+    <form id="form-delete-paciente" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
 @endsection
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let currentPaciente = null;
+
+        document.getElementById('btn-registrar-paciente').addEventListener('click', function() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Estás a punto de registrar un nuevo paciente. Revisa que los datos médicos e información personal ingresada sean correctos.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#00b4d8',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Sí, registrar paciente',
+                cancelButtonText: 'Cancelar y revisar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('btn-submit-real-paciente').click();
+                }
+            });
+        });
 
         // ─── Buscador en Tiempo Real ───────────────────────────────────────────
         document.getElementById('patient-search').addEventListener('input', function (e) {
@@ -621,6 +735,17 @@
             document.getElementById('view-ocupacion').innerText = paciente.ocupacion || 'S/D';
             document.getElementById('view-enfermedades').innerText = paciente.enfermedades_cronicas || 'Ninguna registrada';
 
+            // Foto
+            const fotoUrl = paciente.archivos ? paciente.archivos.find(a => a.tipo === 'imagen') : null;
+            if(fotoUrl) {
+                document.getElementById('p-foto').src = '/storage/' + fotoUrl.url_archivo.replace('public/', '');
+                document.getElementById('p-foto').style.display = 'block';
+                document.getElementById('p-foto-placeholder').style.display = 'none';
+            } else {
+                document.getElementById('p-foto').style.display = 'none';
+                document.getElementById('p-foto-placeholder').style.display = 'flex';
+            }
+
             // Contacto de Emergencia
             const ce = paciente.contacto_emergencia;
             if (ce) {
@@ -635,7 +760,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                            <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -662,6 +787,72 @@
             document.getElementById('btn-' + id).classList.add('tab-active');
 
             if (id === 'tab-evolucion') cargarEvoluciones();
+            if (id === 'tab-historial') cargarHistorialCitas();
+        }
+
+        async function uploadFoto(input) {
+            if (!currentPaciente || !input.files[0]) return;
+            const formData = new FormData();
+            formData.append('foto', input.files[0]);
+            
+            Swal.fire({
+                title: 'Subiendo foto...',
+                text: 'Por favor espera...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const res = await fetch(`/api/pacientes/${currentPaciente.id_paciente}/foto`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: formData
+                });
+                const json = await res.json();
+                if(json.success) {
+                    Swal.fire('¡Éxito!', 'Foto actualizada correctamente.', 'success');
+                    document.getElementById('p-foto').src = json.url;
+                    document.getElementById('p-foto').style.display = 'block';
+                    document.getElementById('p-foto-placeholder').style.display = 'none';
+                } else {
+                    Swal.fire('Error', json.message, 'error');
+                }
+            } catch(e) {
+                console.error(e);
+                Swal.fire('Error', 'Ocurrió un problema al subir la foto.', 'error');
+            }
+        }
+
+        async function cargarHistorialCitas() {
+            if (!currentPaciente) return;
+            const list = document.getElementById('historial-citas-list');
+            list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando historial...</div>';
+
+            try {
+                const res = await fetch(`/api/pacientes/${currentPaciente.id_paciente}/citas`);
+                const json = await res.json();
+
+                if (!json.data || json.data.length === 0) {
+                    list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;"><i class="fa-solid fa-calendar-xmark"></i> Sin citas previas.</p>';
+                    return;
+                }
+
+                list.innerHTML = json.data.map(cita => {
+                    const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
+                    return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                    <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', {dateStyle:'long', timeStyle:'short'})}</span>
+                                    ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                </div>
+                            </div>`;
+                }).join('');
+            } catch (e) {
+                list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
+            }
         }
 
         async function cargarEvoluciones() {
@@ -681,12 +872,12 @@
                 list.innerHTML = json.data.map(ev => {
                     const fecha = new Date(ev.fecha_evolucion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                            </div>
-                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                        </div>`;
+                                                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                    <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                </div>
+                                                <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                            </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -725,6 +916,63 @@
             document.getElementById('form-cita-paciente-id').value = currentPaciente.id_paciente;
             document.getElementById('form-cita-paciente-nombre').value = `${currentPaciente.nombre} ${currentPaciente.apellido_paterno}`;
             openModal('modal-add-cita');
+        }
+
+        // ─── CRUD (Edit / Delete) ────────────────────────────────────────────────
+        function abrirModalEdit() {
+            if (!currentPaciente) return;
+            closeModal('modal-patient-profile'); // Cierra perfil
+            openModal('modal-edit-patient'); // Abre edicion
+
+            document.getElementById('form-edit-patient').action = `/pacientes/${currentPaciente.id_paciente}`;
+
+            // Campos de Solo Lectura
+            document.getElementById('edit-nombre').value = currentPaciente.nombre;
+            document.getElementById('edit-apellidos').value = `${currentPaciente.apellido_paterno} ${currentPaciente.apellido_materno || ''}`;
+            document.getElementById('edit-fecha-nac').value = currentPaciente.fecha_nacimiento || '';
+            document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || 'N/A';
+
+            // Campos Editables
+            document.getElementById('edit-email').value = currentPaciente.correo_electronico || '';
+            document.getElementById('edit-telefono').value = currentPaciente.telefono || '';
+            document.getElementById('edit-peso').value = currentPaciente.peso || '';
+            document.getElementById('edit-direccion').value = currentPaciente.direccion || '';
+            document.getElementById('edit-ocupacion').value = currentPaciente.ocupacion || '';
+            document.getElementById('edit-enfermedades').value = currentPaciente.enfermedades_cronicas || '';
+            document.getElementById('edit-alergias').value = currentPaciente.alergias || '';
+
+            // Contacto Emergencia
+            const ce = currentPaciente.contacto_emergencia;
+            if(ce) {
+                document.getElementById('edit-em-nombre').value = ce.nombre || '';
+                document.getElementById('edit-em-paterno').value = ce.apellido_paterno || '';
+                document.getElementById('edit-em-materno').value = ce.apellido_materno || '';
+                document.getElementById('edit-em-telefono').value = ce.numero_telefono || '';
+            }
+        }
+
+        function eliminarPaciente() {
+            if(!currentPaciente) return;
+
+            Swal.fire({
+                title: '¡ALERTA ROJA!',
+                text: `Estás a punto de ELIMINAR por completo al paciente ${currentPaciente.nombre}. Esta acción es destructiva y limitará el acceso a su historial. ¿Deseas proceder?`,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, ELIMINAR PACIENTE',
+                cancelButtonText: 'Cancelar',
+                background: '#fee2e2',
+                color: '#991b1b',
+                iconColor: '#dc2626'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('form-delete-paciente');
+                    form.action = `/pacientes/${currentPaciente.id_paciente}`;
+                    form.submit();
+                }
+            });
         }
 
         // ─── Protección anti doble submit en el formulario de cita ───────────

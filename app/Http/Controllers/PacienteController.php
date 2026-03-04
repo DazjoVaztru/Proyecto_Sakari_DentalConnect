@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class PacienteController extends Controller
 {
@@ -105,6 +106,7 @@ class PacienteController extends Controller
                 'correo_electronico' => $request->email,
                 'tipo_sangre' => $request->tipo_sangre,
                 'peso' => $request->peso,
+                'direccion' => $request->direccion,
                 'ocupacion' => $request->ocupacion,
                 // Texto libre — NO se usan tablas pivot
                 'enfermedades_cronicas' => $request->enfermedades_cronicas,
@@ -133,6 +135,97 @@ class PacienteController extends Controller
             return redirect()->back()
                 ->with('error', 'Error al guardar el paciente: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+
+    /**
+     * Actualiza los datos de un paciente existente.
+     */
+    public function update(Request $request, $id)
+    {
+        $idClinica = Auth::user()->id_clinica;
+        $paciente = Paciente::where('id_paciente', $id)
+            ->whereHas('usuario', function ($q) use ($idClinica) {
+                $q->where('id_clinica', $idClinica);
+            })->firstOrFail();
+
+        $request->validate([
+            'telefono' => 'required|string|max:20',
+            'peso' => 'nullable|integer|min:0|max:500',
+            'direccion' => 'nullable|string|max:100',
+            'email' => 'required|email|max:100',
+            // fields...
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $paciente->update([
+                'telefono' => $request->telefono,
+                'peso' => $request->peso,
+                'direccion' => $request->direccion,
+                'ocupacion' => $request->ocupacion,
+                'enfermedades_cronicas' => $request->enfermedades_cronicas,
+                'alergias' => $request->alergias,
+            ]);
+
+            if ($request->email && $paciente->usuario->email !== $request->email) {
+                $paciente->usuario->update(['email' => $request->email]);
+            }
+
+            if ($request->filled('emergencia_nombre') || $request->filled('emergencia_telefono')) {
+                if ($paciente->id_contacto_emergencia) {
+                    DB::table('contacto_emergencia')->where('id_contacto_emergencia', $paciente->id_contacto_emergencia)
+                        ->update([
+                            'nombre' => $request->input('emergencia_nombre', ''),
+                            'apellido_paterno' => $request->input('emergencia_apellido_paterno', ''),
+                            'apellido_materno' => $request->input('emergencia_apellido_materno', ''),
+                            'numero_telefono' => $request->input('emergencia_telefono', ''),
+                            'updated_at' => now(),
+                        ]);
+                } else {
+                    $idCe = DB::table('contacto_emergencia')->insertGetId([
+                        'nombre' => $request->input('emergencia_nombre', ''),
+                        'apellido_paterno' => $request->input('emergencia_apellido_paterno', ''),
+                        'apellido_materno' => $request->input('emergencia_apellido_materno', ''),
+                        'numero_telefono' => $request->input('emergencia_telefono', ''),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $paciente->update(['id_contacto_emergencia' => $idCe]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Datos del paciente actualizados correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error al actualizar paciente: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Da de baja (elimina lógicamente) al paciente.
+     */
+    public function destroy($id)
+    {
+        $idClinica = Auth::user()->id_clinica;
+        $paciente = Paciente::where('id_paciente', $id)
+            ->whereHas('usuario', function ($q) use ($idClinica) {
+                $q->where('id_clinica', $idClinica);
+            })->firstOrFail();
+
+        try {
+            DB::beginTransaction();
+
+            $paciente->update(['is_active' => false]);
+            $paciente->usuario->update(['is_active' => false]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Paciente eliminado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error al eliminar paciente: ' . $e->getMessage());
         }
     }
 }

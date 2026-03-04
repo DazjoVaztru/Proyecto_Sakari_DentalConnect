@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Paciente;
 use App\Models\SignoVital;
 use App\Models\EvolucionTratamiento;
+use App\Models\Archivo;
+use App\Models\Cita;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PacienteHistorialController extends Controller
 {
@@ -75,6 +79,67 @@ class PacienteHistorialController extends Controller
             'success' => true,
             'message' => 'Evolución guardada correctamente.',
             'data' => $evolucion
+        ]);
+    }
+
+    /**
+     * Sube y actualiza la foto de progreso del paciente.
+     */
+    public function subirFotoProgreso(Request $request, $idPaciente)
+    {
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = 'paciente_' . $idPaciente . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('pacientes/fotos', $filename, 'public');
+
+            // Buscar si ya tiene una foto, si sí, actualizar, si no, crear.
+            $archivo = Archivo::where('id_paciente', $idPaciente)
+                ->where('tipo', 'imagen')
+                ->first();
+
+            if ($archivo) {
+                // Eliminar archivo anterior si existe
+                if (Storage::disk('public')->exists($archivo->url_archivo)) {
+                    Storage::disk('public')->delete($archivo->url_archivo);
+                }
+                $archivo->url_archivo = $path;
+                $archivo->save();
+            } else {
+                $archivo = Archivo::create([
+                    'id_paciente' => $idPaciente,
+                    'tipo' => 'imagen',
+                    'url_archivo' => $path,
+                    'descripcion' => 'Foto de perfil/progreso del paciente',
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto actualizada correctamente.',
+                'url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No se recibió ninguna imagen.']);
+    }
+
+    /**
+     * Retorna el historial de citas del paciente.
+     */
+    public function historialCitas($idPaciente)
+    {
+        $citas = Cita::with(['servicio', 'doctor'])
+            ->where('id_paciente', $idPaciente)
+            ->orderBy('fecha_hora_inicio', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $citas,
         ]);
     }
 }

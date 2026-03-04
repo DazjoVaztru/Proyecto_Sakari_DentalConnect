@@ -53,6 +53,7 @@ class StorePacienteRequest extends FormRequest
             // Datos médicos opcionales
             'tipo_sangre' => 'nullable|string|max:5',
             'peso' => 'nullable|numeric|min:1|max:300',
+            'direccion' => 'nullable|string|max:100',
             'ocupacion' => 'nullable|string|max:100',
             'enfermedades_cronicas' => 'nullable|string|max:1000',
             'alergias' => 'nullable|string|max:1000',

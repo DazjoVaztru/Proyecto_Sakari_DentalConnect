@@ -64,11 +64,7 @@ class Paciente extends Model
         'peso',                  // Valor actual (decimal)
 
         // Dirección
-        'calle',
-        'num_exterior',
-        'num_interior',
-        'colonia',
-        'municipio',
+        'direccion',
 
         // Datos Médicos Rápidos (Texto libre)
         'alergias',              // Columna real en BD: texto libre de alergias

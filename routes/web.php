@@ -54,8 +54,8 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Pacientes — solo index (lista) y store (crear desde modal del dashboard)
-    Route::resource('pacientes', PacienteController::class)->only(['index', 'store']);
+    // Pacientes
+    Route::resource('pacientes', PacienteController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Tratamientos
     Route::resource('tratamientos', TratamientoController::class)->except(['create', 'edit', 'show']);
@@ -90,6 +90,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/pacientes/{idPaciente}/signos-vitales', [PacienteHistorialController::class, 'signosVitales']);
     Route::get('/api/pacientes/{idPaciente}/evoluciones', [PacienteHistorialController::class, 'evoluciones']);
     Route::post('/api/pacientes/{idPaciente}/evoluciones', [PacienteHistorialController::class, 'storeEvolucion']);
+    Route::post('/api/pacientes/{idPaciente}/foto', [PacienteHistorialController::class, 'subirFotoProgreso']);
+    Route::get('/api/pacientes/{idPaciente}/citas', [PacienteHistorialController::class, 'historialCitas']);
 
     // Citas
     Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
