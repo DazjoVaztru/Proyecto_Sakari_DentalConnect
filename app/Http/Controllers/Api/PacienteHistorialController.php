@@ -34,7 +34,8 @@ class PacienteHistorialController extends Controller
      */
     public function evoluciones($idPaciente)
     {
-        $registros = EvolucionTratamiento::where('id_paciente', $idPaciente)
+        $registros = EvolucionTratamiento::with('imagenes')
+            ->where('id_paciente', $idPaciente)
             ->orderBy('fecha_evolucion', 'desc')
             ->take(10)
             ->get();
