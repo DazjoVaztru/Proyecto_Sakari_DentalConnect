@@ -42,9 +42,9 @@ class StorePacienteRequest extends FormRequest
     {
         return [
             // Datos básicos obligatorios
-            'nombre' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'nombre' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'telefono' => 'required|string|max:20|regex:/^[0-9]+$/',
             'email' => 'required|email|max:150|unique:usuarios_sistema,email',
             'fecha_nacimiento' => 'required|date|before:today',
@@ -58,9 +58,9 @@ class StorePacienteRequest extends FormRequest
             'alergias' => 'nullable|string|max:1000',
 
             // Contacto de emergencia (todos opcionales)
-            'emergencia_nombre' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'emergencia_apellido_paterno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'emergencia_apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'emergencia_nombre' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'emergencia_apellido_paterno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'emergencia_apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'emergencia_telefono' => 'nullable|string|max:20|regex:/^[0-9]+$/',
         ];
     }

@@ -69,10 +69,10 @@ class AuthController extends Controller
 
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             // Letras, acentos y ñ, incluyendo espacios simples, sin caracteres especiales
-            'nombre' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'nombre' => ['required', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             // Apellidos: letras y espacios (para apellidos compuestos como "De La Cruz")
-            'apellido_paterno' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'apellido_materno' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'apellido_paterno' => ['required', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'apellido_materno' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'email' => 'required|email|max:100|unique:usuarios_sistema,email',
             'password' => [
                 'required',
@@ -87,8 +87,8 @@ class AuthController extends Controller
             'rfc_clinica' => ['required', 'string', 'max:13', 'regex:/^[A-Z0-9]{12,13}$/'],
             // Teléfono: solo dígitos, sin espacios ni letras. Máximo 12 dígitos.
             'telefono_clinica' => ['nullable', 'regex:/^[0-9]{1,12}$/', 'max:12'],
-            'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'estado_clinica' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'estado_clinica' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'codigo_postal' => ['nullable', 'regex:/^[0-9]{5}$/'],
         ], $messages);
 

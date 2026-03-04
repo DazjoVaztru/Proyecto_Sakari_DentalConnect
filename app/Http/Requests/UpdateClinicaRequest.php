@@ -29,8 +29,8 @@ class UpdateClinicaRequest extends FormRequest
         return [
             'nombre_comercial' => 'required|string|max:150',
             'numero_telefono' => 'nullable|string|max:20|regex:/^[0-9]+$/',
-            'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
-            'estado' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'estado' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
         ];
     }
 

@@ -34,7 +34,7 @@ class UpdateUsuarioRequest extends FormRequest
     {
         return [
             'id_usuario' => 'required|exists:usuarios_sistema,id_usuario',
-            'nombre_completo' => ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\x{00C0}-\x{024F}\x{00D1}\x{00F1} ]+$/u'],
+            'nombre_completo' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'email' => 'required|email|max:150',
             'password' => 'nullable|string|min:8|confirmed',
             // Datos del doctor (opcionales, se ignoran para recepcionistas)
