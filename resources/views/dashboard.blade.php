@@ -745,7 +745,10 @@
                             const tdLast = `padding:14px 15px; font-size:1em; font-weight:700; color:var(--primary-color); background:${bgFila};`;
                             const tr = document.createElement('tr');
                             tr.style.borderBottom = borde;
-                            if (esActual) tr.style.fontWeight = '700';
+                            if (esActual) {
+                                tr.style.fontWeight = '700';
+                                tr.setAttribute('data-cita-actual', 'true');
+                            }
                             
                             // Determinar color y icono del estado
                             let colorEstado = '#999';
@@ -1017,43 +1020,32 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // --- ACTUALIZAR SEGUIMIENTO EN LA TABLA ---
+                        // --- ACTUALIZAR SEGUIMIENTO EN LA TABLA (CITA DE HOY) ---
                         const nuevoSeguimiento = document.querySelector('textarea[name="notas_seguimiento"]').value || '';
                         if (nuevoSeguimiento) {
-                            // Buscar la fila activa y actualizar su seguimiento
+                            // Buscar la fila marcada como cita actual
                             if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                                for (let i = 0; i < window.todasLasFilas.length; i++) {
-                                    const fila = window.todasLasFilas[i];
-                                    if (fila.style.fontWeight === '700' || fila.style.background === 'rgb(232, 255, 244)') {
-                                        if (fila.cells.length >= 3) {
-                                            fila.cells[2].innerText = nuevoSeguimiento;
-                                        }
-                                        break;
-                                    }
+                                const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
+                                if (filaActual && filaActual.cells.length >= 3) {
+                                    filaActual.cells[2].innerText = nuevoSeguimiento;
+                                    renderizarPagina();
                                 }
-                                renderizarPagina();
                             }
                         }
 
-                        // --- ACTUALIZAR ABONO EN LA TABLA ---
+                        // --- ACTUALIZAR ABONO EN LA TABLA (CITA DE HOY) ---
                         const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
 
                         if (montoAbonado > 0) {
-                            // Buscar la fila activa y actualizar su abono (columna 3)
+                            // Buscar la fila marcada como cita actual y actualizar su abono
                             if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                                for (let i = 0; i < window.todasLasFilas.length; i++) {
-                                    const fila = window.todasLasFilas[i];
-                                    if (fila.style.fontWeight === '700' || fila.style.background === 'rgb(232, 255, 244)') {
-                                        if (fila.cells.length >= 4) {
-                                            // Actualizar la celda de Abono (cell[3]) con el monto formateado
-                                            fila.cells[3].innerText = data.data.abono_fila;
-                                            fila.cells[3].style.fontWeight = '800';
-                                            fila.cells[3].style.color = 'var(--primary-color)';
-                                        }
-                                        break;
-                                    }
+                                const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
+                                if (filaActual && filaActual.cells.length >= 4) {
+                                    filaActual.cells[3].innerText = data.data.abono_fila;
+                                    filaActual.cells[3].style.fontWeight = '800';
+                                    filaActual.cells[3].style.color = 'var(--primary-color)';
+                                    renderizarPagina();
                                 }
-                                renderizarPagina();
                             }
                             
                             // Limpiar el input de abono
@@ -1198,21 +1190,16 @@
                         return;
                     }
 
-                    // ── ACTUALIZAR SOLO EL ESTADO EN LA TABLA ────────────
+                    // ── ACTUALIZAR SOLO EL ESTADO EN LA TABLA (CITA DE HOY) ────────────
                     if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                        for (let i = 0; i < window.todasLasFilas.length; i++) {
-                            const fila = window.todasLasFilas[i];
-                            if (fila.style.background === 'rgb(232, 255, 244)' || fila.style.backgroundColor === 'rgb(232, 255, 244)') {
-                                if (fila.cells.length >= 5) {
-                                    const celdaEstado = fila.cells[4];
-                                    celdaEstado.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completada';
-                                    celdaEstado.style.color = '#22C55E';
-                                    celdaEstado.style.fontWeight = '700';
-                                }
-                                break;
-                            }
+                        const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
+                        if (filaActual && filaActual.cells.length >= 5) {
+                            const celdaEstado = filaActual.cells[4];
+                            celdaEstado.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completada';
+                            celdaEstado.style.color = '#22C55E';
+                            celdaEstado.style.fontWeight = '700';
+                            renderizarPagina();
                         }
-                        renderizarPagina();
                     }
                 })
                 .catch(err => {
