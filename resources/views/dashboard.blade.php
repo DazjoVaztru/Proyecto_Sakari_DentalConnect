@@ -137,7 +137,7 @@
                         {{-- Botón Marcar Completada --}}
                         <button type="button" id="btn-completar-{{ $cita->id_cita }}"
                             onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
-                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.85em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap;"
+                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center;"
                             onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
                             onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
                             <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
