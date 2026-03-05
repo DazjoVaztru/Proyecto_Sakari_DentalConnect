@@ -79,7 +79,10 @@
                     $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
                 @endphp
                 <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
-                    style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%;">
+                    onclick="cargarModalCita({{ $cita->id_cita }})"
+                    style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.2s ease;"
+                    onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
+                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
 
                     {{-- Overlay de checkmark (oculto por default) --}}
                     <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
@@ -131,22 +134,15 @@
                             </div>
                         </div>
 
-                        {{-- Botones --}}
-                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                            <button type="button" id="btn-completar-{{ $cita->id_cita }}"
-                                onclick="completarCita({{ $cita->id_cita }})"
-                                style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 0.85em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s;"
-                                onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
-                                onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
-                                <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
-                                Marcar completada
-                            </button>
-                            <button type="button" onclick="cargarModalCita({{ $cita->id_cita }})"
-                                style="background: transparent; border: 1px solid #ddd; border-radius: 8px; padding: 9px 13px; cursor: pointer; color: #666; transition: background 0.2s;"
-                                onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">
-                                <i class="fa-solid fa-chevron-right" style="font-size: 0.9em;"></i>
-                            </button>
-                        </div>
+                        {{-- Botón Marcar Completada --}}
+                        <button type="button" id="btn-completar-{{ $cita->id_cita }}"
+                            onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
+                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.85em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap;"
+                            onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
+                            onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+                            <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
+                            Marcar completada
+                        </button>
                     </div>
                 </div>
             @empty

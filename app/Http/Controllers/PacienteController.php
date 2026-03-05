@@ -157,7 +157,7 @@ class PacienteController extends Controller
             'emergencia_nombre' => 'nullable|string|max:100',
             'emergencia_apellido_paterno' => 'nullable|string|max:100',
             'emergencia_apellido_materno' => 'nullable|string|max:100',
-            'emergencia_telefono' => 'nullable|string|max:13',
+            'emergencia_telefono' => 'nullable|string|max:15',
         ]);
 
         try {
