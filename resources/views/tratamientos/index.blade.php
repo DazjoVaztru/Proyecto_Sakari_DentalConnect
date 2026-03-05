@@ -16,7 +16,8 @@
         <div style="position: relative; width: 350px;">
             <input type="text" placeholder="Buscar..."
                 style="width: 100%; padding: 12px 25px; border-radius: 50px; border: 1px solid #bcebf5; background: #e0fbfc; outline: none;">
-            <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 20px; top: 12px; color: #00b4d8;"></i>
+            <i class="fa-solid fa-magnifying-glass"
+                style="position: absolute; right: 20px; top: 12px; color: #00b4d8;"></i>
         </div>
 
         <button onclick="openModal('modal-new-treatment')" class="ghost-btn"
@@ -55,14 +56,16 @@
                                 style="display:inline;" onsubmit="return confirm('¿Borrar?');">
                                 @csrf @method('DELETE')
                                 <button type="submit"
-                                    style="background: none; border: none; cursor: pointer; color: #ef4444;"><i
-                                        class="fa-solid fa-trash"></i></button>
+                                    style="background: none; border: none; cursor: pointer; color: #ef4444;">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 30px; color: #999;">No hay tratamientos registrados.
+                        <td colspan="4" style="text-align: center; padding: 30px; color: #999;">
+                            No hay tratamientos registrados.
                         </td>
                     </tr>
                 @endforelse
@@ -70,6 +73,7 @@
         </table>
     </div>
 
+    <!-- MODAL NUEVO -->
     <div id="modal-new-treatment" class="modal-overlay">
         <div class="modal-glass" style="max-width: 500px;">
             <button class="close-modal" onclick="closeModal('modal-new-treatment')">&times;</button>
@@ -77,12 +81,13 @@
             <form action="{{ route('tratamientos.store') }}" method="POST">
                 @csrf
                 <div style="margin-bottom: 15px;">
-                    <input type="text" name="nombre" class="modern-input" placeholder="Nombre Servicio" required
-                        style="width: 100%;">
+                    <input type="text" name="nombre" class="modern-input" placeholder="Nombre Servicio"
+                        oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜáéíóúüÑñ\s]/g, '')"
+                        required style="width: 100%;">
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <input type="number" name="precio" step="0.01" class="modern-input" placeholder="Precio Base" required
-                        style="width: 100%;">
+                    <input type="number" name="precio" step="0.01" class="modern-input"
+                        placeholder="Precio Base" required style="width: 100%;">
                 </div>
                 <div style="margin-bottom: 15px;">
                     <select name="categoria" class="modern-input" style="width: 100%;">
@@ -95,11 +100,14 @@
                     </select>
                 </div>
                 <button type="submit" class="ghost-btn"
-                    style="width: 100%; background: var(--primary-color); color: white;">Guardar</button>
+                    style="width: 100%; background: var(--primary-color); color: white;">
+                    Guardar
+                </button>
             </form>
         </div>
     </div>
 
+    <!-- MODAL EDITAR -->
     <div id="modal-edit-treatment" class="modal-overlay">
         <div class="modal-glass" style="max-width: 500px;">
             <button class="close-modal" onclick="closeModal('modal-edit-treatment')">&times;</button>
@@ -108,16 +116,19 @@
                 @csrf @method('PUT')
                 <div style="margin-bottom: 15px;">
                     <label style="font-size: 0.8em;">Nombre</label>
-                    <input type="text" id="edit-nombre" name="nombre" class="modern-input" required style="width: 100%;">
+                    <input type="text" id="edit-nombre" name="nombre" class="modern-input"
+                        oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜáéíóúüÑñ\s]/g, '')"
+                        required style="width: 100%;">
                 </div>
                 <div style="margin-bottom: 15px;">
                     <label style="font-size: 0.8em;">Precio</label>
-                    <input type="number" id="edit-precio" name="precio" step="0.01" class="modern-input" required
-                        style="width: 100%;">
+                    <input type="number" id="edit-precio" name="precio" step="0.01"
+                        class="modern-input" required style="width: 100%;">
                 </div>
                 <div style="margin-bottom: 15px;">
                     <label style="font-size: 0.8em;">Categoría</label>
-                    <select id="edit-categoria" name="categoria" class="modern-input" style="width: 100%;">
+                    <select id="edit-categoria" name="categoria" class="modern-input"
+                        style="width: 100%;">
                         <option value="General">General</option>
                         <option value="Ortodoncia">Ortodoncia</option>
                         <option value="Limpieza">Limpieza</option>
@@ -127,7 +138,9 @@
                     </select>
                 </div>
                 <button type="submit" class="ghost-btn"
-                    style="width: 100%; background: #f59e0b; color: white;">Actualizar</button>
+                    style="width: 100%; background: #f59e0b; color: white;">
+                    Actualizar
+                </button>
             </form>
         </div>
     </div>
@@ -140,7 +153,6 @@
             document.getElementById('edit-precio').value = servicio.precio_base;
             document.getElementById('edit-categoria').value = servicio.categoria || 'General';
 
-            // OJO: Usamos 'id_servicio' porque así se llama en tu BD
             const form = document.getElementById('form-edit');
             form.action = `/tratamientos/${servicio.id_servicio}`;
 

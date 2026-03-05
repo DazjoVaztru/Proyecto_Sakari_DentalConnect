@@ -348,7 +348,7 @@
     <div class="patients-grid" id="patients-grid">
         @forelse($pacientes as $paciente)
             <div class="patient-card"
-                onclick="verPerfil({{ json_encode($paciente->load(['usuario', 'contactoEmergencia', 'archivos'])) }})">
+                onclick='verPerfil(@json($paciente->load(["usuario","contactoEmergencia","archivos"])))'>
                 <div class="avatar-circle">
                     <i class="fa-solid fa-user"></i>
                 </div>
@@ -412,28 +412,32 @@
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid #e0fbfc; padding-bottom: 6px; margin-bottom: 5px;">
                         <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales
-                    </div>
-                    <input type="text" name="nombre" class="modern-input" placeholder="Nombre(s)*" required
-                        value="{{ old('nombre') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="apellido_paterno" class="modern-input" placeholder="Apellido Paterno*" required
-                        value="{{ old('apellido_paterno') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="apellido_materno" class="modern-input" placeholder="Apellido Materno"
-                        value="{{ old('apellido_materno') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="email" name="email" class="modern-input" placeholder="Email (Usuario App)*" required
-                        value="{{ old('email') }}">
-                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono*" required maxlength="15"
-                        value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+</div>
+<input type="text"
+       name="nombre"
+       class="modern-input"
+       placeholder="Nombre(s)*"
+       required
+       value="{{ old('nombre') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
 
-                    <div style="position:relative; padding-top: 18px;">
-                        <label
-                            style="font-size:0.75em; position:absolute; top:0; left:5px; color:#666; font-weight:600;">Fecha
-                            Nacimiento *</label>
-                        <input type="date" name="fecha_nacimiento" class="modern-input" required
-                            value="{{ old('fecha_nacimiento') }}">
-                    </div>
+<input type="text"
+       name="apellido_paterno"
+       class="modern-input"
+       placeholder="Apellido Paterno*"
+       required
+       value="{{ old('apellido_paterno') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
+
+<input type="text"
+       name="apellido_materno"
+       class="modern-input"
+       placeholder="Apellido Materno"
+       value="{{ old('apellido_materno') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
 
                     <select name="sexo" class="modern-input">
                         <option value="O" {{ old('sexo', 'O') == 'O' ? 'selected' : '' }}>Sexo</option>
@@ -462,19 +466,37 @@
                         style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
                         <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
                     </div>
-                    <input type="text" name="emergencia_nombre" class="modern-input" placeholder="Nombre Contacto"
-                        value="{{ old('emergencia_nombre') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_apellido_paterno" class="modern-input"
-                        placeholder="Apellido Paterno" value="{{ old('emergencia_apellido_paterno') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_apellido_materno" class="modern-input"
-                        placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_telefono" class="modern-input" placeholder="Teléfono Emergencia"
-                        maxlength="15" value="{{ old('emergencia_telefono') }}"
-                        oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+                   <input type="text"
+       name="emergencia_nombre"
+       class="modern-input"
+       placeholder="Nombre Contacto"
+       value="{{ old('emergencia_nombre') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
 
+<input type="text"
+       name="emergencia_apellido_paterno"
+       class="modern-input"
+       placeholder="Apellido Paterno"
+       value="{{ old('emergencia_apellido_paterno') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
+
+<input type="text"
+       name="emergencia_apellido_materno"
+       class="modern-input"
+       placeholder="Apellido Materno"
+       value="{{ old('emergencia_apellido_materno') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
+
+<input type="text"
+       name="emergencia_telefono"
+       class="modern-input"
+       placeholder="Teléfono Emergencia"
+       maxlength="15"
+       value="{{ old('emergencia_telefono') }}"
+       oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
                     {{-- Salud --}}
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
@@ -863,6 +885,8 @@
         @method('DELETE')
     </form>
 
+    
+
 @endsection
 
 @section('scripts')
@@ -1170,6 +1194,14 @@
                 document.getElementById('edit-em-telefono').value = ce.numero_telefono || '';
             }
         }
+        function formatearNombre(input) {
+            let valor = input.value.trim().toLowerCase();
+            valor = valor.split(' ').map(palabra => {
+                if (palabra.length === 0) return '';
+                return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+            }).join(' ');
+            input.value = valor;
+}
 
         function eliminarPaciente() {
             if (!currentPaciente) return;
@@ -1205,7 +1237,51 @@
                 btn.style.cursor = 'not-allowed';
             }
         });
+// ─────────────────────────────────────────────
+// SOLO LETRAS (bloquea números en tiempo real)
+// ─────────────────────────────────────────────
+function soloLetras(e){
+    let tecla = e.key;
+    let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
 
+    if(!regex.test(tecla)){
+        return false;
+    }
+}
+
+function formatearEnVivo(input){
+
+    let valor = input.value.toLowerCase();
+
+    valor = valor.replace(/\b\w/g, function(letra){
+        return letra.toUpperCase();
+    });
+
+    input.value = valor;
+}
+
+// ─────────────────────────────────────────────
+// Evita doble espacio
+// ─────────────────────────────────────────────
+function limpiarEspacios(input) {
+    input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
+                             .replace(/\s{2,}/g, ' ');
+}
+
+// ─────────────────────────────────────────────
+// Primera letra mayúscula
+// ─────────────────────────────────────────────
+function formatearNombre(input) {
+    let valor = input.value.trim().toLowerCase();
+
+    valor = valor.split(' ').map(palabra => {
+        if (palabra.length === 0) return '';
+        return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+    }).join(' ');
+
+    input.value = valor;
+}
+        
         // ─── Auto-abrir modal si hay errores de validación ──────────────
         @if($errors->any())
             openModal('modal-new-patient');
