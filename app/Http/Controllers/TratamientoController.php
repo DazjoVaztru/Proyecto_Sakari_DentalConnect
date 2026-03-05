@@ -4,57 +4,58 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Servicio;
+use Illuminate\Support\Facades\Auth;
 
 class TratamientoController extends Controller
 {
-    /**
-     * Muestra la lista de tratamientos/servicios disponibles.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
-        $idClinica = \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1;
+        $idClinica = Auth::user()->id_clinica ?? 1;
         $servicios = Servicio::where('id_clinica', $idClinica)->get();
+
         return view('tratamientos.index', compact('servicios'));
     }
 
-    /**
-     * Almacena un nuevo tratamiento/servicio.
-     *
-     * Valida los datos y crea un nuevo registro de servicio asociado a la clínica.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:100', // Ajustado a varchar(100) de tu BD
+            'nombre' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ\s]+$/'
+            ],
             'precio' => 'required|numeric|min:0',
-            'categoria' => 'nullable|string|max:50' // Ajustado a varchar(50)
+            'categoria' => 'nullable|string|max:50',
+        ], [
+            'nombre.regex' => 'El nombre del tratamiento solo puede contener letras y espacios.'
         ]);
 
         Servicio::create([
-            'id_clinica' => \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1,
+            'id_clinica' => Auth::user()->id_clinica ?? 1,
             'nombre_servicio' => $request->nombre,
             'precio_base' => $request->precio,
-            'categoria' => $request->categoria ?? 'General' // Valor por defecto si lo dejan vacío
+            'categoria' => $request->categoria ?? 'General'
         ]);
 
         return redirect()->back()->with('success', 'Tratamiento creado correctamente.');
     }
 
-    /**
-     * Actualiza la información de un tratamiento existente.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, $id)
     {
-        // OJO: Usamos 'id_servicio' porque así definimos la primaryKey en el modelo
+        $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ\s]+$/'
+            ],
+            'precio' => 'required|numeric|min:0',
+            'categoria' => 'nullable|string|max:50',
+        ], [
+            'nombre.regex' => 'El nombre del tratamiento solo puede contener letras y espacios.'
+        ]);
+
         $servicio = Servicio::findOrFail($id);
 
         $servicio->update([
@@ -66,12 +67,6 @@ class TratamientoController extends Controller
         return redirect()->back()->with('success', 'Tratamiento actualizado.');
     }
 
-    /**
-     * Elimina un tratamiento.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function destroy($id)
     {
         $servicio = Servicio::findOrFail($id);
