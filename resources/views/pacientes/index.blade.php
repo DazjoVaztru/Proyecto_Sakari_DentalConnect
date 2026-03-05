@@ -413,7 +413,6 @@
                         style="font-size: 0.78em; font-weight: 700; color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid #e0fbfc; padding-bottom: 6px; margin-bottom: 5px;">
                         <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales
 </div>
-
 <input type="text"
        name="nombre"
        class="modern-input"
@@ -421,8 +420,7 @@
        required
        value="{{ old('nombre') }}"
        onkeypress="return soloLetras(event)"
-       oninput="limpiarEspacios(this)"
-       onblur="formatearNombre(this)">
+       oninput="formatearEnVivo(this)">
 
 <input type="text"
        name="apellido_paterno"
@@ -431,8 +429,7 @@
        required
        value="{{ old('apellido_paterno') }}"
        onkeypress="return soloLetras(event)"
-       oninput="limpiarEspacios(this)"
-       onblur="formatearNombre(this)">
+       oninput="formatearEnVivo(this)">
 
 <input type="text"
        name="apellido_materno"
@@ -440,23 +437,7 @@
        placeholder="Apellido Materno"
        value="{{ old('apellido_materno') }}"
        onkeypress="return soloLetras(event)"
-       oninput="limpiarEspacios(this)"
-       onblur="formatearNombre(this)">
-
-<input type="email"
-       name="email"
-       class="modern-input"
-       placeholder="Email (Usuario App)*"
-       required
-       value="{{ old('email') }}">
-
-<input type="text"
-       name="telefono"
-       class="modern-input"
-       placeholder="Teléfono*"
-       required
-       maxlength="15"
-       value="{{ old('telefono') }}">
+       oninput="formatearEnVivo(this)">
                      
                     <div style="position:relative; padding-top: 18px;">
                         <label
@@ -894,43 +875,7 @@
         @method('DELETE')
     </form>
 
-    <script>
-// ─────────────────────────────────────────────
-// SOLO LETRAS (bloquea números en tiempo real)
-// ─────────────────────────────────────────────
-function soloLetras(e) {
-    const tecla = e.key;
-    const regex = /^[A-Za-zÀ-ÿÑñ\s]$/;
-
-    if (!regex.test(tecla)) {
-        e.preventDefault();
-        return false;
-    }
-    return true;
-}
-
-// ─────────────────────────────────────────────
-// Evita doble espacio
-// ─────────────────────────────────────────────
-function limpiarEspacios(input) {
-    input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
-                             .replace(/\s{2,}/g, ' ');
-}
-
-// ─────────────────────────────────────────────
-// Primera letra mayúscula
-// ─────────────────────────────────────────────
-function formatearNombre(input) {
-    let valor = input.value.trim().toLowerCase();
-
-    valor = valor.split(' ').map(palabra => {
-        if (palabra.length === 0) return '';
-        return palabra.charAt(0).toUpperCase() + palabra.slice(1);
-    }).join(' ');
-
-    input.value = valor;
-}
-</script>
+    
 
 @endsection
 
@@ -1282,6 +1227,40 @@ function formatearNombre(input) {
                 btn.style.cursor = 'not-allowed';
             }
         });
+        <script>
+// ─────────────────────────────
+// Bloquear números
+// ─────────────────────────────
+function soloLetras(e) {
+    const tecla = e.key;
+    const regex = /^[A-Za-zÀ-ÿÑñ\s]$/;
+
+    if (!regex.test(tecla)) {
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
+// ─────────────────────────────
+// Formatear en tiempo real
+// ─────────────────────────────
+function formatearEnVivo(input) {
+    let cursorPos = input.selectionStart;
+
+    let valor = input.value
+        .replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .toLowerCase()
+        .split(' ')
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(' ');
+
+    input.value = valor;
+
+    input.setSelectionRange(cursorPos, cursorPos);
+}
+</script>
 
         // ─── Auto-abrir modal si hay errores de validación ──────────────
         @if($errors->any())
