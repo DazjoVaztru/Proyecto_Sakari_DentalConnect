@@ -348,7 +348,7 @@
     <div class="patients-grid" id="patients-grid">
         @forelse($pacientes as $paciente)
             <div class="patient-card"
-               onclick='verPerfil(@json($paciente->load(["usuario","contactoEmergencia","archivos"])))'>
+                onclick="verPerfil({{ json_encode($paciente->load(['usuario', 'contactoEmergencia', 'archivos'])) }})">
                 <div class="avatar-circle">
                     <i class="fa-solid fa-user"></i>
                 </div>
@@ -387,44 +387,6 @@
     </div>
 
 @endsection
-<script>
-
-let pacienteActual = null;
-
-function verPerfil(paciente){
-    
-    pacienteActual = paciente;
-
-    document.getElementById("p-name").innerText =
-        paciente.nombre + " " + (paciente.apellido_paterno ?? "");
-
-    document.getElementById("p-email").innerHTML =
-        '<i class="fa-solid fa-envelope"></i> ' +
-        (paciente.correo_electronico ?? "Sin email");
-
-    document.getElementById("p-tel").innerHTML =
-        '<i class="fa-solid fa-phone"></i> ' +
-        (paciente.telefono ?? "Sin teléfono");
-
-    document.getElementById("view-sangre").innerText =
-        paciente.tipo_sangre ?? "S/D";
-
-    document.getElementById("view-peso").innerText =
-        paciente.peso ?? "S/D";
-
-    document.getElementById("view-ocupacion").innerText =
-        paciente.ocupacion ?? "S/D";
-
-    document.getElementById("view-enfermedades").innerText =
-        paciente.enfermedades_cronicas ?? "Ninguna";
-
-    document.getElementById("view-alergias-badges").innerHTML =
-        paciente.alergias ?? "Sin alergias";
-
-    openModal("modal-patient-profile");
-}
-
-</script>
 
 @section('modales')
     {{-- Modal de Registro (Extendido) --}}
@@ -476,14 +438,6 @@ function verPerfil(paciente){
        value="{{ old('apellido_materno') }}"
        onkeypress="return soloLetras(event)"
        oninput="formatearEnVivo(this)">
-                     
-                    <div style="position:relative; padding-top: 18px;">
-                        <label
-                            style="font-size:0.75em; position:absolute; top:0; left:5px; color:#666; font-weight:600;">Fecha
-                            Nacimiento *</label>
-                        <input type="date" name="fecha_nacimiento" class="modern-input" required
-                            value="{{ old('fecha_nacimiento') }}">
-                    </div>
 
                     <select name="sexo" class="modern-input">
                         <option value="O" {{ old('sexo', 'O') == 'O' ? 'selected' : '' }}>Sexo</option>
@@ -810,7 +764,7 @@ function verPerfil(paciente){
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 700;">Fecha:</label>
-                        <input type="date" name="fecha" id="fecha-cita" class="modern-input" required>
+                        <input type="date" name="fecha" class="modern-input" required value="{{ date('Y-m-d') }}">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 700;">Hora:</label>
@@ -922,30 +876,6 @@ function verPerfil(paciente){
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let currentPaciente = null;
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const fechaInput = document.getElementById("fecha-cita");
-
-    const hoy = new Date();
-
-    // Primer día del siguiente mes
-    const siguienteMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
-
-    const yyyy = siguienteMes.getFullYear();
-    const mm = String(siguienteMes.getMonth() + 1).padStart(2, '0');
-    const dd = String(siguienteMes.getDate()).padStart(2, '0');
-
-    const fechaMinima = `${yyyy}-${mm}-${dd}`;
-
-    // El calendario no permitirá fechas antes de ese día
-    fechaInput.min = fechaMinima;
-
-    // Mostrar ese día por defecto
-    fechaInput.value = fechaMinima;
-
-});
-
 
         document.getElementById('btn-registrar-paciente').addEventListener('click', function () {
             Swal.fire({
@@ -1289,10 +1219,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 btn.style.cursor = 'not-allowed';
             }
         });
-        <script>
-// ─────────────────────────────
-// Bloquear números
-// ─────────────────────────────
+// ─────────────────────────────────────────────
+// SOLO LETRAS (bloquea números en tiempo real)
+// ─────────────────────────────────────────────
 function soloLetras(e) {
     const tecla = e.key;
     const regex = /^[A-Za-zÀ-ÿÑñ\s]$/;
@@ -1304,26 +1233,28 @@ function soloLetras(e) {
     return true;
 }
 
-// ─────────────────────────────
-// Formatear en tiempo real
-// ─────────────────────────────
-function formatearEnVivo(input) {
-    let cursorPos = input.selectionStart;
+// ─────────────────────────────────────────────
+// Evita doble espacio
+// ─────────────────────────────────────────────
+function limpiarEspacios(input) {
+    input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
+                             .replace(/\s{2,}/g, ' ');
+}
 
-    let valor = input.value
-        .replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
-        .replace(/\s{2,}/g, ' ')
-        .toLowerCase()
-        .split(' ')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join(' ');
+// ─────────────────────────────────────────────
+// Primera letra mayúscula
+// ─────────────────────────────────────────────
+function formatearNombre(input) {
+    let valor = input.value.trim().toLowerCase();
+
+    valor = valor.split(' ').map(palabra => {
+        if (palabra.length === 0) return '';
+        return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+    }).join(' ');
 
     input.value = valor;
-
-    input.setSelectionRange(cursorPos, cursorPos);
 }
-</script>
-
+        
         // ─── Auto-abrir modal si hay errores de validación ──────────────
         @if($errors->any())
             openModal('modal-new-patient');
