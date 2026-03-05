@@ -466,19 +466,37 @@
                         style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
                         <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
                     </div>
-                    <input type="text" name="emergencia_nombre" class="modern-input" placeholder="Nombre Contacto"
-                        value="{{ old('emergencia_nombre') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_apellido_paterno" class="modern-input"
-                        placeholder="Apellido Paterno" value="{{ old('emergencia_apellido_paterno') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_apellido_materno" class="modern-input"
-                        placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_telefono" class="modern-input" placeholder="Teléfono Emergencia"
-                        maxlength="15" value="{{ old('emergencia_telefono') }}"
-                        oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+                   <input type="text"
+       name="emergencia_nombre"
+       class="modern-input"
+       placeholder="Nombre Contacto"
+       value="{{ old('emergencia_nombre') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
 
+<input type="text"
+       name="emergencia_apellido_paterno"
+       class="modern-input"
+       placeholder="Apellido Paterno"
+       value="{{ old('emergencia_apellido_paterno') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
+
+<input type="text"
+       name="emergencia_apellido_materno"
+       class="modern-input"
+       placeholder="Apellido Materno"
+       value="{{ old('emergencia_apellido_materno') }}"
+       onkeypress="return soloLetras(event)"
+       oninput="formatearEnVivo(this)">
+
+<input type="text"
+       name="emergencia_telefono"
+       class="modern-input"
+       placeholder="Teléfono Emergencia"
+       maxlength="15"
+       value="{{ old('emergencia_telefono') }}"
+       oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
                     {{-- Salud --}}
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
