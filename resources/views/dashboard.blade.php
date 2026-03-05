@@ -786,15 +786,15 @@
                     }
 
                     // 5. Calendario
-                   if (data.fecha_cita) {
+                  if (data.fecha_cita) {
                     calMesActual = data.fecha_cita.mes + 1;
                     calAnioActual = data.fecha_cita.anio;
-                    if (calMesActual > 12) {
-                        calMesActual = 1;
-                        calAnioActual++;}
+                    // Si pasa de diciembre → enero del siguiente año
+                    if (calMesActual > 12) {calMesActual = 1;calAnioActual++;
 
-    cargarCalendarioFuncional(calMesActual, calAnioActual);
-}
+                    }
+                    cargarCalendarioFuncional(calMesActual, calAnioActual);
+                }
 
                     // 5. Histórico Odontograma
                     document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
