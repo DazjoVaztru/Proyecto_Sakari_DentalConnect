@@ -185,11 +185,136 @@
             margin-bottom: 20px;
             opacity: 0.3;
         }
+
+        /* Ajuste de z-index para SweetAlert */
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+
+        /* Responsive Design (Mobile) */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.5rem !important;
+            }
+
+            .header-info-count {
+                font-size: 0.8rem !important;
+            }
+
+            .header-tools {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .search-pill-container {
+                width: 100%;
+            }
+
+            .search-pill {
+                padding: 12px 20px;
+                padding-right: 45px;
+            }
+
+            .btn-pill {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
+            }
+
+            .patients-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+                padding: 18px;
+            }
+
+            .card-details .info-row {
+                justify-content: center;
+            }
+
+            .allergy-badge {
+                position: static;
+                display: inline-block;
+                margin-top: 5px;
+            }
+
+            /* Modal overrides */
+            .modal-glass {
+                padding: 20px !important;
+                width: 95vw !important;
+            }
+
+            .form-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            input.modern-input,
+            select.modern-input,
+            textarea.modern-input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            /* Perfil Paciente overrides */
+            #modal-patient-profile .modal-glass {
+                padding: 0 !important;
+            }
+
+            .profile-header-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px !important;
+                padding: 25px 20px !important;
+            }
+
+            .profile-header-container>div:last-child {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .profile-tabs-container {
+                flex-direction: column;
+                padding: 0 !important;
+            }
+
+            .tab-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .tab-btn.tab-active {
+                border-bottom: 3px solid var(--primary-color);
+            }
+
+            .profile-content-container {
+                padding: 20px !important;
+            }
+
+            .general-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+
+            .time-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div
+        style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px;">
         <h2 class="page-title" style="margin-bottom: 0;">Pacientes</h2>
-        <div style="font-size: 0.9rem; color: #6c757d; font-weight: 500;">
+        <div class="header-info-count" style="font-size: 0.9rem; color: #6c757d; font-weight: 500;">
             <i class="fa-solid fa-circle-info"></i> {{ count($pacientes) }} pacientes registrados
         </div>
     </div>
@@ -299,8 +424,8 @@
                         oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="email" name="email" class="modern-input" placeholder="Email (Usuario App)*" required
                         value="{{ old('email') }}">
-                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono (+codigo)*" required
-                        maxlength="15" value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono*" required maxlength="15"
+                        value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
 
                     <div style="position:relative; padding-top: 18px;">
                         <label
@@ -323,8 +448,8 @@
                         @endforeach
                     </select>
 
-                    <input type="number" name="peso" class="modern-input" placeholder="Peso (kg enteros)" step="1" min="0"
-                        max="500" value="{{ old('peso') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="number" name="peso" class="modern-input" placeholder="Peso" step="1" min="0" max="500"
+                        value="{{ old('peso') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
 
                     <input type="text" name="direccion" class="modern-input" placeholder="Dirección Completa"
                         value="{{ old('direccion') }}" style="grid-column: span 1;">
@@ -346,8 +471,8 @@
                     <input type="text" name="emergencia_apellido_materno" class="modern-input"
                         placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}"
                         oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
-                    <input type="text" name="emergencia_telefono" class="modern-input"
-                        placeholder="Teléfono Emergencia (+codigo)" maxlength="15" value="{{ old('emergencia_telefono') }}"
+                    <input type="text" name="emergencia_telefono" class="modern-input" placeholder="Teléfono Emergencia"
+                        maxlength="15" value="{{ old('emergencia_telefono') }}"
                         oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
 
                     {{-- Salud --}}
@@ -383,35 +508,34 @@
             <button class="close-modal" onclick="closeModal('modal-patient-profile')"
                 style="position: absolute; top: 15px; right: 20px; z-index: 10;">&times;</button>
 
-            <div
-                style="background: linear-gradient(135deg, #e0fbfc 0%, #caf0f8 100%); padding: 35px 45px; border-bottom: 1px solid #b0e0f5;">
-                <div style="display: flex; align-items: center; gap: 25px;">
-                    <div style="position: relative; width: 85px; height: 85px;"
-                        title="Clic para subir/cambiar foto de progreso">
-                        <img id="p-foto" src="" alt="Foto Paciente"
-                            style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 15px rgba(0,180,216,0.25); display: none; cursor: pointer;"
-                            onclick="document.getElementById('foto-upload').click()">
-                        <div id="p-foto-placeholder"
-                            style="background: white; border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,180,216,0.25); cursor: pointer;"
-                            onclick="document.getElementById('foto-upload').click()">
-                            <i class="fa-solid fa-camera" style="font-size: 2.5rem; color: var(--primary-color);"></i>
-                        </div>
-                        <input type="file" id="foto-upload" style="display: none;"
-                            accept="image/jpeg, image/png, image/webp" onchange="uploadFoto(this)">
+            <div class="profile-header-container"
+                style="background: linear-gradient(135deg, #e0fbfc 0%, #caf0f8 100%); padding: 35px 45px; border-bottom: 1px solid #b0e0f5; display: flex; align-items: center; gap: 25px;">
+                <div style="position: relative; width: 85px; height: 85px;"
+                    title="Clic para subir/cambiar foto de progreso">
+                    <img id="p-foto" src="" alt="Foto Paciente"
+                        style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 15px rgba(0,180,216,0.25); display: none; cursor: pointer;"
+                        onclick="document.getElementById('foto-upload').click()">
+                    <div id="p-foto-placeholder"
+                        style="background: white; border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,180,216,0.25); cursor: pointer;"
+                        onclick="document.getElementById('foto-upload').click()">
+                        <i class="fa-solid fa-camera" style="font-size: 2.5rem; color: var(--primary-color);"></i>
                     </div>
-                    <div>
-                        <h2 id="p-name" style="color: #2b2d42; margin: 0; font-size: 1.8em; font-weight: 800;">Nombre</h2>
-                        <div style="display: flex; gap: 15px; margin-top: 8px;">
-                            <span id="p-email" style="color: #6c757d; font-size: 0.95em;"><i
-                                    class="fa-solid fa-envelope"></i> email</span>
-                            <span id="p-tel" style="color: #6c757d; font-size: 0.95em;"><i class="fa-solid fa-phone"></i>
-                                tel</span>
-                        </div>
+                    <input type="file" id="foto-upload" style="display: none;" accept="image/jpeg, image/png, image/webp"
+                        onchange="uploadFoto(this)">
+                </div>
+                <div>
+                    <h2 id="p-name" style="color: #2b2d42; margin: 0; font-size: 1.8em; font-weight: 800;">Nombre</h2>
+                    <div style="display: flex; gap: 15px; margin-top: 8px;">
+                        <span id="p-email" style="color: #6c757d; font-size: 0.95em;"><i class="fa-solid fa-envelope"></i>
+                            email</span>
+                        <span id="p-tel" style="color: #6c757d; font-size: 0.95em;"><i class="fa-solid fa-phone"></i>
+                            tel</span>
                     </div>
                 </div>
             </div>
 
-            <div style="display: flex; border-bottom: 2px solid #eee; padding: 0 30px; background: white;">
+            <div class="profile-tabs-container"
+                style="display: flex; border-bottom: 2px solid #eee; padding: 0 30px; background: white;">
                 <button onclick="showTab('tab-general')" id="btn-tab-general" class="tab-btn tab-active">
                     <i class="fa-solid fa-user"></i> Resumen General
                 </button>
@@ -478,9 +602,9 @@
                 }
             </style>
 
-            <div style="padding: 35px 45px; overflow-y: auto; max-height: 65vh;">
+            <div class="profile-content-container" style="padding: 35px 45px; overflow-y: auto; max-height: 65vh;">
                 <div id="tab-general">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div class="general-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
                         <div>
                             <div class="profile-info-card">
                                 <h4>Datos del Paciente</h4>
@@ -510,7 +634,8 @@
                             <div
                                 style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 18px; padding: 22px; margin-bottom: 15px;">
                                 <h4 style="color: #c53030; margin-bottom:15px;"><i
-                                        class="fa-solid fa-triangle-exclamation"></i> Alergias</h4>
+                                        class="fa-solid fa-triangle-exclamation"></i>
+                                    Alergias</h4>
                                 <div id="view-alergias-badges">
                                     <span style="color: #888; font-size: 0.9em;">Sin alergias registradas</span>
                                 </div>
@@ -521,7 +646,8 @@
                                 <h4 style="color: #b45309; margin-bottom:12px;"><i class="fa-solid fa-notes-medical"></i>
                                     Enfermedades Crónicas</h4>
                                 <p id="view-enfermedades"
-                                    style="margin: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">Ninguna</p>
+                                    style="margin: 0; color: #555; font-size: 0.95rem; line-height: 1.5;">
+                                    Ninguna</p>
                             </div>
 
                             <button class="btn-pill"
@@ -565,14 +691,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                const file = this.files[0];
-                                                if(file) {
-                                                    document.getElementById('label-ev-foto').innerText = file.name;
-                                                    document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                } else {
-                                                    document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                    document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                }">
+                                            const file = this.files[0];
+                                            if(file) {
+                                                document.getElementById('label-ev-foto').innerText = file.name;
+                                                document.getElementById('label-ev-foto').style.color = '#10b981';
+                                            } else {
+                                                document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                            }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -630,7 +756,8 @@
                     </select>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="time-grid"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 700;">Fecha:</label>
                         <input type="date" name="fecha" class="modern-input" required value="{{ date('Y-m-d') }}">
@@ -681,11 +808,10 @@
 
                     <input type="email" name="email" id="edit-email" class="modern-input" placeholder="Email (Usuario App)*"
                         required>
-                    <input type="text" name="telefono" id="edit-telefono" class="modern-input"
-                        placeholder="Teléfono (+codigo)*" required maxlength="15"
-                        oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
-                    <input type="number" name="peso" id="edit-peso" class="modern-input" placeholder="Peso (kg enteros)"
-                        step="1" min="0" max="500" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="text" name="telefono" id="edit-telefono" class="modern-input" placeholder="Teléfono*"
+                        required maxlength="15" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+                    <input type="number" name="peso" id="edit-peso" class="modern-input" placeholder="Peso" step="1" min="0"
+                        max="500" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                     <input type="text" name="direccion" id="edit-direccion" class="modern-input"
                         placeholder="Dirección Completa" style="grid-column: span 1;">
                     <input type="text" name="ocupacion" id="edit-ocupacion" class="modern-input" placeholder="Ocupación">
@@ -704,7 +830,7 @@
                         placeholder="Apellido Materno"
                         oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     <input type="text" name="emergencia_telefono" id="edit-em-telefono" class="modern-input"
-                        placeholder="Teléfono Emergencia (+codigo)" maxlength="15"
+                        placeholder="Teléfono Emergencia" maxlength="15"
                         oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
 
                     <div class="full-width"
@@ -814,7 +940,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                    <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -894,15 +1020,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                            <div>
-                                                <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                            </div>
-                                            <div style="text-align: right;">
-                                                <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                            </div>
-                                        </div>`;
+                                        <div>
+                                            <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                            <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                            ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                        </div>
+                                    </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -930,20 +1056,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                    <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                        <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                    </a>
-                                                 </div>`;
+                                                <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                    <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                </a>
+                                             </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                            </div>
-                                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                            ${imageHtml}
-                                                        </div>`;
+                                                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                            <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                        </div>
+                                                        <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                        ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                        ${imageHtml}
+                                                    </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';

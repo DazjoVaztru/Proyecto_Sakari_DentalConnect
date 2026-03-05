@@ -66,9 +66,9 @@ class PacienteHistorialController extends Controller
     {
         try {
             $request->validate([
-                'descripcion_avance' => 'required|string|max:100',
+                'descripcion_avance' => 'required|string|max:500',
                 'plan_tratamiento' => 'nullable|string',
-                'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // máximo 5MB
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // máximo 5MB
             ]);
 
             $evolucion = new EvolucionTratamiento();
@@ -98,6 +98,11 @@ class PacienteHistorialController extends Controller
                 'message' => 'Evolución guardada correctamente.',
                 'data' => $evolucion
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->validator->errors()->first()
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

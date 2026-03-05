@@ -54,7 +54,6 @@ class CitaController extends Controller
             $idDoctor = DB::table('doctores')
                 ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
                 ->where('usuarios_sistema.id_clinica', $idClinica)
-                ->where('usuarios_sistema.is_active', true)
                 ->value('doctores.id_doctor') ?? 1;
 
             // ── Verificar duplicado exacto ────────────────────────────────
@@ -67,7 +66,7 @@ class CitaController extends Controller
                 ->exists();
 
             if ($duplicado) {
-                return redirect()->back()
+                return redirect()->route('pacientes.index')
                     ->with('error', 'Ya existe una cita pendiente para este paciente en la misma fecha y hora.')
                     ->withInput();
             }
@@ -84,10 +83,10 @@ class CitaController extends Controller
                 'costo_estimado' => $servicio->precio_base,
             ]);
 
-            return redirect()->back()->with('success', '¡Cita agendada correctamente para el ' . $fechaHora->format('d/m/Y \a \l\a\s H:i') . '!');
+            return redirect()->route('pacientes.index')->with('success', '¡Cita agendada correctamente para el ' . $fechaHora->format('d/m/Y \a \l\a\s H:i') . '!');
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error al agendar: ' . $e->getMessage())->withInput();
+            return redirect()->route('pacientes.index')->with('error', 'Error al agendar: ' . $e->getMessage())->withInput();
         }
     }
 }
