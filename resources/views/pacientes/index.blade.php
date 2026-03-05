@@ -387,6 +387,44 @@
     </div>
 
 @endsection
+<script>
+
+let pacienteActual = null;
+
+function verPerfil(paciente){
+    
+    pacienteActual = paciente;
+
+    document.getElementById("p-name").innerText =
+        paciente.nombre + " " + (paciente.apellido_paterno ?? "");
+
+    document.getElementById("p-email").innerHTML =
+        '<i class="fa-solid fa-envelope"></i> ' +
+        (paciente.correo_electronico ?? "Sin email");
+
+    document.getElementById("p-tel").innerHTML =
+        '<i class="fa-solid fa-phone"></i> ' +
+        (paciente.telefono ?? "Sin teléfono");
+
+    document.getElementById("view-sangre").innerText =
+        paciente.tipo_sangre ?? "S/D";
+
+    document.getElementById("view-peso").innerText =
+        paciente.peso ?? "S/D";
+
+    document.getElementById("view-ocupacion").innerText =
+        paciente.ocupacion ?? "S/D";
+
+    document.getElementById("view-enfermedades").innerText =
+        paciente.enfermedades_cronicas ?? "Ninguna";
+
+    document.getElementById("view-alergias-badges").innerHTML =
+        paciente.alergias ?? "Sin alergias";
+
+    openModal("modal-patient-profile");
+}
+
+</script>
 
 @section('modales')
     {{-- Modal de Registro (Extendido) --}}
