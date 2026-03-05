@@ -1205,7 +1205,27 @@
                         return;
                     }
 
-                    // ── 2. Deshabilitar todos los botones ────────────────────
+                    // ── 2. Actualizar estado en la tabla del modal ────────────
+                    if (window.todasLasFilas && window.todasLasFilas.length > 0) {
+                        // Buscar la fila activa (la que está marcada como es_actual)
+                        for (let i = 0; i < window.todasLasFilas.length; i++) {
+                            const fila = window.todasLasFilas[i];
+                            // Busca la fila con fondo verde (es_actual)
+                            if (fila.style.background === 'rgb(232, 255, 244)' || fila.style.backgroundColor === 'rgb(232, 255, 244)') {
+                                // Actualizar la última celda (Estado) a Completada
+                                if (fila.cells.length >= 5) {
+                                    const celdaEstado = fila.cells[4];
+                                    celdaEstado.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completada';
+                                    celdaEstado.style.color = '#22C55E';
+                                }
+                                break;
+                            }
+                        }
+                        // Re-renderizar la página actual
+                        renderizarPagina();
+                    }
+
+                    // ── 3. Deshabilitar todos los botones ────────────────────
                     card.querySelectorAll('button').forEach(b => {
                         b.disabled = true;
                         b.style.pointerEvents = 'none';
