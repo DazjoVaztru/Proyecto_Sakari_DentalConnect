@@ -405,7 +405,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('pacientes.store') }}" method="POST">
+           <form action="{{ route('pacientes.store') }}" method="POST" autocomplete="off">
                 @csrf
                 <div class="form-grid">
                     {{-- Datos Personales --}}
