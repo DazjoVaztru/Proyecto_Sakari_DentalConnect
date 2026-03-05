@@ -348,7 +348,7 @@
     <div class="patients-grid" id="patients-grid">
         @forelse($pacientes as $paciente)
             <div class="patient-card"
-                onclick="verPerfil({{ json_encode($paciente->load(['usuario', 'contactoEmergencia', 'archivos'])) }})">
+                onclick='verPerfil(@json($paciente->load(["usuario","contactoEmergencia","archivos"])))'>
                 <div class="avatar-circle">
                     <i class="fa-solid fa-user"></i>
                 </div>
@@ -438,7 +438,7 @@
        value="{{ old('apellido_materno') }}"
        onkeypress="return soloLetras(event)"
        oninput="formatearEnVivo(this)">
-
+       
                     <select name="sexo" class="modern-input">
                         <option value="O" {{ old('sexo', 'O') == 'O' ? 'selected' : '' }}>Sexo</option>
                         <option value="M" {{ old('sexo') == 'M' ? 'selected' : '' }}>Masculino</option>
@@ -1222,15 +1222,24 @@
 // ─────────────────────────────────────────────
 // SOLO LETRAS (bloquea números en tiempo real)
 // ─────────────────────────────────────────────
-function soloLetras(e) {
-    const tecla = e.key;
-    const regex = /^[A-Za-zÀ-ÿÑñ\s]$/;
+function soloLetras(e){
+    let tecla = e.key;
+    let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
 
-    if (!regex.test(tecla)) {
-        e.preventDefault();
+    if(!regex.test(tecla)){
         return false;
     }
-    return true;
+}
+
+function formatearEnVivo(input){
+
+    let valor = input.value.toLowerCase();
+
+    valor = valor.replace(/\b\w/g, function(letra){
+        return letra.toUpperCase();
+    });
+
+    input.value = valor;
 }
 
 // ─────────────────────────────────────────────
