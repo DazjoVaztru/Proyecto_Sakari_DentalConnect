@@ -306,7 +306,10 @@
                                     <th
                                         style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
                                         Seguimiento</th>
-                                    <th style="padding: 15px; color:#000; font-weight: 700;">Abono</th>
+                                    <th
+                                        style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
+                                        Abono</th>
+                                    <th style="padding: 15px; color:#000; font-weight: 700;">Estado</th>
                                 </tr>
                             </thead>
                             <tbody id="cita-tabla-body" style="background: white;">
@@ -743,12 +746,23 @@
                             const tr = document.createElement('tr');
                             tr.style.borderBottom = borde;
                             if (esActual) tr.style.fontWeight = '700';
+                            // Determinar color y icono del estado
+                            let colorEstado = '#999';
+                            let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
+                            let textoEstado = 'Pendiente';
+                            
+                            if (fila.estado === 'Completada' || fila.estado === 'completada') {
+                                colorEstado = '#22C55E';
+                                iconoEstado = '<i class="fa-solid fa-circle-check"></i>';
+                                textoEstado = 'Completada';
+                            }
+                            
                             tr.innerHTML = `
                                             <td style="${tdStyle}">${fila.dia}</td>
                                             <td style="${tdStyle}">${fila.hora}</td>
                                             <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
                                             <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.estado}</td>
+                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
                                         `;
                             return tr;
                         });
@@ -1038,7 +1052,7 @@
                                                                         <td style="padding:12px 15px; border-right:${borde}; color:#555;">${horaCita}</td>
                                                                         <td style="padding:12px 15px; border-right:${borde}; color:#555;">${seguimientoCita}</td>
                                                                         <td style="padding:12px 15px; border-right:${borde}; font-weight:800; color:var(--primary-color);">${data.data.abono_fila}</td>
-                                                                        <td style="padding:12px 15px; color:#555;">Abono</td>
+                                                                        <td style="padding:12px 15px; color:#999; font-weight:700; display:flex; align-items:center; gap:6px; justify-content:center;"><i class="fa-regular fa-hourglass"></i> Abono</td>
                                                                     `;
 
                                 // Agregar al inicio del array global y volver a página 1
