@@ -154,7 +154,10 @@ class PacienteController extends Controller
             'peso' => 'nullable|integer|min:0|max:500',
             'direccion' => 'nullable|string|max:100',
             'email' => 'required|email|max:100',
-            // fields...
+            'emergencia_nombre' => 'nullable|string|max:100',
+            'emergencia_apellido_paterno' => 'nullable|string|max:100',
+            'emergencia_apellido_materno' => 'nullable|string|max:100',
+            'emergencia_telefono' => 'nullable|string|max:13',
         ]);
 
         try {
@@ -169,10 +172,7 @@ class PacienteController extends Controller
                 'alergias' => $request->alergias,
             ]);
 
-            if ($request->email && $paciente->usuario->email !== $request->email) {
-                $paciente->usuario->update(['email' => $request->email]);
-            }
-
+            // Actualizar contacto de emergencia si se proporcionó información
             if ($request->filled('emergencia_nombre') || $request->filled('emergencia_telefono')) {
                 if ($paciente->id_contacto_emergencia) {
                     DB::table('contacto_emergencia')->where('id_contacto_emergencia', $paciente->id_contacto_emergencia)

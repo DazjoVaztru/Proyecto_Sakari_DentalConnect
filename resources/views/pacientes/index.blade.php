@@ -484,12 +484,13 @@
                     <input type="text" name="ocupacion" class="modern-input" placeholder="Ocupación"
                         value="{{ old('ocupacion') }}">
 
-                    {{-- Contacto de Emergencia --}}
-                    <div class="full-width"
-                        style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
-                        <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
-                    </div>
-                   <input type="text"
+                  {{-- Contacto de Emergencia --}}
+<div class="full-width"
+     style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
+    <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
+</div>
+
+<input type="text"
        name="emergencia_nombre"
        class="modern-input"
        placeholder="Nombre Contacto"
@@ -519,8 +520,7 @@
        placeholder="Teléfono Emergencia"
        maxlength="15"
        value="{{ old('emergencia_telefono') }}"
-       oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
-                    {{-- Salud --}}
+       oninput="this.value = this.value.replace(/\D/g,'')">{{-- Salud --}}
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
                         <i class="fa-solid fa-notes-medical" style="margin-right: 5px;"></i> Información de Salud
@@ -736,14 +736,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                            const file = this.files[0];
-                                            if(file) {
-                                                document.getElementById('label-ev-foto').innerText = file.name;
-                                                document.getElementById('label-ev-foto').style.color = '#10b981';
-                                            } else {
-                                                document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                            }">
+                                                    const file = this.files[0];
+                                                    if(file) {
+                                                        document.getElementById('label-ev-foto').innerText = file.name;
+                                                        document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                    } else {
+                                                        document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                        document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                    }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -987,7 +987,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                    <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                            <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1067,15 +1067,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                            <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                            ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                        </div>
-                                        <div style="text-align: right;">
-                                            <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                        </div>
-                                    </div>`;
+                                                <div>
+                                                    <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                    <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                    ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                </div>
+                                                <div style="text-align: right;">
+                                                    <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                </div>
+                                            </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1103,20 +1103,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                    <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                </a>
-                                             </div>`;
+                                                        <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                            <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                        </a>
+                                                     </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                            <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                        </div>
-                                                        <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                        ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                        ${imageHtml}
-                                                    </div>`;
+                                                                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                    <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                </div>
+                                                                <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                ${imageHtml}
+                                                            </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -1230,8 +1230,8 @@
             if (!currentPaciente) return;
 
             Swal.fire({
-                title: '¡Atención!',
-                text: `Estás a punto de ELIMINAR por completo al paciente ${currentPaciente.nombre}. Esta acción eliminara por completo los datos del paciente ¿Deseas Continuar?`,
+                title: '¡ALERTA ROJA!',
+                text: `Estás a punto de ELIMINAR por completo al paciente ${currentPaciente.nombre}. Esta acción es destructiva y limitará el acceso a su historial. ¿Deseas proceder?`,
                 icon: 'error',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
