@@ -748,7 +748,7 @@
                                             <td style="${tdStyle}">${fila.hora}</td>
                                             <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
                                             <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                            <td style="${tdLast}">${fila.estado}</td>
+                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.estado}</td>
                                         `;
                             return tr;
                         });
