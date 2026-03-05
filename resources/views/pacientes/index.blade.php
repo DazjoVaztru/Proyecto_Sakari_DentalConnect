@@ -348,7 +348,7 @@
     <div class="patients-grid" id="patients-grid">
         @forelse($pacientes as $paciente)
             <div class="patient-card"
-                onclick="verPerfil({{ json_encode($paciente->load(['usuario', 'contactoEmergencia', 'archivos'])) }})">
+               onclick='verPerfil(@json($paciente->load(["usuario","contactoEmergencia","archivos"])))'>
                 <div class="avatar-circle">
                     <i class="fa-solid fa-user"></i>
                 </div>
@@ -772,7 +772,7 @@
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 700;">Fecha:</label>
-                        <input type="date" name="fecha" class="modern-input" required value="{{ date('Y-m-d') }}">
+                        <input type="date" name="fecha" id="fecha-cita" class="modern-input" required>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 700;">Hora:</label>
@@ -884,6 +884,30 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let currentPaciente = null;
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fechaInput = document.getElementById("fecha-cita");
+
+    const hoy = new Date();
+
+    // Primer día del siguiente mes
+    const siguienteMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
+
+    const yyyy = siguienteMes.getFullYear();
+    const mm = String(siguienteMes.getMonth() + 1).padStart(2, '0');
+    const dd = String(siguienteMes.getDate()).padStart(2, '0');
+
+    const fechaMinima = `${yyyy}-${mm}-${dd}`;
+
+    // El calendario no permitirá fechas antes de ese día
+    fechaInput.min = fechaMinima;
+
+    // Mostrar ese día por defecto
+    fechaInput.value = fechaMinima;
+
+});
+
 
         document.getElementById('btn-registrar-paciente').addEventListener('click', function () {
             Swal.fire({
