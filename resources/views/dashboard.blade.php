@@ -1014,6 +1014,24 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // --- ACTUALIZAR SEGUIMIENTO EN LA TABLA ---
+                        const nuevoSeguimiento = document.querySelector('textarea[name="notas_seguimiento"]').value || '';
+                        if (nuevoSeguimiento) {
+                            // Buscar la fila activa y actualizar su seguimiento
+                            if (window.todasLasFilas && window.todasLasFilas.length > 0) {
+                                for (let i = 0; i < window.todasLasFilas.length; i++) {
+                                    const fila = window.todasLasFilas[i];
+                                    if (fila.style.fontWeight === '700' || fila.style.background === 'rgb(232, 255, 244)') {
+                                        if (fila.cells.length >= 3) {
+                                            fila.cells[2].innerText = nuevoSeguimiento;
+                                        }
+                                        break;
+                                    }
+                                }
+                                renderizarPagina();
+                            }
+                        }
+
                         // --- TABLA DE ABONOS ---
                         const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
 
@@ -1042,7 +1060,8 @@
                                 const cells = filaReferencia.cells;
                                 const diaCita = cells[0] ? cells[0].innerText : '';
                                 const horaCita = cells[1] ? cells[1].innerText : '';
-                                const seguimientoCita = cells[2] ? cells[2].innerText : '';
+                                // Usar el seguimiento actualizado del textarea o el existente
+                                const seguimientoCita = document.querySelector('textarea[name="notas_seguimiento"]').value || (cells[2] ? cells[2].innerText : '');
 
                                 const borde = '2px solid #00D1FF';
                                 const nuevaFila = document.createElement('tr');
