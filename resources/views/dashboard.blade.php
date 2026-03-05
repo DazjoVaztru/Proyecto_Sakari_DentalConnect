@@ -1170,20 +1170,15 @@
         }
 
         // ==========================================
-        // MARCAR CITA COMO COMPLETADA (con animación)
+        // MARCAR CITA COMO COMPLETADA
         // ==========================================
         function completarCita(idCita) {
-            const card = document.getElementById('cita-card-' + idCita);
-            const overlay = document.getElementById('overlay-' + idCita);
-            const path = document.getElementById('check-path-' + idCita);
             const btn = document.getElementById('btn-completar-' + idCita);
 
-            if (!card || !overlay) return;
-
             // Evitar doble clic
-            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'default'; }
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
 
-            // ── 1. Llamada AJAX ───────────────────────────────────────────
+            // ── Llamada AJAX ───────────────────────────────────────────
             fetch('/api/citas/' + idCita + '/completar', {
                 method: 'POST',
                 headers: {
@@ -1196,87 +1191,30 @@
                 .then(data => {
                     if (!data.success) {
                         alert('Error: ' + (data.message || 'No se pudo completar la cita.'));
-                        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+                        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
                         return;
                     }
 
-                    // ── 2. Actualizar estado en la tabla del modal ────────────
+                    // ── ACTUALIZAR SOLO EL ESTADO EN LA TABLA ────────────
                     if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                        // Buscar la fila activa (la que está marcada como es_actual)
                         for (let i = 0; i < window.todasLasFilas.length; i++) {
                             const fila = window.todasLasFilas[i];
-                            // Busca la fila con fondo verde (es_actual)
                             if (fila.style.background === 'rgb(232, 255, 244)' || fila.style.backgroundColor === 'rgb(232, 255, 244)') {
-                                // Actualizar la última celda (Estado) a Completada
                                 if (fila.cells.length >= 5) {
                                     const celdaEstado = fila.cells[4];
                                     celdaEstado.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completada';
                                     celdaEstado.style.color = '#22C55E';
+                                    celdaEstado.style.fontWeight = '700';
                                 }
                                 break;
                             }
                         }
-                        // Re-renderizar la página actual
                         renderizarPagina();
                     }
-
-                    // ── 3. Deshabilitar todos los botones ────────────────────
-                    card.querySelectorAll('button').forEach(b => {
-                        b.disabled = true;
-                        b.style.pointerEvents = 'none';
-                    });
-
-                    // ── 3. Mostrar overlay ────────────────────────────────────
-                    overlay.style.display = 'flex';
-
-                    // ── 4. Animar el trazo del check (doble rAF para forzar reflow) ──
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            if (path) path.style.strokeDashoffset = '0';
-                        });
-                    });
-
-                    // ── 5. Tras 4.5 s → colapsar y desvanecer ────────────────
-                    setTimeout(() => {
-                        // Medir altura real ANTES de poner overflow:hidden
-                        const realH = card.getBoundingClientRect().height;
-
-                        // Fijar altura y poner overflow para que el colapso sea limpio
-                        card.style.maxHeight = realH + 'px';
-                        card.style.overflow = 'hidden';
-
-                        // Forzar reflow
-                        card.getBoundingClientRect();
-
-                        // Activar transición y colapsar todo de golpe
-                        card.style.transition = [
-                            'opacity 0.7s ease',
-                            'max-height 0.7s ease',
-                            'padding-top 0.7s ease',
-                            'padding-bottom 0.7s ease',
-                            'margin-bottom 0.7s ease'
-                        ].join(', ');
-
-                        card.style.opacity = '0';
-                        card.style.maxHeight = '0';
-                        card.style.paddingTop = '0';
-                        card.style.paddingBottom = '0';
-                        card.style.marginBottom = '0';
-
-                        // ── 6. Eliminar del DOM al terminar la transición ─────
-                        setTimeout(() => {
-                            card.remove();
-                            const list = document.getElementById('appointment-list');
-                            if (list && list.querySelectorAll('.appointment-card').length === 0) {
-                                list.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No hay citas próximas agendadas.</p>';
-                            }
-                        }, 750);
-
-                    }, 4500);
                 })
                 .catch(err => {
                     console.error('Error al completar cita:', err);
-                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
                     alert('Error de conexión. Inténtalo de nuevo.');
                 });
         }
