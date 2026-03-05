@@ -97,3 +97,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
 
 });
+
+// Fallback route para servir imágenes del storage público cuando el enlace simbólico no está disponible (ej. en Railway)
+Route::get('/storage/{path}', function (string $path) {
+    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+    return \Illuminate\Support\Facades\Storage::disk('public')->response($path);
+})->where('path', '.*');

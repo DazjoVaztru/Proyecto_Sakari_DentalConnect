@@ -439,6 +439,29 @@
        onkeypress="return soloLetras(event)"
        oninput="formatearEnVivo(this)">
 
+<input type="email"
+       name="email"
+       class="modern-input"
+       placeholder="Correo Electrónico*"
+       required
+       value="{{ old('email') }}">
+
+<input type="text"
+       name="telefono"
+       class="modern-input"
+       placeholder="Teléfono Celular*"
+       required
+       maxlength="15"
+       value="{{ old('telefono') }}"
+       oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+
+<input type="date"
+       name="fecha_nacimiento"
+       class="modern-input"
+       required
+       value="{{ old('fecha_nacimiento') }}"
+       title="Fecha de Nacimiento">
+
                     <select name="sexo" class="modern-input">
                         <option value="O" {{ old('sexo', 'O') == 'O' ? 'selected' : '' }}>Sexo</option>
                         <option value="M" {{ old('sexo') == 'M' ? 'selected' : '' }}>Masculino</option>
