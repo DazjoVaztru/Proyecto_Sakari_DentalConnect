@@ -438,7 +438,7 @@
        value="{{ old('apellido_materno') }}"
        onkeypress="return soloLetras(event)"
        oninput="formatearEnVivo(this)">
-       
+
                     <select name="sexo" class="modern-input">
                         <option value="O" {{ old('sexo', 'O') == 'O' ? 'selected' : '' }}>Sexo</option>
                         <option value="M" {{ old('sexo') == 'M' ? 'selected' : '' }}>Masculino</option>
