@@ -1032,53 +1032,29 @@
                             }
                         }
 
-                        // --- TABLA DE ABONOS ---
+                        // --- ACTUALIZAR ABONO EN LA TABLA ---
                         const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
 
                         if (montoAbonado > 0) {
-                            // Agregar una nueva fila de abono a la tabla
-                            const tbody = document.getElementById('cita-tabla-body');
-                            if (tbody && window.todasLasFilas && window.todasLasFilas.length > 0) {
-                                // Buscar la fila activa (con fondo verde) o usar la primera fila disponible
-                                let filaReferencia = null;
-
-                                // Buscar en todas las filas (no solo las visibles)
+                            // Buscar la fila activa y actualizar su abono (columna 3)
+                            if (window.todasLasFilas && window.todasLasFilas.length > 0) {
                                 for (let i = 0; i < window.todasLasFilas.length; i++) {
                                     const fila = window.todasLasFilas[i];
-                                    if (fila.style.fontWeight === '700' || fila.querySelector('td[style*="E8FFF4"]')) {
-                                        filaReferencia = fila;
+                                    if (fila.style.fontWeight === '700' || fila.style.background === 'rgb(232, 255, 244)') {
+                                        if (fila.cells.length >= 4) {
+                                            // Actualizar la celda de Abono (cell[3]) con el monto formateado
+                                            fila.cells[3].innerText = data.data.abono_fila;
+                                            fila.cells[3].style.fontWeight = '800';
+                                            fila.cells[3].style.color = 'var(--primary-color)';
+                                        }
                                         break;
                                     }
                                 }
-
-                                // Si no encontramos fila activa, usar la primera
-                                if (!filaReferencia) {
-                                    filaReferencia = window.todasLasFilas[0];
-                                }
-
-                                // Obtener los datos de las celdas
-                                const cells = filaReferencia.cells;
-                                const diaCita = cells[0] ? cells[0].innerText : '';
-                                const horaCita = cells[1] ? cells[1].innerText : '';
-                                // Usar el seguimiento actualizado del textarea o el existente
-                                const seguimientoCita = document.querySelector('textarea[name="notas_seguimiento"]').value || (cells[2] ? cells[2].innerText : '');
-
-                                const borde = '2px solid #00D1FF';
-                                const nuevaFila = document.createElement('tr');
-                                nuevaFila.style.borderBottom = borde;
-                                nuevaFila.innerHTML = `
-                                                                        <td style="padding:12px 15px; border-right:${borde}; color:#555;">${diaCita}</td>
-                                                                        <td style="padding:12px 15px; border-right:${borde}; color:#555;">${horaCita}</td>
-                                                                        <td style="padding:12px 15px; border-right:${borde}; color:#555;">${seguimientoCita}</td>
-                                                                        <td style="padding:12px 15px; border-right:${borde}; font-weight:800; color:var(--primary-color);">${data.data.abono_fila}</td>
-                                                                        <td style="padding:12px 15px; color:#999; font-weight:700; display:flex; align-items:center; gap:6px; justify-content:center;"><i class="fa-regular fa-hourglass"></i> Abono</td>
-                                                                    `;
-
-                                // Agregar al inicio del array global y volver a página 1
-                                window.todasLasFilas.unshift(nuevaFila);
-                                window.paginaActual = 1;
                                 renderizarPagina();
                             }
+                            
+                            // Limpiar el input de abono
+                            document.querySelector('input[name="monto_abono"]').value = '';
                         }
 
                         // --- ACTUALIZAR TOTALES ---
