@@ -159,12 +159,6 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($c) use ($idCita) {
                 $abonadoEnCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
-                $estadoBadge = match ($c->estado_cita) {
-                    'completada' => '✅ Completada',
-                    'cancelada' => '❌ Cancelada',
-                    'pendiente' => '🕐 Pendiente',
-                    default => ucfirst($c->estado_cita),
-                };
                 return [
                     'id' => $c->id_cita,
                     'dia' => Carbon::parse($c->fecha_hora_inicio)->format('d/m/Y'),
@@ -173,7 +167,7 @@ class DashboardController extends Controller
                     'servicio' => $c->servicio?->nombre_servicio ?? 'Consulta General',
                     'seguimiento' => $c->motivo ?? ($c->servicio?->nombre_servicio ?? 'Consulta'),
                     'abono' => number_format($abonadoEnCita, 2),
-                    'estado' => $estadoBadge,
+                    'estado' => $c->estado_cita,
                     'es_actual' => $c->id_cita == $idCita,
                 ];
             });

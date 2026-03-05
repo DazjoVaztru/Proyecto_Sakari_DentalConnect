@@ -746,12 +746,15 @@
                             const tr = document.createElement('tr');
                             tr.style.borderBottom = borde;
                             if (esActual) tr.style.fontWeight = '700';
+                            
                             // Determinar color y icono del estado
                             let colorEstado = '#999';
                             let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
                             let textoEstado = 'Pendiente';
                             
-                            if (fila.estado === 'Completada' || fila.estado === 'completada') {
+                            // Comparar estado sin diferenciar mayúsculas/minúsculas
+                            const estadoLower = (fila.estado || '').toLowerCase().trim();
+                            if (estadoLower === 'completada') {
                                 colorEstado = '#22C55E';
                                 iconoEstado = '<i class="fa-solid fa-circle-check"></i>';
                                 textoEstado = 'Completada';
