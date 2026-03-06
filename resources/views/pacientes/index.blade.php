@@ -191,6 +191,45 @@
             z-index: 99999 !important;
         }
 
+        /* Error visual para campos faltantes */
+        .field-error {
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+            animation: shakeField 0.4s ease;
+        }
+
+        @keyframes shakeField {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-6px);
+            }
+
+            40% {
+                transform: translateX(6px);
+            }
+
+            60% {
+                transform: translateX(-4px);
+            }
+
+            80% {
+                transform: translateX(4px);
+            }
+        }
+
+        .field-error-label {
+            color: #ef4444;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 3px;
+            display: block;
+        }
+
         /* Responsive Design (Mobile) */
         @media (max-width: 768px) {
             .page-title {
@@ -447,8 +486,9 @@
                         @endforeach
                     </select>
 
-                    <input type="number" name="peso" class="modern-input" placeholder="Peso" step="1" min="0" max="500"
-                        value="{{ old('peso') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <input type="number" name="peso" class="modern-input" placeholder="Peso (kg)*" step="1" min="1"
+                        max="500" required value="{{ old('peso') }}" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
 
                     <input type="text" name="direccion" class="modern-input" placeholder="Dirección Completa*" required
                         value="{{ old('direccion') }}" style="grid-column: span 1;">
@@ -482,12 +522,12 @@
                         <i class="fa-solid fa-notes-medical" style="margin-right: 5px;"></i> Información de Salud
                     </div>
                     <div class="full-width">
-                        <textarea name="enfermedades_cronicas" class="modern-input" rows="2"
-                            placeholder="Enfermedades Crónicas (Texto libre)">{{ old('enfermedades_cronicas') }}</textarea>
+                        <textarea name="enfermedades_cronicas" class="modern-input" rows="2" required
+                            placeholder="Enfermedades Crónicas* (Si no tiene, escriba 'Ninguna')">{{ old('enfermedades_cronicas') }}</textarea>
                     </div>
                     <div class="full-width">
-                        <textarea name="alergias" class="modern-input" rows="2"
-                            placeholder="Alergias a Medicamentos (Texto libre)">{{ old('alergias') }}</textarea>
+                        <textarea name="alergias" class="modern-input" rows="2" required
+                            placeholder="Alergias a Medicamentos* (Si no tiene, escriba 'Ninguna')">{{ old('alergias') }}</textarea>
                     </div>
                 </div>
 
@@ -698,14 +738,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                                                const file = this.files[0];
-                                                                                if(file) {
-                                                                                    document.getElementById('label-ev-foto').innerText = file.name;
-                                                                                    document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                                                } else {
-                                                                                    document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                                                    document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                                                }">
+                                                                                    const file = this.files[0];
+                                                                                    if(file) {
+                                                                                        document.getElementById('label-ev-foto').innerText = file.name;
+                                                                                        document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                                                    } else {
+                                                                                        document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                                                        document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                                                    }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -877,11 +917,58 @@
         let currentPaciente = null;
 
         document.getElementById('btn-registrar-paciente').addEventListener('click', function () {
-            // Validar campos requeridos ANTES de mostrar la confirmación
             const form = document.querySelector('#modal-new-patient form');
-            if (!form.reportValidity()) {
-                return; // El navegador mostrará los mensajes de campos obligatorios
+
+            // ── Campos sensibles obligatorios ──
+            const camposSensibles = [
+                { el: form.querySelector('[name="sexo"]'), label: 'Sexo' },
+                { el: form.querySelector('[name="tipo_sangre"]'), label: 'Tipo de Sangre' },
+                { el: form.querySelector('[name="peso"]'), label: 'Peso' },
+                { el: form.querySelector('[name="enfermedades_cronicas"]'), label: 'Enfermedades Crónicas' },
+                { el: form.querySelector('[name="alergias"]'), label: 'Alergias' },
+                { el: form.querySelector('[name="emergencia_nombre"]'), label: 'Nombre Contacto Emergencia' },
+                { el: form.querySelector('[name="emergencia_telefono"]'), label: 'Teléfono Emergencia' },
+            ];
+
+            // Limpiar errores previos
+            form.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            form.querySelectorAll('.field-error-label').forEach(el => el.remove());
+
+            let faltantes = [];
+            camposSensibles.forEach(({ el, label }) => {
+                if (!el) return;
+                const val = el.value.trim();
+                if (!val) {
+                    el.classList.add('field-error');
+                    // Insertar etiqueta de error debajo
+                    const errMsg = document.createElement('span');
+                    errMsg.className = 'field-error-label';
+                    errMsg.textContent = `⚠ ${label} es obligatorio`;
+                    el.parentNode.insertBefore(errMsg, el.nextSibling);
+                    faltantes.push(label);
+                }
+            });
+
+            if (faltantes.length > 0) {
+                // Scroll al primer campo con error
+                const primerError = form.querySelector('.field-error');
+                if (primerError) primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campos obligatorios faltantes',
+                    html: `<p style="text-align:left;font-size:0.95rem;">Para crear el expediente clínico, debes completar:</p>
+                               <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
+                                   ${faltantes.map(f => `<li>${f}</li>`).join('')}
+                               </ul>`,
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
             }
+
+            // Validar campos restantes del form con validación nativa
+            if (!form.reportValidity()) return;
 
             Swal.fire({
                 title: '¿Estás seguro?',
@@ -896,6 +983,20 @@
                 if (result.isConfirmed) {
                     document.getElementById('btn-submit-real-paciente').click();
                 }
+            });
+        });
+
+        // ── Quitar borde rojo al escribir ─────────────────────────────────────────
+        document.querySelectorAll('#modal-new-patient .modern-input').forEach(input => {
+            input.addEventListener('input', function () {
+                this.classList.remove('field-error');
+                const errLabel = this.parentNode.querySelector('.field-error-label');
+                if (errLabel) errLabel.remove();
+            });
+            input.addEventListener('change', function () {
+                this.classList.remove('field-error');
+                const errLabel = this.parentNode.querySelector('.field-error-label');
+                if (errLabel) errLabel.remove();
             });
         });
 
@@ -952,7 +1053,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                                                            <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1032,15 +1133,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                                                            <div>
-                                                                                <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                                                <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                                                ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                                                            </div>
-                                                                            <div style="text-align: right;">
-                                                                                <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                                                            </div>
-                                                                        </div>`;
+                                                                                <div>
+                                                                                    <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                                                    <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                                                    ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                                                </div>
+                                                                                <div style="text-align: right;">
+                                                                                    <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                                                </div>
+                                                                            </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1068,20 +1169,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                                                    <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                                                        <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                                                    </a>
-                                                                                 </div>`;
+                                                                                        <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                                                            <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                                                        </a>
+                                                                                     </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                                                            </div>
-                                                                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                                                            ${imageHtml}
-                                                                                        </div>`;
+                                                                                                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                                                    <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                                                </div>
+                                                                                                <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                                                ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                                                ${imageHtml}
+                                                                                            </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
