@@ -51,25 +51,27 @@ class TratamientoController extends Controller
             'precio.min' => 'El precio no puede ser negativo.'
         ]);
 
-        // 🔴 VERIFICAR DUPLICADO
+        $nombre = trim($request->nombre);
+
+        // 🔴 VERIFICAR DUPLICADO (ignora mayúsculas/minúsculas)
         $existe = Servicio::where('id_clinica', $idClinica)
-            ->whereRaw('LOWER(nombre_servicio) = ?', [strtolower($request->nombre)])
+            ->whereRaw('LOWER(TRIM(nombre_servicio)) = ?', [strtolower($nombre)])
             ->exists();
 
         if ($existe) {
-            return redirect()->back()
+            return back()
                 ->withInput()
                 ->with('error', 'Ya existe un tratamiento con ese nombre.');
         }
 
         Servicio::create([
             'id_clinica' => $idClinica,
-            'nombre_servicio' => trim($request->nombre),
+            'nombre_servicio' => $nombre,
             'precio_base' => $request->precio,
             'categoria' => $request->categoria ?? 'General'
         ]);
 
-        return redirect()->back()->with('success', 'Tratamiento creado correctamente.');
+        return back()->with('success', 'Tratamiento creado correctamente.');
     }
 
     /**
@@ -101,26 +103,27 @@ class TratamientoController extends Controller
         ]);
 
         $servicio = Servicio::findOrFail($id);
+        $nombre = trim($request->nombre);
 
         // 🔴 VERIFICAR DUPLICADO EXCLUYENDO EL ACTUAL
         $existe = Servicio::where('id_clinica', $idClinica)
-            ->whereRaw('LOWER(nombre_servicio) = ?', [strtolower($request->nombre)])
+            ->whereRaw('LOWER(TRIM(nombre_servicio)) = ?', [strtolower($nombre)])
             ->where('id', '!=', $id)
             ->exists();
 
         if ($existe) {
-            return redirect()->back()
+            return back()
                 ->withInput()
                 ->with('error', 'Ya existe otro tratamiento con ese nombre.');
         }
 
         $servicio->update([
-            'nombre_servicio' => trim($request->nombre),
+            'nombre_servicio' => $nombre,
             'precio_base' => $request->precio,
             'categoria' => $request->categoria ?? 'General'
         ]);
 
-        return redirect()->back()->with('success', 'Tratamiento actualizado.');
+        return back()->with('success', 'Tratamiento actualizado.');
     }
 
     /**
@@ -131,6 +134,6 @@ class TratamientoController extends Controller
         $servicio = Servicio::findOrFail($id);
         $servicio->delete();
 
-        return redirect()->back()->with('success', 'Tratamiento eliminado.');
+        return back()->with('success', 'Tratamiento eliminado.');
     }
 }
