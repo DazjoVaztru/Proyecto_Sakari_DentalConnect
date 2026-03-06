@@ -79,7 +79,7 @@
                     $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
                 @endphp
                 <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
-                    onclick="cargarModalCita({{ $cita->id_cita }})"
+                    onclick="if(event.target.closest('button') === null) { cargarModalCita({{ $cita->id_cita }}); }"
                     style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.2s ease;"
                     onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
                     onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
