@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use App\Helpers\StringHelper;
 
@@ -46,28 +45,7 @@ class StorePacienteRequest extends FormRequest
             // Datos básicos obligatorios
             'nombre' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
-            'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u',
-                // Validar que no exista un paciente con el mismo nombre + apellido_paterno + apellido_materno en la clínica
-                function ($attribute, $value, $fail) {
-                    $idClinica = Auth::user()->id_clinica;
-                    $nombre = $this->input('nombre');
-                    $apellidoPaterno = $this->input('apellido_paterno');
-                    $apellidoMaterno = $value;
-                    
-                    $duplicado = DB::table('pacientes')
-                        ->whereHas('usuario', function ($query) use ($idClinica) {
-                            $query->where('id_clinica', $idClinica);
-                        })
-                        ->where('nombre', $nombre)
-                        ->where('apellido_paterno', $apellidoPaterno)
-                        ->where('apellido_materno', $apellidoMaterno)
-                        ->exists();
-                    
-                    if ($duplicado) {
-                        $fail('Este paciente ya ha sido registrado.');
-                    }
-                },
-            ],
+            'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'telefono' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]+$/'],
             'email' => ['required', 'email', 'max:150',
                 // Sólo un paciente por clínica. usamos regla personalizada para filtrar por id_clinica
