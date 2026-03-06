@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\Auth;
 
 class TratamientoController extends Controller
 {
+
     public function index()
     {
-        // Obtenemos los tratamientos filtrados por la clínica del usuario
         $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
-
         return view('tratamientos.index', compact('tratamientos'));
     }
 
@@ -54,7 +53,6 @@ class TratamientoController extends Controller
 
         $idClinica = Auth::user()->id_clinica;
 
-        // Buscamos usando el nombre real de la columna id_servicio
         $tratamiento = Servicio::where('id_servicio', $id)
                         ->where('id_clinica', $idClinica)
                         ->firstOrFail();
@@ -79,22 +77,27 @@ class TratamientoController extends Controller
 
     public function destroy($id)
     {
-        $idClinica = Auth::user()->id_clinica;
+        try {
+            $idClinica = Auth::user()->id_clinica;
 
-        // EXPLICACIÓN DEL CAMBIO:
-        // Usamos where directamente para asegurar que Laravel no busque la columna 'id' genérica.
-        $tratamiento = Servicio::where('id_servicio', $id)
-                        ->where('id_clinica', $idClinica)
-                        ->first();
+            // Buscamos el tratamiento manualmente
+            $tratamiento = Servicio::where('id_servicio', $id)
+                            ->where('id_clinica', $idClinica)
+                            ->first();
 
-        if (!$tratamiento) {
-            return redirect()->back()->with('error', 'No se pudo encontrar el tratamiento.');
+            // Si no existe, evitamos el Error 500 y mandamos un mensaje
+            if (!$tratamiento) {
+                return redirect()->back()->with('error', 'No se encontró el tratamiento o no tienes permiso.');
+            }
+
+            // Ejecutamos el borrado
+            $tratamiento->delete();
+
+            return redirect()->back()->with('success', 'Tratamiento eliminado correctamente');
+
+        } catch (\Exception $e) {
+            // Si el error persiste, esto nos dirá qué está pasando en la sesión de errores
+            return redirect()->back()->with('error', 'Error interno: ' . $e->getMessage());
         }
-
-        // Al tener el objeto recuperado, ejecutamos el delete. 
-        // Asegúrate que en Servicio.php tengas: protected $primaryKey = 'id_servicio';
-        $tratamiento->delete();
-
-        return redirect()->back()->with('success', 'Tratamiento eliminado correctamente');
     }
 }

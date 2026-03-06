@@ -5,34 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Modelo del catálogo de servicios o tratamientos dentales.
- *
- * Define los servicios ofrecidos por la clínica y su precio base.
- *
- * @property int $id_servicio
- * @property int $id_clinica
- * @property string $nombre_servicio
- * @property float $precio_base
- * @property string|null $categoria
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- */
 class Servicio extends Model
 {
     use HasFactory;
 
-    // 1. EL NOMBRE EXACTO DE TU TABLA EN HEIDISQL
+    // 1. Nombre de la tabla
     protected $table = 'catalogo_servicios';
 
-    // 2. TU LLAVE PRIMARIA
+    // 2. Llave primaria (Crucial para que el delete funcione)
     protected $primaryKey = 'id_servicio';
 
-    // 3. LAS COLUMNAS EXACTAS QUE TIENES (Según tu imagen)
+    // 3. DESACTIVAR TIMESTAMPS 
+    // Si tu tabla no tiene las columnas created_at y updated_at, DEBES poner esto en false.
+    public $timestamps = false; 
+
+    // 4. Columnas asignables
     protected $fillable = [
         'id_clinica',
         'nombre_servicio',
         'precio_base',
-        'categoria' // En tu imagen tienes 'categoria', no 'descripcion'
+        'categoria'
     ];
 }
