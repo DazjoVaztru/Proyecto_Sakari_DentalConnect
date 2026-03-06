@@ -602,12 +602,6 @@
 
 @section('scripts')
     <script>
-        const horasTotales = 8;
-const citasDelDia = data.citas_por_dia[dia] || 0;
-
-if (citasDelDia >= horasTotales) {
-    div.classList.add('dia-ocupado');
-}
         // ==========================================
         // aqui va ek calendario
         // ==========================================
