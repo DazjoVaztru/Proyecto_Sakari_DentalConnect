@@ -205,27 +205,17 @@ class PacienteController extends Controller
     }
 
     /**
-     * Da de baja (elimina lógicamente) al paciente.
+     * Eliminación de pacientes deshabilitada por cumplimiento normativo.
+     *
+     * NOM-004-SSA3-2012: Los expedientes clínicos deben conservarse un mínimo
+     * de 5 años tras la última consulta.
      */
     public function destroy($id)
     {
-        $idClinica = Auth::user()->id_clinica;
-        $paciente = Paciente::where('id_paciente', $id)
-            ->whereHas('usuario', function ($q) use ($idClinica) {
-                $q->where('id_clinica', $idClinica);
-            })->firstOrFail();
-
-        try {
-            DB::beginTransaction();
-
-            $paciente->update(['is_active' => false]);
-            $paciente->usuario->update(['is_active' => false]);
-
-            DB::commit();
-            return redirect()->back()->with('success', 'Paciente eliminado correctamente.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Error al eliminar paciente: ' . $e->getMessage());
-        }
+        return redirect()->back()->with(
+            'error',
+            'Acción no permitida. La NOM-004-SSA3-2012 prohíbe la eliminación de expedientes clínicos. ' .
+            'Los registros deben conservarse un mínimo de 5 años.'
+        );
     }
 }
