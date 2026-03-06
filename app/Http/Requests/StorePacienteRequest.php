@@ -64,7 +64,7 @@ class StorePacienteRequest extends FormRequest
                         ->exists();
                     
                     if ($duplicado) {
-                        $fail('Ya existe un paciente con el mismo nombre, apellido paterno y apellido materno en esta clínica.');
+                        $fail('Este paciente ya ha sido registrado.');
                     }
                 },
             ],
