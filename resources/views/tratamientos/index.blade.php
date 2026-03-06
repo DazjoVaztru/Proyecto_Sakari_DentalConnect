@@ -15,12 +15,6 @@
 </div>
 @endif
 
-@if(session('error'))
-<div style="background:#fee2e2;color:#991b1b;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #fecaca;">
-    <i class="fa-solid fa-triangle-exclamation"></i> {{ session('error') }}
-</div>
-@endif
-
 
 {{-- BARRA SUPERIOR --}}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
@@ -129,6 +123,20 @@ No hay tratamientos registrados.
 onclick="closeModal('modal-new-treatment')">&times;</button>
 
 <h3>Nuevo Tratamiento</h3>
+
+@if(session('error'))
+<div style="
+    background:#fee2e2;
+    color:#991b1b;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:15px;
+    border:1px solid #fecaca;
+    font-size:14px;">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    {{ session('error') }}
+</div>
+@endif
 
 <form action="{{ route('tratamientos.store') }}" method="POST">
 
