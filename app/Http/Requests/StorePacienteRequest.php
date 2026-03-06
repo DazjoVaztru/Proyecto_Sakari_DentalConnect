@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use App\Helpers\StringHelper;
 
 
@@ -46,7 +47,13 @@ class StorePacienteRequest extends FormRequest
             'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'telefono' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]+$/'],
-            'email' => ['required', 'email', 'max:150', 'unique:usuarios_sistema,email'],
+            'email' => ['required', 'email', 'max:150',
+                // Sólo un paciente por clínica. usamos regla personalizada para filtrar por id_clinica
+                \Illuminate\Validation\Rule::unique('usuarios_sistema','email')
+                    ->where(function ($query) {
+                        return $query->where('id_clinica', Auth::user()->id_clinica);
+                    }),
+            ],
             'fecha_nacimiento' => ['required', 'date', 'before:today'],
             'sexo' => ['nullable', 'in:M,F,O'],
 
