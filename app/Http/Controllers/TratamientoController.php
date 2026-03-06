@@ -9,12 +9,15 @@ use Illuminate\Support\Facades\Auth;
 class TratamientoController extends Controller
 {
 
-    public function index()
-    {
-        $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
+  public function index()
+{
+    // Obtenemos los tratamientos filtrados por la clínica del usuario
+    $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
 
-        return view('dashboard', compact('tratamientos'));
-    }
+    // ESTE ES EL CAMBIO CLAVE:
+    // Antes decía 'dashboard', pero tu archivo es 'tratamientos/index.blade.php'
+    return view('tratamientos.index', compact('tratamientos'));
+}
 
 
     public function store(Request $request)
