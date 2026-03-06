@@ -47,29 +47,32 @@ class StorePacienteRequest extends FormRequest
             'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'telefono' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]+$/'],
-            'email' => ['required', 'email', 'max:150',
+            'email' => [
+                'required',
+                'email',
+                'max:150',
                 // Sólo un paciente por clínica. usamos regla personalizada para filtrar por id_clinica
-                \Illuminate\Validation\Rule::unique('usuarios_sistema','email')
+                \Illuminate\Validation\Rule::unique('usuarios_sistema', 'email')
                     ->where(function ($query) {
                         return $query->where('id_clinica', Auth::user()->id_clinica);
                     }),
             ],
             'fecha_nacimiento' => ['required', 'date', 'before:today'],
-            'sexo' => ['nullable', 'in:M,F,O'],
+            'sexo' => ['required', 'in:M,F,O'],
 
             // Datos médicos opcionales
-            'tipo_sangre' => ['nullable', 'string', 'max:5'],
+            'tipo_sangre' => ['required', 'string', 'max:5'],
             'peso' => ['nullable', 'numeric', 'min:1', 'max:300'],
             'direccion' => ['nullable', 'string', 'max:100'],
             'ocupacion' => ['nullable', 'string', 'max:100'],
             'enfermedades_cronicas' => ['nullable', 'string', 'max:1000'],
             'alergias' => ['nullable', 'string', 'max:1000'],
 
-            // Contacto de emergencia (todos opcionales)
-            'emergencia_nombre' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            // Contacto de emergencia (nombre y teléfono obligatorios)
+            'emergencia_nombre' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'emergencia_apellido_paterno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'emergencia_apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
-            'emergencia_telefono' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9]+$/'],
+            'emergencia_telefono' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]+$/'],
         ];
     }
 
@@ -96,6 +99,10 @@ class StorePacienteRequest extends FormRequest
             'emergencia_apellido_paterno.regex' => 'El apellido paterno del contacto solo puede contener letras y espacios.',
             'emergencia_apellido_materno.regex' => 'El apellido materno del contacto solo puede contener letras y espacios.',
             'emergencia_telefono.regex' => 'El teléfono del contacto de emergencia solo puede contener números.',
+            'sexo.required' => 'El sexo del paciente es obligatorio.',
+            'tipo_sangre.required' => 'El tipo de sangre es obligatorio.',
+            'emergencia_nombre.required' => 'El nombre del contacto de emergencia es obligatorio.',
+            'emergencia_telefono.required' => 'El teléfono del contacto de emergencia es obligatorio.',
         ];
     }
 }

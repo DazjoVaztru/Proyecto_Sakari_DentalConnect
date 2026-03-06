@@ -348,7 +348,7 @@
     <div class="patients-grid" id="patients-grid">
         @forelse($pacientes as $paciente)
             <div class="patient-card"
-                onclick='verPerfil(@json($paciente->load(["usuario","contactoEmergencia","archivos"])))'>
+                onclick='verPerfil(@json($paciente->load(["usuario", "contactoEmergencia", "archivos"])))'>
                 <div class="avatar-circle">
                     <i class="fa-solid fa-user"></i>
                 </div>
@@ -412,64 +412,36 @@
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid #e0fbfc; padding-bottom: 6px; margin-bottom: 5px;">
                         <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales
-</div>
-<input type="text"
-       name="nombre"
-       class="modern-input"
-       placeholder="Nombre(s)*"
-       required
-       value="{{ old('nombre') }}"
-       onkeypress="return soloLetras(event)"
-       oninput="formatearEnVivo(this)">
+                    </div>
+                    <input type="text" name="nombre" class="modern-input" placeholder="Nombre(s)*" required
+                        value="{{ old('nombre') }}" onkeypress="return soloLetras(event)" oninput="formatearEnVivo(this)">
 
-<input type="text"
-       name="apellido_paterno"
-       class="modern-input"
-       placeholder="Apellido Paterno*"
-       required
-       value="{{ old('apellido_paterno') }}"
-       onkeypress="return soloLetras(event)"
-       oninput="formatearEnVivo(this)">
+                    <input type="text" name="apellido_paterno" class="modern-input" placeholder="Apellido Paterno*" required
+                        value="{{ old('apellido_paterno') }}" onkeypress="return soloLetras(event)"
+                        oninput="formatearEnVivo(this)">
 
-<input type="text"
-       name="apellido_materno"
-       class="modern-input"
-       placeholder="Apellido Materno"
-       value="{{ old('apellido_materno') }}"
-       onkeypress="return soloLetras(event)"
-       oninput="formatearEnVivo(this)">
+                    <input type="text" name="apellido_materno" class="modern-input" placeholder="Apellido Materno"
+                        value="{{ old('apellido_materno') }}" onkeypress="return soloLetras(event)"
+                        oninput="formatearEnVivo(this)">
 
-<input type="email"
-       name="email"
-       class="modern-input"
-       placeholder="Correo Electrónico*"
-       required
-       value="{{ old('email') }}">
+                    <input type="email" name="email" class="modern-input" placeholder="Correo Electrónico*" required
+                        value="{{ old('email') }}">
 
-<input type="text"
-       name="telefono"
-       class="modern-input"
-       placeholder="Teléfono Celular*"
-       required
-       maxlength="15"
-       value="{{ old('telefono') }}"
-       oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+                    <input type="text" name="telefono" class="modern-input" placeholder="Teléfono Celular*" required
+                        maxlength="15" value="{{ old('telefono') }}" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
 
-<input type="date"
-       name="fecha_nacimiento"
-       class="modern-input"
-       required
-       value="{{ old('fecha_nacimiento') }}"
-       title="Fecha de Nacimiento">
+                    <input type="date" name="fecha_nacimiento" class="modern-input" required
+                        value="{{ old('fecha_nacimiento') }}" title="Fecha de Nacimiento">
 
-                    <select name="sexo" class="modern-input">
-                        <option value="O" {{ old('sexo', 'O') == 'O' ? 'selected' : '' }}>Sexo</option>
+                    <select name="sexo" class="modern-input" required>
+                        <option value="" disabled selected>Sexo*</option>
                         <option value="M" {{ old('sexo') == 'M' ? 'selected' : '' }}>Masculino</option>
                         <option value="F" {{ old('sexo') == 'F' ? 'selected' : '' }}>Femenino</option>
+                        <option value="O" {{ old('sexo') == 'O' ? 'selected' : '' }}>Otro</option>
                     </select>
 
-                    <select name="tipo_sangre" class="modern-input">
-                        <option value="">Tipo de Sangre</option>
+                    <select name="tipo_sangre" class="modern-input" required>
+                        <option value="" disabled selected>Tipo de Sangre*</option>
                         @foreach(['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'] as $ts)
                             <option value="{{ $ts }}" {{ old('tipo_sangre') == $ts ? 'selected' : '' }}>{{ $ts }}</option>
                         @endforeach
@@ -484,43 +456,27 @@
                     <input type="text" name="ocupacion" class="modern-input" placeholder="Ocupación"
                         value="{{ old('ocupacion') }}">
 
-                  {{-- Contacto de Emergencia --}}
-<div class="full-width"
-     style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
-    <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
-</div>
+                    {{-- Contacto de Emergencia --}}
+                    <div class="full-width"
+                        style="font-size: 0.78em; font-weight: 700; color: #ef4444; text-transform: uppercase; border-bottom: 2px solid #fee2e2; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
+                        <i class="fa-solid fa-phone-volume" style="margin-right: 5px;"></i> Contacto de Emergencia
+                    </div>
 
-<input type="text"
-       name="emergencia_nombre"
-       class="modern-input"
-       placeholder="Nombre Contacto"
-       value="{{ old('emergencia_nombre') }}"
-       onkeypress="return soloLetras(event)"
-       oninput="formatearEnVivo(this)">
+                    <input type="text" name="emergencia_nombre" class="modern-input" placeholder="Nombre Contacto*" required
+                        value="{{ old('emergencia_nombre') }}" onkeypress="return soloLetras(event)"
+                        oninput="formatearEnVivo(this)">
 
-<input type="text"
-       name="emergencia_apellido_paterno"
-       class="modern-input"
-       placeholder="Apellido Paterno"
-       value="{{ old('emergencia_apellido_paterno') }}"
-       onkeypress="return soloLetras(event)"
-       oninput="formatearEnVivo(this)">
+                    <input type="text" name="emergencia_apellido_paterno" class="modern-input"
+                        placeholder="Apellido Paterno" value="{{ old('emergencia_apellido_paterno') }}"
+                        onkeypress="return soloLetras(event)" oninput="formatearEnVivo(this)">
 
-<input type="text"
-       name="emergencia_apellido_materno"
-       class="modern-input"
-       placeholder="Apellido Materno"
-       value="{{ old('emergencia_apellido_materno') }}"
-       onkeypress="return soloLetras(event)"
-       oninput="formatearEnVivo(this)">
+                    <input type="text" name="emergencia_apellido_materno" class="modern-input"
+                        placeholder="Apellido Materno" value="{{ old('emergencia_apellido_materno') }}"
+                        onkeypress="return soloLetras(event)" oninput="formatearEnVivo(this)">
 
-<input type="text"
-       name="emergencia_telefono"
-       class="modern-input"
-       placeholder="Teléfono Emergencia"
-       maxlength="15"
-       value="{{ old('emergencia_telefono') }}"
-       oninput="this.value = this.value.replace(/\D/g,'')">{{-- Salud --}}
+                    <input type="text" name="emergencia_telefono" class="modern-input" placeholder="Teléfono Emergencia*"
+                        required maxlength="15" value="{{ old('emergencia_telefono') }}"
+                        oninput="this.value = this.value.replace(/\D/g,'')">{{-- Salud --}}
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-top: 12px; margin-bottom: 5px;">
                         <i class="fa-solid fa-notes-medical" style="margin-right: 5px;"></i> Información de Salud
@@ -736,14 +692,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                    const file = this.files[0];
-                                                    if(file) {
-                                                        document.getElementById('label-ev-foto').innerText = file.name;
-                                                        document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                    } else {
-                                                        document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                        document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                    }">
+                                                                const file = this.files[0];
+                                                                if(file) {
+                                                                    document.getElementById('label-ev-foto').innerText = file.name;
+                                                                    document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                                } else {
+                                                                    document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                                    document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                                }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -908,7 +864,7 @@
         @method('DELETE')
     </form>
 
-    
+
 
 @endsection
 
@@ -919,6 +875,12 @@
         let currentPaciente = null;
 
         document.getElementById('btn-registrar-paciente').addEventListener('click', function () {
+            // Validar campos requeridos ANTES de mostrar la confirmación
+            const form = document.querySelector('#modal-new-patient form');
+            if (!form.reportValidity()) {
+                return; // El navegador mostrará los mensajes de campos obligatorios
+            }
+
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: "Estás a punto de registrar un nuevo paciente. Revisa que los datos médicos e información personal ingresada sean correctos.",
@@ -987,7 +949,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                            <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1067,15 +1029,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                                <div>
-                                                    <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                    <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                    ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                                </div>
-                                                <div style="text-align: right;">
-                                                    <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                                </div>
-                                            </div>`;
+                                                            <div>
+                                                                <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                                <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                                ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                            </div>
+                                                            <div style="text-align: right;">
+                                                                <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                            </div>
+                                                        </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1103,20 +1065,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                        <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                            <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                        </a>
-                                                     </div>`;
+                                                                    <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                                        <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                                    </a>
+                                                                 </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                    <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                                </div>
-                                                                <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                                ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                                ${imageHtml}
-                                                            </div>`;
+                                                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                            </div>
+                                                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                            ${imageHtml}
+                                                                        </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -1224,7 +1186,7 @@
                 return palabra.charAt(0).toUpperCase() + palabra.slice(1);
             }).join(' ');
             input.value = valor;
-}
+        }
 
         function eliminarPaciente() {
             if (!currentPaciente) return;
@@ -1260,51 +1222,51 @@
                 btn.style.cursor = 'not-allowed';
             }
         });
-// ─────────────────────────────────────────────
-// SOLO LETRAS (bloquea números en tiempo real)
-// ─────────────────────────────────────────────
-function soloLetras(e){
-    let tecla = e.key;
-    let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
+        // ─────────────────────────────────────────────
+        // SOLO LETRAS (bloquea números en tiempo real)
+        // ─────────────────────────────────────────────
+        function soloLetras(e) {
+            let tecla = e.key;
+            let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
 
-    if(!regex.test(tecla)){
-        return false;
-    }
-}
+            if (!regex.test(tecla)) {
+                return false;
+            }
+        }
 
-function formatearEnVivo(input){
+        function formatearEnVivo(input) {
 
-    let valor = input.value.toLowerCase();
+            let valor = input.value.toLowerCase();
 
-    valor = valor.replace(/\b\w/g, function(letra){
-        return letra.toUpperCase();
-    });
+            valor = valor.replace(/\b\w/g, function (letra) {
+                return letra.toUpperCase();
+            });
 
-    input.value = valor;
-}
+            input.value = valor;
+        }
 
-// ─────────────────────────────────────────────
-// Evita doble espacio
-// ─────────────────────────────────────────────
-function limpiarEspacios(input) {
-    input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
-                             .replace(/\s{2,}/g, ' ');
-}
+        // ─────────────────────────────────────────────
+        // Evita doble espacio
+        // ─────────────────────────────────────────────
+        function limpiarEspacios(input) {
+            input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
+                .replace(/\s{2,}/g, ' ');
+        }
 
-// ─────────────────────────────────────────────
-// Primera letra mayúscula
-// ─────────────────────────────────────────────
-function formatearNombre(input) {
-    let valor = input.value.trim().toLowerCase();
+        // ─────────────────────────────────────────────
+        // Primera letra mayúscula
+        // ─────────────────────────────────────────────
+        function formatearNombre(input) {
+            let valor = input.value.trim().toLowerCase();
 
-    valor = valor.split(' ').map(palabra => {
-        if (palabra.length === 0) return '';
-        return palabra.charAt(0).toUpperCase() + palabra.slice(1);
-    }).join(' ');
+            valor = valor.split(' ').map(palabra => {
+                if (palabra.length === 0) return '';
+                return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+            }).join(' ');
 
-    input.value = valor;
-}
-        
+            input.value = valor;
+        }
+
         // ─── Auto-abrir modal si hay errores de validación ──────────────
         @if($errors->any())
             openModal('modal-new-patient');
