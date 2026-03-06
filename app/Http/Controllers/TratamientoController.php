@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Servicio;
+use Illuminate\Support\Facades\Auth;
 
 class TratamientoController extends Controller
 {
@@ -12,7 +13,7 @@ class TratamientoController extends Controller
      */
     public function index()
     {
-        $idClinica = \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1;
+        $idClinica = Auth::user()->id_clinica ?? 1;
         $servicios = Servicio::where('id_clinica', $idClinica)->get();
 
         return view('tratamientos.index', compact('servicios'));
@@ -23,6 +24,8 @@ class TratamientoController extends Controller
      */
     public function store(Request $request)
     {
+        $idClinica = Auth::user()->id_clinica ?? 1;
+
         $request->validate([
             'nombre' => [
                 'required',
@@ -48,9 +51,20 @@ class TratamientoController extends Controller
             'precio.min' => 'El precio no puede ser negativo.'
         ]);
 
+        // 🔴 VERIFICAR DUPLICADO
+        $existe = Servicio::where('id_clinica', $idClinica)
+            ->whereRaw('LOWER(nombre_servicio) = ?', [strtolower($request->nombre)])
+            ->exists();
+
+        if ($existe) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Ya existe un tratamiento con ese nombre.');
+        }
+
         Servicio::create([
-            'id_clinica' => \Illuminate\Support\Facades\Auth::user()->id_clinica ?? 1,
-            'nombre_servicio' => $request->nombre,
+            'id_clinica' => $idClinica,
+            'nombre_servicio' => trim($request->nombre),
             'precio_base' => $request->precio,
             'categoria' => $request->categoria ?? 'General'
         ]);
@@ -63,6 +77,8 @@ class TratamientoController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $idClinica = Auth::user()->id_clinica ?? 1;
+
         $request->validate([
             'nombre' => [
                 'required',
@@ -86,10 +102,22 @@ class TratamientoController extends Controller
 
         $servicio = Servicio::findOrFail($id);
 
+        // 🔴 VERIFICAR DUPLICADO EXCLUYENDO EL ACTUAL
+        $existe = Servicio::where('id_clinica', $idClinica)
+            ->whereRaw('LOWER(nombre_servicio) = ?', [strtolower($request->nombre)])
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($existe) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Ya existe otro tratamiento con ese nombre.');
+        }
+
         $servicio->update([
-            'nombre_servicio' => $request->nombre,
+            'nombre_servicio' => trim($request->nombre),
             'precio_base' => $request->precio,
-            'categoria' => $request->categoria
+            'categoria' => $request->categoria ?? 'General'
         ]);
 
         return redirect()->back()->with('success', 'Tratamiento actualizado.');
