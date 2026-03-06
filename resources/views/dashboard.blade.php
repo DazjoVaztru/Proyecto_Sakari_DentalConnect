@@ -653,6 +653,14 @@ if (citasDelDia >= horasTotales) {
                         div.style.fontSize = '0.9em';
                         div.style.transition = '0.2s';
 
+                        // Crear tooltip con información de horas
+                        let tooltipText = `Día ${dia}`;
+                        if (data.horas_disponibles !== undefined) {
+                            tooltipText += `\n📅 Horas disponibles: ${data.horas_disponibles}/8`;
+                            tooltipText += `\n📌 Horas ocupadas: ${data.horas_ocupadas}/8`;
+                        }
+                        div.title = tooltipText;
+
                         // Verificar si este día está por debajo de la fecha mínima permitida
                         const estaFecha = new Date(anio, mes - 1, parseInt(dia));
                         estaFecha.setHours(0, 0, 0, 0);
@@ -666,13 +674,20 @@ if (citasDelDia >= horasTotales) {
                             div.style.opacity = '0.5';
                             div.title = 'No disponible para reagendar';
                         } else if (data.estado === 'verde') {
-                            div.style.background = '#32D74B'; div.style.color = 'white';
+                            div.style.background = '#32D74B'; 
+                            div.style.color = 'white';
+                            div.title = `${tooltipText}\n✅ Horario completamente disponible`;
                         } else if (data.estado === 'amarillo') {
-                            div.style.background = '#FFC107'; div.style.color = '#333';
+                            div.style.background = '#FFC107'; 
+                            div.style.color = '#333';
+                            div.title = `${tooltipText}\n⚠️ Algunas horas disponibles`;
                         } else if (data.estado === 'rojo') {
-                            div.style.background = '#EF4444'; div.style.color = 'white';
+                            div.style.background = '#EF4444'; 
+                            div.style.color = 'white';
+                            div.title = `${tooltipText}\n❌ Sin horarios disponibles`;
                         } else {
-                            div.style.background = '#f0f0f0'; div.style.color = '#ccc';
+                            div.style.background = '#f0f0f0'; 
+                            div.style.color = '#ccc';
                         }
 
                         if (!esBloqueado && data.clickable) {
@@ -682,7 +697,7 @@ if (citasDelDia >= horasTotales) {
                             div.onmouseout = () => div.style.transform = 'scale(1)';
                         } else if (!esBloqueado && data.estado === 'rojo') {
                             div.style.cursor = 'not-allowed';
-                            div.onclick = () => alert('Este día no tiene horarios disponibles.');
+                            div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.\n\nIntenta otro día con horas libres.`);
                         } else if (esBloqueado) {
                             div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
                         }
@@ -1051,31 +1066,21 @@ if (citasDelDia >= horasTotales) {
                         // --- ACTUALIZAR ABONO EN LA TABLA (CITA DE HOY) ---
                         const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
 
-const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
+                        // Buscar la fila actual (cita de hoy) en todas las filas
+                        const filaActualAbono = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
 
-if (filaActual) {
-
-   let abonoMostrar = fila.abono;
-
-const partes = fila.dia.split('/');
-const fechaFila = new Date(partes[2], partes[1]-1, partes[0]);
-
-const hoy = new Date();
-hoy.setHours(0,0,0,0);
-
-if (fechaFila > hoy) {
-    abonoMostrar = "0.00";
-}
-
-    if (montoAbonado > 0) {
-        filaActual.cells[3].innerText = montoAbonado.toFixed(2);
-        filaActual.cells[3].style.fontWeight = '800';
-        filaActual.cells[3].style.color = 'var(--primary-color)';
-    }
-}
+                        if (filaActualAbono && montoAbonado > 0) {
+                            // Actualizar la celda de abono (columna 4, índice 3)
+                            filaActualAbono.cells[3].innerText = '$' + montoAbonado.toFixed(2);
+                            filaActualAbono.cells[3].style.fontWeight = '800';
+                            filaActualAbono.cells[3].style.color = 'var(--primary-color)';
                             
-                            // Limpiar el input de abono
-                            document.querySelector('input[name="monto_abono"]').value = '';
+                            // Re-renderizar la página para reflejar los cambios
+                            renderizarPagina();
+                        }
+                        
+                        // Limpiar el input de abono
+                        document.querySelector('input[name="monto_abono"]').value = '';
                         }
 
                         // --- ACTUALIZAR TOTALES ---

@@ -286,6 +286,12 @@ class DashboardController extends Controller
     // --- FUNCIÓN 4: Disponibilidad del mes para el calendario ---
     /**
      * Retorna los días del mes con citas agendadas para colorear el calendario.
+     * 
+     * REGLAS:
+     * - Verde (libre): Sin citas o con citas pero horas disponibles
+     * - Amarillo (ocupado): Algunas citas pero aún hay horas libres
+     * - Rojo (lleno): Todas las horas disponibles del día están ocupadas (8 horas = 16 slots de 30 min)
+     * - Gris: Días pasados (no pueden agendar)
      */
     public function obtenerDisponibilidadMes(Request $request)
     {
@@ -293,42 +299,56 @@ class DashboardController extends Controller
         $anio = $request->input('anio', Carbon::now()->year);
 
         $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
-
-        $citasPorDia = Cita::where('id_clinica', Auth::user()->id_clinica)
-            ->whereMonth('fecha_hora_inicio', $mes)
-            ->whereYear('fecha_hora_inicio', $anio)
-            ->where('estado_cita', '!=', 'cancelada')
-            ->select(DB::raw('DAY(fecha_hora_inicio) as dia'), DB::raw('COUNT(*) as total'))
-            ->groupBy(DB::raw('DAY(fecha_hora_inicio)'))
-            ->pluck('total', 'dia')
-            ->toArray();
+        
+        // Horas operativas: 8 horas (08:00 - 17:00) = 16 slots de 30 minutos
+        $slotsDisponiblesPorDia = 16;
 
         $eventos = [];
+        
         for ($i = 1; $i <= $diasDelMes; $i++) {
-            $total = $citasPorDia[$i] ?? 0;
-
-            if ($total == 0) {
-                $estado = 'verde';
-                $clickable = true;
-            } elseif ($total < 8) { // Límite de ejemplo: 8 citas por día
+            $fecha = Carbon::createFromDate($anio, $mes, $i);
+            
+            // Contar citas del día (solo no canceladas)
+            $citasDelDia = Cita::where('id_clinica', Auth::user()->id_clinica)
+                ->whereDate('fecha_hora_inicio', $fecha)
+                ->where('estado_cita', '!=', 'cancelada')
+                ->get();
+            
+            $totalCitas = $citasDelDia->count();
+            
+            // Estado del día basado en disponibilidad de slots
+            $estado = 'verde'; // Por defecto libre
+            $clickable = true;
+            
+            if ($totalCitas > 0 && $totalCitas < $slotsDisponiblesPorDia) {
+                // Está ocupado pero aún hay horas disponibles
                 $estado = 'amarillo';
                 $clickable = true;
-            } else {
+            } elseif ($totalCitas >= $slotsDisponiblesPorDia) {
+                // Todas las horas están ocupadas
                 $estado = 'rojo';
                 $clickable = false;
             }
 
             // Días pasados en gris y no clickeables
-            $fechaCiclo = Carbon::createFromDate($anio, $mes, $i)->endOfDay();
-            if ($fechaCiclo->isPast() && !$fechaCiclo->isToday()) {
+            $fechaFinal = $fecha->copy()->endOfDay();
+            if ($fechaFinal->isPast() && !$fecha->isToday()) {
                 $estado = 'gris';
                 $clickable = false;
             }
 
+            // Información sobre horas ocupadas y disponibles
+            $horasOcupadas = ceil($totalCitas / 2); // 2 slots = 1 hora
+            $horasDisponibles = max(0, 8 - $horasOcupadas);
+
             $eventos[$i] = [
                 'estado' => $estado,
                 'clickable' => $clickable,
-                'total' => $total
+                'total_citas' => $totalCitas,
+                'horas_ocupadas' => $horasOcupadas,
+                'horas_disponibles' => $horasDisponibles,
+                'slots_ocupados' => $totalCitas,
+                'slots_totales' => $slotsDisponiblesPorDia
             ];
         }
 
