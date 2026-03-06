@@ -725,6 +725,7 @@ if (citasDelDia >= horasTotales) {
         // LÓGICA DE CARGA DE DATOS DE LA CITA
         // ==========================================
         function cargarModalCita(idCita) {
+            console.log('Abriendo modal para cita:', idCita);
             openModal('modal-detalle-cita');
             document.getElementById('form-actualizar-cita').action = `/citas/${idCita}/actualizar`;
 
@@ -732,8 +733,15 @@ if (citasDelDia >= horasTotales) {
             document.getElementById('lbl-nombre').innerText = 'Cargando...';
 
             fetch(`/api/citas/${idCita}/modal-detalles`)
-                .then(res => res.json())
+                .then(res => {
+                    console.log('Response status:', res.status);
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
                 .then(data => {
+                    console.log('Datos recibidos:', data);
                     // 1. Datos Paciente
                     document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
                     document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
