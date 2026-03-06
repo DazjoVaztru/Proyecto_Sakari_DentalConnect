@@ -45,7 +45,7 @@ class StorePacienteRequest extends FormRequest
             // Datos básicos obligatorios
             'nombre' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'apellido_paterno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
-            'apellido_materno' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            'apellido_materno' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'telefono' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9]+$/'],
             'email' => [
                 'required',
@@ -64,7 +64,7 @@ class StorePacienteRequest extends FormRequest
             'tipo_sangre' => ['required', 'string', 'max:5'],
             'peso' => ['required', 'integer', 'min:1', 'max:500'],
             'direccion' => ['required', 'string', 'max:100'],
-            'ocupacion' => ['nullable', 'string', 'max:100'],
+            'ocupacion' => ['required', 'string', 'max:100'],
             'enfermedades_cronicas' => ['required', 'string', 'max:1000'],
             'alergias' => ['required', 'string', 'max:1000'],
 
