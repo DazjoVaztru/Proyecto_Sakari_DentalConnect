@@ -662,10 +662,14 @@
                                     style="flex: 1; padding: 12px; border-radius: 12px; background: #f59e0b; color: white; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
                                     <i class="fa-solid fa-pen-to-square"></i> Editar Datos
                                 </button>
-                                <button onclick="eliminarPaciente()"
-                                    style="flex: 1; padding: 12px; border-radius: 12px; background: #ef4444; color: white; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                    <i class="fa-solid fa-trash-can"></i> Eliminar
-                                </button>
+                            </div>
+                            <div
+                                style="margin-top: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; display: flex; align-items: flex-start; gap: 8px;">
+                                <i class="fa-solid fa-scale-balanced" style="color: #b45309; margin-top: 2px;"></i>
+                                <span style="font-size: 0.72rem; color: #92400e; line-height: 1.4;">
+                                    <strong>NOM-004-SSA3-2012:</strong> Los expedientes clínicos deben conservarse un mínimo
+                                    de 5 años. La eliminación de registros médicos no está permitida.
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -692,14 +696,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                                const file = this.files[0];
-                                                                if(file) {
-                                                                    document.getElementById('label-ev-foto').innerText = file.name;
-                                                                    document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                                } else {
-                                                                    document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                                    document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                                }">
+                                                                        const file = this.files[0];
+                                                                        if(file) {
+                                                                            document.getElementById('label-ev-foto').innerText = file.name;
+                                                                            document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                                        } else {
+                                                                            document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                                            document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                                        }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -858,11 +862,7 @@
         </div>
     </div>
 
-    {{-- Formulario para Delete (oculto) --}}
-    <form id="form-delete-paciente" method="POST" style="display: none;">
-        @csrf
-        @method('DELETE')
-    </form>
+    {{-- Eliminación de pacientes deshabilitada por cumplimiento NOM-004-SSA3-2012 --}}
 
 
 
@@ -949,7 +949,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                                                <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1029,15 +1029,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                                            <div>
-                                                                <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                                <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                                ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                                            </div>
-                                                            <div style="text-align: right;">
-                                                                <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                                            </div>
-                                                        </div>`;
+                                                                    <div>
+                                                                        <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                                        <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                                        ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                                    </div>
+                                                                    <div style="text-align: right;">
+                                                                        <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                                    </div>
+                                                                </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1065,20 +1065,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                                    <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                                        <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                                    </a>
-                                                                 </div>`;
+                                                                            <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                                                <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                                            </a>
+                                                                         </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                                            </div>
-                                                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                                            ${imageHtml}
-                                                                        </div>`;
+                                                                                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                                        <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                                    </div>
+                                                                                    <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                                    ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                                    ${imageHtml}
+                                                                                </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -1188,27 +1188,14 @@
             input.value = valor;
         }
 
+        // Eliminación de pacientes deshabilitada por cumplimiento NOM-004-SSA3-2012
         function eliminarPaciente() {
-            if (!currentPaciente) return;
-
             Swal.fire({
-                title: '¡ALERTA ROJA!',
-                text: `Estás a punto de ELIMINAR por completo al paciente ${currentPaciente.nombre}. Esta acción es destructiva y limitará el acceso a su historial. ¿Deseas proceder?`,
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, ELIMINAR PACIENTE',
-                cancelButtonText: 'Cancelar',
-                background: '#fee2e2',
-                color: '#991b1b',
-                iconColor: '#dc2626'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.getElementById('form-delete-paciente');
-                    form.action = `/pacientes/${currentPaciente.id_paciente}`;
-                    form.submit();
-                }
+                title: 'Acción no permitida',
+                html: '<b>NOM-004-SSA3-2012:</b> Los expedientes clínicos deben conservarse un mínimo de 5 años tras la última consulta.<br><br>La eliminación de registros médicos electrónicos no está permitida por la normativa mexicana.',
+                icon: 'info',
+                confirmButtonColor: '#00b4d8',
+                confirmButtonText: 'Entendido'
             });
         }
 
