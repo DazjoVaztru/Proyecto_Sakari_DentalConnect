@@ -8,10 +8,16 @@
     Gestión de Tratamientos
 </h2>
 
-{{-- MENSAJE SUCCESS --}}
+{{-- ÁREA DE MENSAJES (SUCCESS Y ERROR) --}}
 @if(session('success'))
-<div style="background:#dcfce7;color:#166534;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #bbf7d0;">
-    <i class="fa-solid fa-check"></i> {{ session('success') }}
+<div style="background:#dcfce7;color:#166534;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #bbf7d0; display: flex; align-items: center; gap: 10px;">
+    <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div style="background:#fee2e2;color:#991b1b;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #fecaca; display: flex; align-items: center; gap: 10px;">
+    <i class="fa-solid fa-triangle-exclamation"></i> {{ session('error') }}
 </div>
 @endif
 
@@ -22,7 +28,7 @@
         <i class="fa-solid fa-magnifying-glass" style="position:absolute;right:20px;top:12px;color:#00b4d8;"></i>
     </div>
 
-    <button onclick="openModal('modal-new-treatment')" class="ghost-btn" style="border-radius:50px;background:#00D1FF;color:white;border:none;padding:12px 25px;">
+    <button onclick="openModal('modal-new-treatment')" class="ghost-btn" style="border-radius:50px;background:#00D1FF;color:white;border:none;padding:12px 25px; cursor: pointer; transition: 0.3s;">
         <i class="fa-solid fa-plus"></i> Nuevo Tratamiento
     </button>
 </div>
@@ -52,18 +58,15 @@
                 </td>
                 <td style="padding:15px;text-align:right;">
                     {{-- EDITAR --}}
-                    <button onclick='editarTratamiento(@json($servicio))' style="background:none;border:none;cursor:pointer;color:#f59e0b;margin-right:10px;">
+                    <button onclick='editarTratamiento(@json($servicio))' style="background:none;border:none;cursor:pointer;color:#f59e0b;margin-right:10px; font-size: 1.1rem;">
                         <i class="fa-solid fa-pen"></i>
                     </button>
 
-                    {{-- ELIMINAR (CORREGIDO) --}}
-                    <form action="{{ url('tratamientos/' . $servicio->id_servicio) }}" 
-                          method="POST" 
-                          style="display:inline;" 
-                          onsubmit="return confirm('¿Borrar tratamiento?');">
+                    {{-- ELIMINAR CON SWEETALERT --}}
+                    <form id="delete-form-{{ $servicio->id_servicio }}" action="{{ url('tratamientos/' . $servicio->id_servicio) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" style="background:none;border:none;cursor:pointer;color:#ef4444;">
+                        <button type="button" onclick="confirmDelete({{ $servicio->id_servicio }})" style="background:none;border:none;cursor:pointer;color:#ef4444; font-size: 1.1rem;">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </form>
@@ -78,16 +81,12 @@
     </table>
 </div>
 
-{{-- MODAL NUEVO --}}
+{{-- MODAL NUEVO (Sin el bloque de error interno) --}}
 <div id="modal-new-treatment" class="modal-overlay">
     <div class="modal-glass" style="max-width:500px;">
         <button class="close-modal" onclick="closeModal('modal-new-treatment')">&times;</button>
         <h3>Nuevo Tratamiento</h3>
-        @if(session('error'))
-            <div style="background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;margin-bottom:15px;border:1px solid #fecaca;">
-                <i class="fa-solid fa-triangle-exclamation"></i> {{ session('error') }}
-            </div>
-        @endif
+        
         <form action="{{ route('tratamientos.store') }}" method="POST">
             @csrf
             <div style="margin-bottom:15px;">
@@ -120,15 +119,15 @@
             @csrf
             @method('PUT')
             <div style="margin-bottom:15px;">
-                <label>Nombre</label>
+                <label style="display:block; margin-bottom:5px; color:#666;">Nombre</label>
                 <input type="text" id="edit-nombre" name="nombre" class="modern-input" required style="width:100%;">
             </div>
             <div style="margin-bottom:15px;">
-                <label>Precio</label>
+                <label style="display:block; margin-bottom:5px; color:#666;">Precio</label>
                 <input type="number" id="edit-precio" name="precio" step="0.01" class="modern-input" required style="width:100%;">
             </div>
             <div style="margin-bottom:15px;">
-                <label>Categoría</label>
+                <label style="display:block; margin-bottom:5px; color:#666;">Categoría</label>
                 <select id="edit-categoria" name="categoria" class="modern-input" style="width:100%;">
                     <option value="General">General</option>
                     <option value="Ortodoncia">Ortodoncia</option>
@@ -146,20 +145,43 @@
 @endsection
 
 @section('scripts')
+{{-- IMPORTAMOS SWEETALERT2 PARA EL DISEÑO MODERNO --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+// Función para confirmar eliminación con diseño moderno
+function confirmDelete(id) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta acción no se puede deshacer.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        borderRadius: '15px'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    })
+}
+
 function editarTratamiento(servicio){
     document.getElementById('edit-nombre').value = servicio.nombre_servicio;
     document.getElementById('edit-precio').value = servicio.precio_base;
     document.getElementById('edit-categoria').value = servicio.categoria || 'General';
 
     const form = document.getElementById('form-edit');
-    // Usamos URL absoluta para evitar problemas de rutas relativas
     form.action = "{{ url('tratamientos') }}/" + servicio.id_servicio;
 
     openModal('modal-edit-treatment');
 }
 
-@if(session('error'))
+// Abrir modal de nuevo tratamiento solo si el error NO es de eliminación
+@if(session('error') && !str_contains(session('error'), 'eliminar'))
     openModal('modal-new-treatment');
 @endif
 </script>
