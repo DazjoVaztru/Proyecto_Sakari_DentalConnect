@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Servicio;
+use Illuminate\Support\Facades\Auth;
 
 class TratamientoController extends Controller
 {
 
     public function index()
     {
-        $tratamientos = Servicio::all();
+        $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
+
         return view('dashboard', compact('tratamientos'));
     }
 
@@ -19,19 +21,23 @@ class TratamientoController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'precio' => 'required|numeric',
-            'categoria' => 'required|string'
+            'precio' => 'required|numeric|min:0',
+            'categoria' => 'required|string|max:100'
         ]);
 
-        // Verificar duplicado
-        $existe = Servicio::where('nombre_servicio', $request->nombre)->first();
+        $idClinica = Auth::user()->id_clinica;
+
+        // Verificar duplicado en la misma clínica
+        $existe = Servicio::where('nombre_servicio', $request->nombre)
+                    ->where('id_clinica', $idClinica)
+                    ->first();
 
         if ($existe) {
             return redirect()->back()->with('error', 'El tratamiento ya existe');
         }
 
         Servicio::create([
-            'id_clinica' => 1,
+            'id_clinica' => $idClinica,
             'nombre_servicio' => $request->nombre,
             'precio_base' => $request->precio,
             'categoria' => $request->categoria
@@ -44,18 +50,23 @@ class TratamientoController extends Controller
     public function update(Request $request, $id)
     {
 
-        $tratamiento = Servicio::findOrFail($id);
-
         $request->validate([
-            'nombre' => 'required',
-            'precio' => 'required|numeric',
-            'categoria' => 'required'
+            'nombre' => 'required|string|max:255',
+            'precio' => 'required|numeric|min:0',
+            'categoria' => 'required|string|max:100'
         ]);
 
-        // Validar duplicados
+        $idClinica = Auth::user()->id_clinica;
+
+        $tratamiento = Servicio::where('id_servicio', $id)
+                        ->where('id_clinica', $idClinica)
+                        ->firstOrFail();
+
+        // Validar duplicado
         $existe = Servicio::where('nombre_servicio', $request->nombre)
-            ->where('id_servicio', '!=', $id)
-            ->first();
+                    ->where('id_clinica', $idClinica)
+                    ->where('id_servicio', '!=', $id)
+                    ->first();
 
         if ($existe) {
             return redirect()->back()->with('error', 'El tratamiento ya existe');
@@ -67,16 +78,21 @@ class TratamientoController extends Controller
             'categoria' => $request->categoria
         ]);
 
-        return redirect()->back()->with('success', 'Tratamiento actualizado');
+        return redirect()->back()->with('success', 'Tratamiento actualizado correctamente');
     }
 
 
     public function destroy($id)
     {
-        $tratamiento = Servicio::findOrFail($id);
+        $idClinica = Auth::user()->id_clinica;
+
+        $tratamiento = Servicio::where('id_servicio', $id)
+                        ->where('id_clinica', $idClinica)
+                        ->firstOrFail();
 
         $tratamiento->delete();
 
         return redirect()->back()->with('success', 'Tratamiento eliminado correctamente');
     }
+
 }

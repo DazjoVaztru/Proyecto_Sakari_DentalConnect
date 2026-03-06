@@ -72,34 +72,29 @@ ${{ number_format($servicio->precio_base,2) }}
 </td>
 
 <td style="padding:15px;text-align:right;">
-<td style="padding:15px; text-align:right;">
 
-    <!-- BOTON EDITAR -->
-    <button 
-        onclick='editarTratamiento(@json($servicio))'
-        style="background:none;border:none;cursor:pointer;color:#f59e0b;margin-right:10px;">
-        <i class="fa-solid fa-pen"></i>
-    </button>
+<button onclick='editarTratamiento(@json($servicio))'
+style="background:none;border:none;cursor:pointer;color:#f59e0b;margin-right:10px;">
+<i class="fa-solid fa-pen"></i>
+</button>
 
-    <!-- FORMULARIO ELIMINAR -->
-    <form 
-        action="{{ route('tratamientos.destroy', $servicio->id_servicio) }}"
-        method="POST"
-        style="display:inline;"
-        onsubmit="return confirm('¿Borrar tratamiento?');">
+<form action="{{ route('tratamientos.destroy',$servicio->id_servicio) }}"
+method="POST"
+style="display:inline;"
+onsubmit="return confirm('¿Borrar tratamiento?');">
 
-        @csrf
-        @method('DELETE')
+@csrf
+@method('DELETE')
 
-        <button 
-            type="submit"
-            style="background:none;border:none;cursor:pointer;color:#ef4444;">
-            <i class="fa-solid fa-trash"></i>
-        </button>
+<button type="submit"
+style="background:none;border:none;cursor:pointer;color:#ef4444;">
+<i class="fa-solid fa-trash"></i>
+</button>
 
-    </form>
+</form>
 
 </td>
+
 </tr>
 
 @empty
