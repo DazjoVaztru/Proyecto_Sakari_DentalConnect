@@ -8,17 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class TratamientoController extends Controller
 {
+    public function index()
+    {
+        // Obtenemos los tratamientos filtrados por la clínica del usuario
+        $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
 
-  public function index()
-{
-    // Obtenemos los tratamientos filtrados por la clínica del usuario
-    $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
-
-    // ESTE ES EL CAMBIO CLAVE:
-    // Antes decía 'dashboard', pero tu archivo es 'tratamientos/index.blade.php'
-    return view('tratamientos.index', compact('tratamientos'));
-}
-
+        return view('tratamientos.index', compact('tratamientos'));
+    }
 
     public function store(Request $request)
     {
@@ -30,7 +26,6 @@ class TratamientoController extends Controller
 
         $idClinica = Auth::user()->id_clinica;
 
-        // Verificar duplicado en la misma clínica
         $existe = Servicio::where('nombre_servicio', $request->nombre)
                     ->where('id_clinica', $idClinica)
                     ->first();
@@ -49,10 +44,8 @@ class TratamientoController extends Controller
         return redirect()->back()->with('success', 'Tratamiento creado correctamente');
     }
 
-
     public function update(Request $request, $id)
     {
-
         $request->validate([
             'nombre' => 'required|string|max:255',
             'precio' => 'required|numeric|min:0',
@@ -61,11 +54,11 @@ class TratamientoController extends Controller
 
         $idClinica = Auth::user()->id_clinica;
 
+        // Buscamos usando el nombre real de la columna id_servicio
         $tratamiento = Servicio::where('id_servicio', $id)
                         ->where('id_clinica', $idClinica)
                         ->firstOrFail();
 
-        // Validar duplicado
         $existe = Servicio::where('nombre_servicio', $request->nombre)
                     ->where('id_clinica', $idClinica)
                     ->where('id_servicio', '!=', $id)
@@ -84,18 +77,24 @@ class TratamientoController extends Controller
         return redirect()->back()->with('success', 'Tratamiento actualizado correctamente');
     }
 
-
     public function destroy($id)
     {
         $idClinica = Auth::user()->id_clinica;
 
+        // EXPLICACIÓN DEL CAMBIO:
+        // Usamos where directamente para asegurar que Laravel no busque la columna 'id' genérica.
         $tratamiento = Servicio::where('id_servicio', $id)
                         ->where('id_clinica', $idClinica)
-                        ->firstOrFail();
+                        ->first();
 
+        if (!$tratamiento) {
+            return redirect()->back()->with('error', 'No se pudo encontrar el tratamiento.');
+        }
+
+        // Al tener el objeto recuperado, ejecutamos el delete. 
+        // Asegúrate que en Servicio.php tengas: protected $primaryKey = 'id_servicio';
         $tratamiento->delete();
 
         return redirect()->back()->with('success', 'Tratamiento eliminado correctamente');
     }
-
 }
