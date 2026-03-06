@@ -72,29 +72,34 @@ ${{ number_format($servicio->precio_base,2) }}
 </td>
 
 <td style="padding:15px;text-align:right;">
+<td style="padding:15px; text-align:right;">
 
-<button onclick='editarTratamiento(@json($servicio))'
-style="background:none;border:none;cursor:pointer;color:#f59e0b;margin-right:10px;">
-<i class="fa-solid fa-pen"></i>
-</button>
+    <!-- BOTON EDITAR -->
+    <button 
+        onclick='editarTratamiento(@json($servicio))'
+        style="background:none;border:none;cursor:pointer;color:#f59e0b;margin-right:10px;">
+        <i class="fa-solid fa-pen"></i>
+    </button>
 
-<form action="{{ route('tratamientos.destroy',$servicio->id_servicio) }}"
-method="POST"
-style="display:inline;"
-onsubmit="return confirm('¿Borrar tratamiento?');">
+    <!-- FORMULARIO ELIMINAR -->
+    <form 
+        action="{{ route('tratamientos.destroy', $servicio->id_servicio) }}"
+        method="POST"
+        style="display:inline;"
+        onsubmit="return confirm('¿Borrar tratamiento?');">
 
-@csrf
-@method('DELETE')
+        @csrf
+        @method('DELETE')
 
-<button type="submit"
-style="background:none;border:none;cursor:pointer;color:#ef4444;">
-<i class="fa-solid fa-trash"></i>
-</button>
+        <button 
+            type="submit"
+            style="background:none;border:none;cursor:pointer;color:#ef4444;">
+            <i class="fa-solid fa-trash"></i>
+        </button>
 
-</form>
+    </form>
 
 </td>
-
 </tr>
 
 @empty
@@ -211,80 +216,80 @@ Guardar
 </div>
 
 
-
 {{-- MODAL EDITAR --}}
 <div id="modal-edit-treatment" class="modal-overlay">
 
-<div class="modal-glass" style="max-width:500px;">
+    <div class="modal-glass" style="max-width:500px;">
 
-<button class="close-modal"
-onclick="closeModal('modal-edit-treatment')">&times;</button>
+        <button class="close-modal"
+        onclick="closeModal('modal-edit-treatment')">&times;</button>
 
-<h3 style="color:#f59e0b;">Editar Tratamiento</h3>
+        <h3 style="color:#f59e0b;">Editar Tratamiento</h3>
 
-<form id="form-edit" method="POST">
+        <form id="form-edit" method="POST">
 
-@csrf
-@method('PUT')
+            @csrf
+            @method('PUT')
 
-<div style="margin-bottom:15px;">
-<label style="font-size:0.8em;">Nombre</label>
+            {{-- NOMBRE --}}
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.8em;">Nombre</label>
 
-<input
-type="text"
-id="edit-nombre"
-name="nombre"
-class="modern-input"
-required
-style="width:100%;">
+                <input
+                    type="text"
+                    id="edit-nombre"
+                    name="nombre"
+                    class="modern-input"
+                    required
+                    style="width:100%;">
+            </div>
+
+            {{-- PRECIO --}}
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.8em;">Precio</label>
+
+                <input
+                    type="number"
+                    id="edit-precio"
+                    name="precio"
+                    step="0.01"
+                    class="modern-input"
+                    required
+                    style="width:100%;">
+            </div>
+
+            {{-- CATEGORIA --}}
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.8em;">Categoría</label>
+
+                <select
+                    id="edit-categoria"
+                    name="categoria"
+                    class="modern-input"
+                    style="width:100%;">
+
+                    <option value="General">General</option>
+                    <option value="Ortodoncia">Ortodoncia</option>
+                    <option value="Limpieza">Limpieza</option>
+                    <option value="Cirugía">Cirugía</option>
+                    <option value="Estética">Estética</option>
+                    <option value="Endodoncia">Endodoncia</option>
+
+                </select>
+            </div>
+
+            {{-- BOTON --}}
+            <button type="submit"
+                class="ghost-btn"
+                style="width:100%;background:#f59e0b;color:white;">
+                Actualizar
+            </button>
+
+        </form>
+
+    </div>
+
 </div>
-
-
-<div style="margin-bottom:15px;">
-<label style="font-size:0.8em;">Precio</label>
-
-<input
-type="number"
-id="edit-precio"
-name="precio"
-step="0.01"
-class="modern-input"
-required
-style="width:100%;">
-</div>
-
-
-<div style="margin-bottom:15px;">
-<label style="font-size:0.8em;">Categoría</label>
-
-<select
-id="edit-categoria"
-name="categoria"
-class="modern-input"
-style="width:100%;">
-
-<option value="General">General</option>
-<option value="Ortodoncia">Ortodoncia</option>
-<option value="Limpieza">Limpieza</option>
-<option value="Cirugía">Cirugía</option>
-<option value="Estética">Estética</option>
-<option value="Endodoncia">Endodoncia</option>
-
-</select>
-
-</div>
-
-<button type="submit"
-class="ghost-btn"
-style="width:100%;background:#f59e0b;color:white;">
-Actualizar
-</button>
-
-</form>
-
-</div>
-</div>
-
 @endsection
 
 
