@@ -193,7 +193,7 @@
 <body>
     <div class="container" id="container">
         <div class="form-container">
-            <form id="resetPasswordForm">
+            <form id="resetPasswordForm" onsubmit="return false;">
                 <h1>Ingresa tu nueva contraseña</h1>
                 <p>Asegúrate de que sea segura y coincida en ambos campos.</p>
 
@@ -297,9 +297,10 @@
                 const response = await fetch('https://dentalconnectapi-production.up.railway.app/api/auth/reset-password', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ email, token, newPassword })
+                    body: JSON.stringify({ email, token, password: newPassword, password_confirmation: confirmPassword })
                 });
 
                 const data = await response.json();
