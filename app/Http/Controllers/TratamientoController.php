@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class TratamientoController extends Controller
 {
-
     public function index()
     {
+        // Obtenemos los tratamientos filtrados por la clínica del usuario
         $tratamientos = Servicio::where('id_clinica', Auth::user()->id_clinica)->get();
+
         return view('tratamientos.index', compact('tratamientos'));
     }
 
@@ -80,24 +81,24 @@ class TratamientoController extends Controller
         try {
             $idClinica = Auth::user()->id_clinica;
 
-            // Buscamos el tratamiento manualmente
+            // Buscamos el tratamiento explícitamente por su ID personalizado
             $tratamiento = Servicio::where('id_servicio', $id)
-                            ->where('id_clinica', $idClinica)
-                            ->first();
+                                    ->where('id_clinica', $idClinica)
+                                    ->first();
 
-            // Si no existe, evitamos el Error 500 y mandamos un mensaje
             if (!$tratamiento) {
-                return redirect()->back()->with('error', 'No se encontró el tratamiento o no tienes permiso.');
+                return redirect()->back()->with('error', 'Tratamiento no encontrado.');
             }
 
-            // Ejecutamos el borrado
+            // Intentamos eliminar
             $tratamiento->delete();
 
             return redirect()->back()->with('success', 'Tratamiento eliminado correctamente');
 
         } catch (\Exception $e) {
-            // Si el error persiste, esto nos dirá qué está pasando en la sesión de errores
-            return redirect()->back()->with('error', 'Error interno: ' . $e->getMessage());
+            // Si hay un error de base de datos (como una llave foránea), 
+            // esto evitará el Error 500 y te mostrará el mensaje real.
+            return redirect()->back()->with('error', 'No se puede eliminar: el tratamiento está siendo usado en citas registradas.');
         }
     }
 }

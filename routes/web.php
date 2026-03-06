@@ -58,7 +58,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pacientes', PacienteController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Tratamientos
-    Route::resource('tratamientos', TratamientoController::class)->except(['create', 'edit', 'show']);
+    Route::resource('tratamientos', TratamientoController::class)
+    ->parameters(['tratamientos' => 'id']) 
+    ->except(['create', 'edit', 'show']);
     Route::post('/citas/{id}/actualizar', [DashboardController::class, 'actualizarCita'])->name('citas.actualizar');
 
     // Publicidad
