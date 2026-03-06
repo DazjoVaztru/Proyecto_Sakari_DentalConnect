@@ -745,6 +745,8 @@
                             const tdLast = `padding:14px 15px; font-size:1em; font-weight:700; color:var(--primary-color); background:${bgFila};`;
                             const tr = document.createElement('tr');
                             tr.style.borderBottom = borde;
+                            tr.dataset.citaId = fila.id;
+                            tr._citaId = fila.id;
                             if (esActual) {
                                 tr.style.fontWeight = '700';
                                 tr.setAttribute('data-cita-actual', 'true');
@@ -761,6 +763,10 @@
                                 colorEstado = '#22C55E';
                                 iconoEstado = '<i class="fa-solid fa-circle-check"></i>';
                                 textoEstado = 'Completada';
+                            } else if (estadoLower === 'pendiente') {
+                                colorEstado = '#FFC107';
+                                iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
+                                textoEstado = 'Pendiente';
                             }
                             
                             tr.innerHTML = `
@@ -772,6 +778,9 @@
                                         `;
                             return tr;
                         });
+
+                        // Guardar datos de citas para actualización rápida
+                        window.citasData = data.historial_citas;
 
                         // Renderizar la primera página
                         renderizarPagina();
@@ -1190,17 +1199,47 @@
                         return;
                     }
 
-                    // ── ACTUALIZAR SOLO EL ESTADO EN LA TABLA (CITA DE HOY) ────────────
+                    // ── ACTUALIZAR EL ESTADO EN window.citasData (si existe) ────────────
+                    if (window.citasData) {
+                        const cita = window.citasData.find(c => c.id === idCita);
+                        if (cita) {
+                            cita.estado = 'Completada';
+                        }
+                    }
+
+                    // ── ACTUALIZAR LA TABLA SI ESTÁ ABIERTO EL MODAL ──────────────────
                     if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                        const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
-                        if (filaActual && filaActual.cells.length >= 5) {
-                            const celdaEstado = filaActual.cells[4];
-                            celdaEstado.innerHTML = '<i class="fa-solid fa-circle-check"></i> Completada';
-                            celdaEstado.style.color = '#22C55E';
-                            celdaEstado.style.fontWeight = '700';
+                        // Buscar en todasLasFilas por idCita
+                        const indice = window.todasLasFilas.findIndex(fila => {
+                            // Verificar si tiene reference al id
+                            return fila.dataset?.citaId === String(idCita) || (fila._citaId && fila._citaId === idCita);
+                        });
+
+                        // Si no encontramos, reload para actualizar
+                        if (indice === -1) {
+                            renderizarPagina();
+                        } else {
+                            // Actualizar la fila en memoria y re-renderizar
                             renderizarPagina();
                         }
                     }
+
+                    // Animar el overlay de completado
+                    const overlay = document.getElementById('overlay-' + idCita);
+                    if (overlay) {
+                        overlay.style.display = 'flex';
+                        const checkPath = document.getElementById('check-path-' + idCita);
+                        if (checkPath) {
+                            setTimeout(() => {
+                                checkPath.style.strokeDashoffset = '0';
+                            }, 100);
+                        }
+                    }
+
+                    // Re-cargar los datos para reflejar cambios en la tabla
+                    setTimeout(() => {
+                        cargarModalCita(idCita);
+                    }, 800);
                 })
                 .catch(err => {
                     console.error('Error al completar cita:', err);

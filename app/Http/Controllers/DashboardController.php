@@ -158,12 +158,15 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'desc')
             ->get()
             ->map(function ($c) use ($idCita) {
-                $abonadoEnCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
+                // Abono: solo mostrar si la cita es de hoy, sino 0.00
+                $esHoy = Carbon::parse($c->fecha_hora_inicio)->isToday();
+                $abonadoEnCita = $esHoy ? ($c->ingresos ? $c->ingresos->sum('monto') : 0) : 0;
+                
+                // Estado: solo "Completada" o "Pendiente"
                 $estadoBadge = match ($c->estado_cita) {
-                    'completada' => '✅ Completada',
-                    'cancelada' => '❌ Cancelada',
-                    'pendiente' => '🕐 Pendiente',
-                    default => ucfirst($c->estado_cita),
+                    'completada' => 'Completada',
+                    'pendiente' => 'Pendiente',
+                    default => 'Pendiente',
                 };
                 return [
                     'id' => $c->id_cita,
