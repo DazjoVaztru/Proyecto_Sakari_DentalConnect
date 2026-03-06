@@ -74,17 +74,48 @@
     </div>
 
     <!-- MODAL NUEVO -->
-    <div id="modal-new-treatment" class="modal-overlay">
-        <div class="modal-glass" style="max-width: 500px;">
-            <button class="close-modal" onclick="closeModal('modal-new-treatment')">&times;</button>
-            <h3>Nuevo Tratamiento</h3>
-            <form action="{{ route('tratamientos.store') }}" method="POST">
-                @csrf
-                <div style="margin-bottom: 15px;">
-                    <input type="text" name="nombre" class="modern-input" placeholder="Nombre Servicio"
-                        oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜáéíóúüÑñ\s]/g, '')"
-                        required style="width: 100%;">
-                </div>
+   <div id="modal-new-treatment" class="modal-overlay">
+    <div class="modal-glass" style="max-width: 500px;">
+        <button class="close-modal" onclick="closeModal('modal-new-treatment')">&times;</button>
+
+        <h3>Nuevo Tratamiento</h3>
+
+        <form action="{{ route('tratamientos.store') }}" method="POST">
+            @csrf
+
+            <div style="margin-bottom: 15px;">
+                <input 
+                    type="text" 
+                    name="nombre" 
+                    class="modern-input" 
+                    placeholder="Nombre Servicio"
+                    value="{{ old('nombre') }}"
+                    oninput="this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚÜáéíóúüÑñ\s]/g, '')"
+                    required 
+                    style="width: 100%;"
+                >
+
+                @error('nombre')
+                    <small style="color:red;">{{ $message }}</small>
+                @enderror
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <input 
+                    type="number" 
+                    name="precio" 
+                    step="0.01" 
+                    class="modern-input"
+                    placeholder="Precio Base"
+                    value="{{ old('precio') }}"
+                    required 
+                    style="width: 100%;"
+                >
+
+                @error('precio')
+                    <small style="color:red;">{{ $message }}</small>
+                @enderror
+            </div>
                 <div style="margin-bottom: 15px;">
                     <input type="number" name="precio" step="0.01" class="modern-input"
                         placeholder="Precio Base" required style="width: 100%;">
