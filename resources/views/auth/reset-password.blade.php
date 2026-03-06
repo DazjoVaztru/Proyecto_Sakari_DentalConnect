@@ -230,13 +230,19 @@
                 <div id="alertBox" class="alert" style="display:none; text-align:center;"></div>
 
                 <div class="password-wrapper">
-                    <input type="password" id="newPassword" placeholder="Nueva contraseña" required />
+                    <input type="password" id="newPassword" placeholder="Nueva contraseña" minlength="8" required />
                     <button type="button" class="toggle-password" data-target="newPassword" tabindex="-1">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
+                <span
+                    style="font-size:10px; color:#888; margin-top:3px; line-height:1.4; display:block; text-align:left; width:100%;">
+                    <i class="fas fa-shield-alt" style="color:#00b4d8;"></i>
+                    Mínimo 8 caracteres, 1 mayúscula, 1 carácter especial (@#$!), sin secuencias (123).
+                </span>
                 <div class="password-wrapper">
-                    <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required />
+                    <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" minlength="8"
+                        required />
                     <button type="button" class="toggle-password" data-target="confirmPassword" tabindex="-1">
                         <i class="fas fa-eye"></i>
                     </button>
@@ -322,6 +328,35 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
             const submitBtn = document.getElementById('submitBtn');
             const alertBox = document.getElementById('alertBox');
+
+            // Validaciones de seguridad de contraseña (mismas reglas que el registro)
+            if (newPassword.length < 8) {
+                alertBox.textContent = 'La contraseña debe tener mínimo 8 caracteres.';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (!/[A-Z]/.test(newPassword)) {
+                alertBox.textContent = 'La contraseña debe contener al menos una letra mayúscula.';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (!/[\W_]/.test(newPassword)) {
+                alertBox.textContent = 'La contraseña debe contener al menos un carácter especial (ej. @, #, $, !).';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (/123/.test(newPassword)) {
+                alertBox.textContent = 'La contraseña no puede contener secuencias numéricas como 123.';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                return;
+            }
 
             if (newPassword !== confirmPassword) {
                 alertBox.textContent = 'Las contraseñas no coinciden.';
