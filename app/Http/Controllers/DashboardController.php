@@ -153,12 +153,16 @@ class DashboardController extends Controller
             ->get();
 
         // ── Historial completo de citas del paciente ──────────────────────
+        $hoy = Carbon::today();
         $todasLasCitas = Cita::with(['ingresos', 'servicio'])
             ->where('id_paciente', $p?->id_paciente)
             ->orderBy('fecha_hora_inicio', 'desc')
             ->get()
-            ->map(function ($c) use ($idCita) {
-                $abonadoEnCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
+            ->map(function ($c) use ($idCita, $hoy) {
+                // Abono: solo mostrar si la cita es de HOY, sino 0.00
+                $fechaCita = Carbon::parse($c->fecha_hora_inicio)->startOfDay();
+                $esHoy = $fechaCita->equalTo($hoy);
+                $abonadoEnCita = $esHoy ? ($c->ingresos ? $c->ingresos->sum('monto') : 0) : 0;
                 
                 // Estado: solo "Completada" o "Pendiente"
                 $estadoBadge = match ($c->estado_cita) {

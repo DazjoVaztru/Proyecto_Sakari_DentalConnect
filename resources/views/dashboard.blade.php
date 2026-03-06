@@ -602,6 +602,12 @@
 
 @section('scripts')
     <script>
+        const horasTotales = 8;
+const citasDelDia = data.citas_por_dia[dia] || 0;
+
+if (citasDelDia >= horasTotales) {
+    div.classList.add('dia-ocupado');
+}
         // ==========================================
         // aqui va ek calendario
         // ==========================================
@@ -1045,17 +1051,28 @@
                         // --- ACTUALIZAR ABONO EN LA TABLA (CITA DE HOY) ---
                         const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
 
-                        if (montoAbonado > 0) {
-                            // Buscar la fila marcada como cita actual y actualizar su abono
-                            if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                                const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
-                                if (filaActual && filaActual.cells.length >= 4) {
-                                    filaActual.cells[3].innerText = data.data.abono_fila;
-                                    filaActual.cells[3].style.fontWeight = '800';
-                                    filaActual.cells[3].style.color = 'var(--primary-color)';
-                                    renderizarPagina();
-                                }
-                            }
+const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
+
+if (filaActual) {
+
+   let abonoMostrar = fila.abono;
+
+const partes = fila.dia.split('/');
+const fechaFila = new Date(partes[2], partes[1]-1, partes[0]);
+
+const hoy = new Date();
+hoy.setHours(0,0,0,0);
+
+if (fechaFila > hoy) {
+    abonoMostrar = "0.00";
+}
+
+    if (montoAbonado > 0) {
+        filaActual.cells[3].innerText = montoAbonado.toFixed(2);
+        filaActual.cells[3].style.fontWeight = '800';
+        filaActual.cells[3].style.color = 'var(--primary-color)';
+    }
+}
                             
                             // Limpiar el input de abono
                             document.querySelector('input[name="monto_abono"]').value = '';
