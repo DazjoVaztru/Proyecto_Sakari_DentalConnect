@@ -79,7 +79,7 @@
                     $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
                 @endphp
                 <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
-                    onclick="if(event.target.closest('button') === null) { cargarModalCita({{ $cita->id_cita }}); }"
+                    onclick="cargarModalCita({{ $cita->id_cita }})"
                     style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.2s ease;"
                     onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
                     onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
@@ -96,7 +96,7 @@
                         <span style="font-weight: 800; color: #15803D; font-size: 1.05em;">¡Cita completada!</span>
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
                         {{-- Bloque fecha --}}
                         <div
                             style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
@@ -137,7 +137,7 @@
                         {{-- Botón Marcar Completada --}}
                         <button type="button" id="btn-completar-{{ $cita->id_cita }}"
                             onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
-                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center;"
+                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
                             onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
                             onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
                             <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
@@ -222,7 +222,7 @@
 
                     <button class="ghost-btn" id="btn-actualizar-cita"
                         style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
-                                                                                                                                                                                    margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
+                                                                                                                                                                                        margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
                         GUARDAR CAMBIOS
                     </button>
 
@@ -668,19 +668,19 @@
                             div.style.opacity = '0.5';
                             div.title = 'No disponible para reagendar';
                         } else if (data.estado === 'verde') {
-                            div.style.background = '#32D74B'; 
+                            div.style.background = '#32D74B';
                             div.style.color = 'white';
                             div.title = `${tooltipText}\n✅ Horario completamente disponible`;
                         } else if (data.estado === 'amarillo') {
-                            div.style.background = '#FFC107'; 
+                            div.style.background = '#FFC107';
                             div.style.color = '#333';
                             div.title = `${tooltipText}\n⚠️ Algunas horas disponibles`;
                         } else if (data.estado === 'rojo') {
-                            div.style.background = '#EF4444'; 
+                            div.style.background = '#EF4444';
                             div.style.color = 'white';
                             div.title = `${tooltipText}\n❌ Sin horarios disponibles`;
                         } else {
-                            div.style.background = '#f0f0f0'; 
+                            div.style.background = '#f0f0f0';
                             div.style.color = '#ccc';
                         }
 
@@ -774,12 +774,12 @@
                                 tr.style.fontWeight = '700';
                                 tr.setAttribute('data-cita-actual', 'true');
                             }
-                            
+
                             // Determinar color y icono del estado
                             let colorEstado = '#999';
                             let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
                             let textoEstado = 'Pendiente';
-                            
+
                             // Comparar estado sin diferenciar mayúsculas/minúsculas
                             const estadoLower = (fila.estado || '').toLowerCase().trim();
                             if (estadoLower === 'completada') {
@@ -791,14 +791,14 @@
                                 iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
                                 textoEstado = 'Pendiente';
                             }
-                            
+
                             tr.innerHTML = `
-                                            <td style="${tdStyle}">${fila.dia}</td>
-                                            <td style="${tdStyle}">${fila.hora}</td>
-                                            <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                        `;
+                                                <td style="${tdStyle}">${fila.dia}</td>
+                                                <td style="${tdStyle}">${fila.hora}</td>
+                                                <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
+                                                <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
+                                                <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
+                                            `;
                             return tr;
                         });
 
@@ -834,15 +834,16 @@
                     }
 
                     // 5. Calendario
-                  if (data.fecha_cita) {
-                    calMesActual = data.fecha_cita.mes + 1;
-                    calAnioActual = data.fecha_cita.anio;
-                    // Si pasa de diciembre → enero del siguiente año
-                    if (calMesActual > 12) {calMesActual = 1;calAnioActual++;
+                    if (data.fecha_cita) {
+                        calMesActual = data.fecha_cita.mes + 1;
+                        calAnioActual = data.fecha_cita.anio;
+                        // Si pasa de diciembre → enero del siguiente año
+                        if (calMesActual > 12) {
+                            calMesActual = 1; calAnioActual++;
 
+                        }
+                        cargarCalendarioFuncional(calMesActual, calAnioActual);
                     }
-                    cargarCalendarioFuncional(calMesActual, calAnioActual);
-                }
 
                     // 5. Histórico Odontograma
                     document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
@@ -886,14 +887,14 @@
             const dientesPermInf = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const svgCaras = `
-                                                                                                            <svg viewBox="0 0 100 100" class="odontograma-svg">
-                                                                                                                <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
-                                                                                                                <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
-                                                                                                                <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
-                                                                                                                <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
-                                                                                                                <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
-                                                                                                            </svg>
-                                                                                                        `;
+                                                                                                                <svg viewBox="0 0 100 100" class="odontograma-svg">
+                                                                                                                    <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
+                                                                                                                    <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
+                                                                                                                    <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
+                                                                                                                    <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
+                                                                                                                    <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
+                                                                                                                </svg>
+                                                                                                            `;
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -925,9 +926,9 @@
 
                     const svgId = obtenerIdAnatomia(numero);
                     const divAnatomia = `
-                                                                                                <div class="anatomia">
-                                                                                                    <svg><use href="${svgId}"></use></svg>
-                                                                                                </div>`;
+                                                                                                    <div class="anatomia">
+                                                                                                        <svg><use href="${svgId}"></use></svg>
+                                                                                                    </div>`;
                     const divNumero = `<div class="numero-diente">${numero}</div>`;
                     const divCaras = `<div class="caras-interactivas">${svgCaras}</div>`;
 
@@ -1076,73 +1077,73 @@
                             filaActualAbono.cells[3].innerText = '$' + montoAbonado.toFixed(2);
                             filaActualAbono.cells[3].style.fontWeight = '800';
                             filaActualAbono.cells[3].style.color = 'var(--primary-color)';
-                            
+
                             // Re-renderizar la página para reflejar los cambios
                             renderizarPagina();
                         }
-                        
+
                         // Limpiar el input de abono
                         document.querySelector('input[name="monto_abono"]').value = '';
-                        }
-
-                        // --- ACTUALIZAR TOTALES ---
-                        document.getElementById('lbl-total').innerText = data.data.costo_total;
-                        document.getElementById('lbl-restante').innerText = data.data.restante;
-
-                        // Actualizar datos crudos para el widget en futuras adiciones
-                        const nRawCosto = parseFloat(data.data.costo_total.replace('$', '').replace(/,/g, ''));
-                        const nRawRestante = parseFloat(data.data.restante.replace('$', '').replace(/,/g, ''));
-                        document.getElementById('raw-costo-total').value = nRawCosto;
-                        document.getElementById('raw-total-abonado').value = nRawCosto - nRawRestante;
-
-                        // --- ACTUALIZAR TARJETA DE INGRESOS DEL MES EN TIEMPO REAL ---
-                        if (montoAbonado > 0) {
-                            const lblIngresos = document.getElementById('lbl-ingresos-mes');
-                            if (lblIngresos) {
-                                // Extraer el valor actual (quitar $ y comas)
-                                const valorActual = parseFloat(lblIngresos.innerText.replace(/[$,]/g, '')) || 0;
-                                const nuevoTotal = valorActual + montoAbonado;
-                                // Formatear con separadores de miles
-                                lblIngresos.innerText = '$' + nuevoTotal.toLocaleString('es-MX', { maximumFractionDigits: 0 });
-                                // Animación breve para resaltar el cambio
-                                lblIngresos.style.transition = 'color 0.4s';
-                                lblIngresos.style.color = '#FF9800';
-                                setTimeout(() => lblIngresos.style.color = '#333', 1500);
-                            }
-                        }
-
-                        // Actualizar visualmente la fila activa en la tabla si se reprogramó
-                        if (data.data.nueva_fecha || data.data.nueva_hora || data.data.seguimiento) {
-                            const tbody2 = document.getElementById('cita-tabla-body');
-                            if (tbody2) {
-                                const filaActiva = Array.from(tbody2.rows).find(r => r.style.background === 'rgb(232, 255, 244)') || tbody2.lastElementChild;
-                                if (filaActiva && filaActiva.cells.length >= 3) {
-                                    if (data.data.nueva_fecha) filaActiva.cells[0].innerText = data.data.nueva_fecha;
-                                    if (data.data.nueva_hora) filaActiva.cells[1].innerText = data.data.nueva_hora;
-                                    if (data.data.seguimiento) filaActiva.cells[2].innerText = data.data.seguimiento;
-                                }
-                            }
-                        }
-
-                        // Show success
-                        alert('¡Actualizado correctamente!');
-
-                        // Limpiar inputs
-                        document.querySelector('input[name="monto_abono"]').value = '';
-                        document.querySelector('textarea[name="notas_seguimiento"]').value = '';
-                    } else {
-                        alert('Error: ' + data.message);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ocurrió un error inesperado.');
-                })
-                .finally(() => {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                });
-        });
+
+                    // --- ACTUALIZAR TOTALES ---
+                    document.getElementById('lbl-total').innerText = data.data.costo_total;
+                    document.getElementById('lbl-restante').innerText = data.data.restante;
+
+                    // Actualizar datos crudos para el widget en futuras adiciones
+                    const nRawCosto = parseFloat(data.data.costo_total.replace('$', '').replace(/,/g, ''));
+                    const nRawRestante = parseFloat(data.data.restante.replace('$', '').replace(/,/g, ''));
+                    document.getElementById('raw-costo-total').value = nRawCosto;
+                    document.getElementById('raw-total-abonado').value = nRawCosto - nRawRestante;
+
+                    // --- ACTUALIZAR TARJETA DE INGRESOS DEL MES EN TIEMPO REAL ---
+                    if (montoAbonado > 0) {
+                        const lblIngresos = document.getElementById('lbl-ingresos-mes');
+                        if (lblIngresos) {
+                            // Extraer el valor actual (quitar $ y comas)
+                            const valorActual = parseFloat(lblIngresos.innerText.replace(/[$,]/g, '')) || 0;
+                            const nuevoTotal = valorActual + montoAbonado;
+                            // Formatear con separadores de miles
+                            lblIngresos.innerText = '$' + nuevoTotal.toLocaleString('es-MX', { maximumFractionDigits: 0 });
+                            // Animación breve para resaltar el cambio
+                            lblIngresos.style.transition = 'color 0.4s';
+                            lblIngresos.style.color = '#FF9800';
+                            setTimeout(() => lblIngresos.style.color = '#333', 1500);
+                        }
+                    }
+
+                    // Actualizar visualmente la fila activa en la tabla si se reprogramó
+                    if (data.data.nueva_fecha || data.data.nueva_hora || data.data.seguimiento) {
+                        const tbody2 = document.getElementById('cita-tabla-body');
+                        if (tbody2) {
+                            const filaActiva = Array.from(tbody2.rows).find(r => r.style.background === 'rgb(232, 255, 244)') || tbody2.lastElementChild;
+                            if (filaActiva && filaActiva.cells.length >= 3) {
+                                if (data.data.nueva_fecha) filaActiva.cells[0].innerText = data.data.nueva_fecha;
+                                if (data.data.nueva_hora) filaActiva.cells[1].innerText = data.data.nueva_hora;
+                                if (data.data.seguimiento) filaActiva.cells[2].innerText = data.data.seguimiento;
+                            }
+                        }
+                    }
+
+                    // Show success
+                    alert('¡Actualizado correctamente!');
+
+                    // Limpiar inputs
+                    document.querySelector('input[name="monto_abono"]').value = '';
+                    document.querySelector('textarea[name="notas_seguimiento"]').value = '';
+                } else {
+                    alert('Error: ' + data.message);
+        }
+                    })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error inesperado.');
+            })
+            .finally(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+            });
 
 
 
