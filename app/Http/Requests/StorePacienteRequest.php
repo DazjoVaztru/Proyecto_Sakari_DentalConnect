@@ -60,13 +60,13 @@ class StorePacienteRequest extends FormRequest
             'fecha_nacimiento' => ['required', 'date', 'before:today'],
             'sexo' => ['required', 'in:M,F,O'],
 
-            // Datos médicos opcionales
+            // Datos médicos sensibles — todos obligatorios para expediente clínico
             'tipo_sangre' => ['required', 'string', 'max:5'],
-            'peso' => ['nullable', 'integer', 'min:1', 'max:500'],
+            'peso' => ['required', 'integer', 'min:1', 'max:500'],
             'direccion' => ['required', 'string', 'max:100'],
             'ocupacion' => ['nullable', 'string', 'max:100'],
-            'enfermedades_cronicas' => ['nullable', 'string', 'max:1000'],
-            'alergias' => ['nullable', 'string', 'max:1000'],
+            'enfermedades_cronicas' => ['required', 'string', 'max:1000'],
+            'alergias' => ['required', 'string', 'max:1000'],
 
             // Contacto de emergencia (nombre y teléfono obligatorios)
             'emergencia_nombre' => ['required', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
@@ -94,8 +94,11 @@ class StorePacienteRequest extends FormRequest
             'email.unique' => 'Este correo ya está registrado en el sistema.',
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
+            'peso.required' => 'El peso del paciente es obligatorio para el expediente clínico.',
             'peso.integer' => 'El peso debe ser un valor numérico entero (sin decimales).',
             'peso.max' => 'El peso no puede exceder los 500 kg.',
+            'enfermedades_cronicas.required' => 'Las enfermedades crónicas son obligatorias. Si no tiene, escriba "Ninguna".',
+            'alergias.required' => 'Las alergias son obligatorias. Si no tiene, escriba "Ninguna".',
             'direccion.required' => 'La dirección es obligatoria para el expediente clínico.',
             'emergencia_nombre.regex' => 'El nombre del contacto de emergencia solo puede contener letras y espacios.',
             'emergencia_apellido_paterno.regex' => 'El apellido paterno del contacto solo puede contener letras y espacios.',
