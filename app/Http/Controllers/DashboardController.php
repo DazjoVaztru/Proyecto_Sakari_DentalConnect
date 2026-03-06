@@ -171,7 +171,7 @@ class DashboardController extends Controller
                     'hora' => Carbon::parse($c->fecha_hora_inicio)->format('h:i A')
                         . ' – ' . Carbon::parse($c->fecha_hora_fin)->format('h:i A'),
                     'servicio' => $c->servicio?->nombre_servicio ?? 'Consulta General',
-                    'seguimiento' => $c->motivo ?? ($c->servicio?->nombre_servicio ?? 'Consulta'),
+                    'seguimiento' => preg_replace('/^Seguimiento añadido:\s*/i', '', $c->motivo ?? ($c->servicio?->nombre_servicio ?? 'Consulta')),
                     'abono' => number_format($abonadoEnCita, 2),
                     'estado' => $estadoBadge,
                     'es_actual' => $c->id_cita == $idCita,
@@ -229,8 +229,8 @@ class DashboardController extends Controller
                 'id_cita' => $cita->id_cita,
                 'observaciones' => $request->notas_seguimiento
             ]);
-            // Opcional: Podríamos actualizar el "motivo" para que se vea reflejado rápido
-            $cita->motivo = "Seguimiento añadido: " . substr($request->notas_seguimiento, 0, 30) . "...";
+            // Guardamos el texto tal cual sin prefijo para que aparezca limpio en la tabla
+            $cita->motivo = $request->notas_seguimiento;
             $cita->save();
         }
 
