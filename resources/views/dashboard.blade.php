@@ -222,7 +222,7 @@
 
                     <button class="ghost-btn" id="btn-actualizar-cita"
                         style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
-                                                                                                                                                                                        margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
+                                                                                                                                                                                            margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
                         GUARDAR CAMBIOS
                     </button>
 
@@ -793,12 +793,12 @@
                             }
 
                             tr.innerHTML = `
-                                                <td style="${tdStyle}">${fila.dia}</td>
-                                                <td style="${tdStyle}">${fila.hora}</td>
-                                                <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                                <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                                <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                            `;
+                                                    <td style="${tdStyle}">${fila.dia}</td>
+                                                    <td style="${tdStyle}">${fila.hora}</td>
+                                                    <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
+                                                    <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
+                                                    <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
+                                                `;
                             return tr;
                         });
 
@@ -887,14 +887,14 @@
             const dientesPermInf = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const svgCaras = `
-                                                                                                                <svg viewBox="0 0 100 100" class="odontograma-svg">
-                                                                                                                    <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
-                                                                                                                    <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
-                                                                                                                    <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
-                                                                                                                    <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
-                                                                                                                    <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
-                                                                                                                </svg>
-                                                                                                            `;
+                                                                                                                    <svg viewBox="0 0 100 100" class="odontograma-svg">
+                                                                                                                        <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
+                                                                                                                        <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
+                                                                                                                        <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
+                                                                                                                        <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
+                                                                                                                        <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
+                                                                                                                    </svg>
+                                                                                                                `;
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -926,9 +926,9 @@
 
                     const svgId = obtenerIdAnatomia(numero);
                     const divAnatomia = `
-                                                                                                    <div class="anatomia">
-                                                                                                        <svg><use href="${svgId}"></use></svg>
-                                                                                                    </div>`;
+                                                                                                        <div class="anatomia">
+                                                                                                            <svg><use href="${svgId}"></use></svg>
+                                                                                                        </div>`;
                     const divNumero = `<div class="numero-diente">${numero}</div>`;
                     const divCaras = `<div class="caras-interactivas">${svgCaras}</div>`;
 
@@ -1084,66 +1084,65 @@
 
                         // Limpiar el input de abono
                         document.querySelector('input[name="monto_abono"]').value = '';
-                    }
 
-                    // --- ACTUALIZAR TOTALES ---
-                    document.getElementById('lbl-total').innerText = data.data.costo_total;
-                    document.getElementById('lbl-restante').innerText = data.data.restante;
+                        // --- ACTUALIZAR TOTALES ---
+                        document.getElementById('lbl-total').innerText = data.data.costo_total;
+                        document.getElementById('lbl-restante').innerText = data.data.restante;
 
-                    // Actualizar datos crudos para el widget en futuras adiciones
-                    const nRawCosto = parseFloat(data.data.costo_total.replace('$', '').replace(/,/g, ''));
-                    const nRawRestante = parseFloat(data.data.restante.replace('$', '').replace(/,/g, ''));
-                    document.getElementById('raw-costo-total').value = nRawCosto;
-                    document.getElementById('raw-total-abonado').value = nRawCosto - nRawRestante;
+                        // Actualizar datos crudos para el widget en futuras adiciones
+                        const nRawCosto = parseFloat(data.data.costo_total.replace('$', '').replace(/,/g, ''));
+                        const nRawRestante = parseFloat(data.data.restante.replace('$', '').replace(/,/g, ''));
+                        document.getElementById('raw-costo-total').value = nRawCosto;
+                        document.getElementById('raw-total-abonado').value = nRawCosto - nRawRestante;
 
-                    // --- ACTUALIZAR TARJETA DE INGRESOS DEL MES EN TIEMPO REAL ---
-                    if (montoAbonado > 0) {
-                        const lblIngresos = document.getElementById('lbl-ingresos-mes');
-                        if (lblIngresos) {
-                            // Extraer el valor actual (quitar $ y comas)
-                            const valorActual = parseFloat(lblIngresos.innerText.replace(/[$,]/g, '')) || 0;
-                            const nuevoTotal = valorActual + montoAbonado;
-                            // Formatear con separadores de miles
-                            lblIngresos.innerText = '$' + nuevoTotal.toLocaleString('es-MX', { maximumFractionDigits: 0 });
-                            // Animación breve para resaltar el cambio
-                            lblIngresos.style.transition = 'color 0.4s';
-                            lblIngresos.style.color = '#FF9800';
-                            setTimeout(() => lblIngresos.style.color = '#333', 1500);
-                        }
-                    }
-
-                    // Actualizar visualmente la fila activa en la tabla si se reprogramó
-                    if (data.data.nueva_fecha || data.data.nueva_hora || data.data.seguimiento) {
-                        const tbody2 = document.getElementById('cita-tabla-body');
-                        if (tbody2) {
-                            const filaActiva = Array.from(tbody2.rows).find(r => r.style.background === 'rgb(232, 255, 244)') || tbody2.lastElementChild;
-                            if (filaActiva && filaActiva.cells.length >= 3) {
-                                if (data.data.nueva_fecha) filaActiva.cells[0].innerText = data.data.nueva_fecha;
-                                if (data.data.nueva_hora) filaActiva.cells[1].innerText = data.data.nueva_hora;
-                                if (data.data.seguimiento) filaActiva.cells[2].innerText = data.data.seguimiento;
+                        // --- ACTUALIZAR TARJETA DE INGRESOS DEL MES EN TIEMPO REAL ---
+                        if (montoAbonado > 0) {
+                            const lblIngresos = document.getElementById('lbl-ingresos-mes');
+                            if (lblIngresos) {
+                                // Extraer el valor actual (quitar $ y comas)
+                                const valorActual = parseFloat(lblIngresos.innerText.replace(/[$,]/g, '')) || 0;
+                                const nuevoTotal = valorActual + montoAbonado;
+                                // Formatear con separadores de miles
+                                lblIngresos.innerText = '$' + nuevoTotal.toLocaleString('es-MX', { maximumFractionDigits: 0 });
+                                // Animación breve para resaltar el cambio
+                                lblIngresos.style.transition = 'color 0.4s';
+                                lblIngresos.style.color = '#FF9800';
+                                setTimeout(() => lblIngresos.style.color = '#333', 1500);
                             }
                         }
+
+                        // Actualizar visualmente la fila activa en la tabla si se reprogramó
+                        if (data.data.nueva_fecha || data.data.nueva_hora || data.data.seguimiento) {
+                            const tbody2 = document.getElementById('cita-tabla-body');
+                            if (tbody2) {
+                                const filaActiva = Array.from(tbody2.rows).find(r => r.style.background === 'rgb(232, 255, 244)') || tbody2.lastElementChild;
+                                if (filaActiva && filaActiva.cells.length >= 3) {
+                                    if (data.data.nueva_fecha) filaActiva.cells[0].innerText = data.data.nueva_fecha;
+                                    if (data.data.nueva_hora) filaActiva.cells[1].innerText = data.data.nueva_hora;
+                                    if (data.data.seguimiento) filaActiva.cells[2].innerText = data.data.seguimiento;
+                                }
+                            }
+                        }
+
+                        // Show success
+                        alert('¡Actualizado correctamente!');
+
+                        // Limpiar inputs
+                        document.querySelector('input[name="monto_abono"]').value = '';
+                        document.querySelector('textarea[name="notas_seguimiento"]').value = '';
+                    } else {
+                        alert('Error: ' + data.message);
                     }
-
-                    // Show success
-                    alert('¡Actualizado correctamente!');
-
-                    // Limpiar inputs
-                    document.querySelector('input[name="monto_abono"]').value = '';
-                    document.querySelector('textarea[name="notas_seguimiento"]').value = '';
-                } else {
-                    alert('Error: ' + data.message);
-        }
-                    })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error inesperado.');
-            })
-            .finally(() => {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            });
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error inesperado.');
+                })
+                .finally(() => {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+        });
 
 
 
