@@ -98,6 +98,36 @@
             border-radius: 5px;
         }
 
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #888;
+            font-size: 15px;
+            line-height: 1;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        .toggle-password:hover {
+            color: #00b4d8;
+        }
+
         .container {
             background-color: #fff;
             border-radius: 10px;
@@ -307,7 +337,12 @@
                 @endif
 
                 <input type="email" name="email" placeholder="Email" required />
-                <input type="password" name="password" placeholder="Contraseña" required />
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="loginPassword" placeholder="Contraseña" required />
+                    <button type="button" class="toggle-password" data-target="loginPassword" tabindex="-1">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 <a href="/olvide-password">¿Olvidaste tu contraseña?</a>
                 <button type="submit">Ingresar</button>
             </form>
@@ -422,6 +457,21 @@
                         window.location.href = href;
                     }
                 });
+            });
+        });
+
+        // Toggle mostrar/ocultar contraseña
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const input = document.getElementById(this.dataset.target);
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
             });
         });
     </script>

@@ -117,6 +117,33 @@
             background-color: #eef9fd;
         }
 
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #888;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .toggle-password:hover {
+            color: #00b4d8;
+        }
+
         .form-group input.is-invalid {
             border-color: #e63946;
             background-color: #fff5f5;
@@ -282,8 +309,13 @@
 
                 <div class="form-group">
                     <label for="password">Contraseña <span style="color:red">*</span></label>
-                    <input type="password" id="password" name="password" placeholder="Contraseña segura" minlength="8"
-                        class="{{ $errors->has('password') ? 'is-invalid' : '' }}" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" placeholder="Contraseña segura"
+                            minlength="8" class="{{ $errors->has('password') ? 'is-invalid' : '' }}" required>
+                        <button type="button" class="toggle-password" data-target="password" tabindex="-1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <span style="font-size:10px; color:#888; margin-top:3px; line-height:1.4;">
                         <i class="fas fa-shield-alt" style="color:#00b4d8;"></i>
                         Mínimo 8 caracteres, 1 mayúscula, 1 carácter especial (@#$!), sin secuencias (123).
@@ -293,8 +325,13 @@
 
                 <div class="form-group">
                     <label for="password_confirmation">Confirmar Contraseña <span style="color:red">*</span></label>
-                    <input type="password" id="password_confirmation" name="password_confirmation"
-                        placeholder="Repite tu contraseña" minlength="8" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="password_confirmation" name="password_confirmation"
+                            placeholder="Repite tu contraseña" minlength="8" required>
+                        <button type="button" class="toggle-password" data-target="password_confirmation" tabindex="-1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -410,6 +447,21 @@
                     validatePasswordMatch();
                     confirmInput.focus();
                 }
+            });
+
+            // Toggle mostrar/ocultar contraseña
+            document.querySelectorAll('.toggle-password').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const input = document.getElementById(this.dataset.target);
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
+                    }
+                });
             });
         });
 

@@ -95,6 +95,36 @@
             border-radius: 5px;
         }
 
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            color: #888;
+            font-size: 15px;
+            line-height: 1;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        .toggle-password:hover {
+            color: #00b4d8;
+        }
+
         .container {
             background-color: #fff;
             border-radius: 10px;
@@ -199,8 +229,18 @@
 
                 <div id="alertBox" class="alert" style="display:none; text-align:center;"></div>
 
-                <input type="password" id="newPassword" placeholder="Nueva contraseña" required />
-                <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required />
+                <div class="password-wrapper">
+                    <input type="password" id="newPassword" placeholder="Nueva contraseña" required />
+                    <button type="button" class="toggle-password" data-target="newPassword" tabindex="-1">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="password-wrapper">
+                    <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required />
+                    <button type="button" class="toggle-password" data-target="confirmPassword" tabindex="-1">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 <button type="submit" id="submitBtn">Actualizar Contraseña</button>
             </form>
         </div>
@@ -258,6 +298,21 @@
             particlesArray.forEach(p => p.update());
         }
         init(); animate();
+
+        // Toggle mostrar/ocultar contraseña
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const input = document.getElementById(this.dataset.target);
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
 
         // Lógica de Fetch y URLSearchParams
         document.getElementById('resetPasswordForm').addEventListener('submit', async function (e) {
