@@ -62,8 +62,8 @@ class StorePacienteRequest extends FormRequest
 
             // Datos médicos opcionales
             'tipo_sangre' => ['required', 'string', 'max:5'],
-            'peso' => ['nullable', 'numeric', 'min:1', 'max:300'],
-            'direccion' => ['nullable', 'string', 'max:100'],
+            'peso' => ['nullable', 'integer', 'min:1', 'max:500'],
+            'direccion' => ['required', 'string', 'max:100'],
             'ocupacion' => ['nullable', 'string', 'max:100'],
             'enfermedades_cronicas' => ['nullable', 'string', 'max:1000'],
             'alergias' => ['nullable', 'string', 'max:1000'],
@@ -94,7 +94,9 @@ class StorePacienteRequest extends FormRequest
             'email.unique' => 'Este correo ya está registrado en el sistema.',
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
-            'peso.numeric' => 'El peso debe ser un valor numérico.',
+            'peso.integer' => 'El peso debe ser un valor numérico entero (sin decimales).',
+            'peso.max' => 'El peso no puede exceder los 500 kg.',
+            'direccion.required' => 'La dirección es obligatoria para el expediente clínico.',
             'emergencia_nombre.regex' => 'El nombre del contacto de emergencia solo puede contener letras y espacios.',
             'emergencia_apellido_paterno.regex' => 'El apellido paterno del contacto solo puede contener letras y espacios.',
             'emergencia_apellido_materno.regex' => 'El apellido materno del contacto solo puede contener letras y espacios.',
