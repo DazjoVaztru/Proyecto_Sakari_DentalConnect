@@ -70,86 +70,81 @@
 
     </div>
 
+<div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
+    <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
+    <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
+        @forelse($proximasCitas as $cita)
+            @php
+                $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
+            @endphp
+            {{-- Añadimos transition: opacity para el efecto de salida --}}
+            <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
+                onclick="cargarModalCita({{ $cita->id_cita }})"
+                style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.5s ease;"
+                onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
+                onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
 
-    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
-        <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
-        <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
-            @forelse($proximasCitas as $cita)
-                @php
-                    $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
-                @endphp
-                <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
-                    onclick="cargarModalCita({{ $cita->id_cita }})"
-                    style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.2s ease;"
-                    onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
-                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
-
-                    {{-- Overlay de checkmark (oculto por default) --}}
-                    <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
-                        style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(240,255,246,0.97); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
-                        <svg width="60" height="60" viewBox="0 0 60 60">
-                            <circle cx="30" cy="30" r="28" fill="#22C55E" />
-                            <path id="check-path-{{ $cita->id_cita }}" d="M16 30 L26 42 L44 20" stroke="white" stroke-width="5"
-                                fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55"
-                                stroke-dashoffset="55" style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
-                        </svg>
-                        <span style="font-weight: 800; color: #15803D; font-size: 1.05em;">¡Cita completada!</span>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
-                        {{-- Bloque fecha --}}
-                        <div
-                            style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
-                            <span
-                                style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : 'var(--primary-color)' }}; font-size: 1.4em;">
-                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
-                            </span>
-                            <small style="color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em;">
-                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
-                            </small>
-                        </div>
-
-                        {{-- Info --}}
-                        <div style="flex: 1; overflow: hidden;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                <h4
-                                    style="margin: 0; font-size: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;">
-                                    {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
-                                </h4>
-                                @if($esVencida)
-                                    <span
-                                        style="background: #FEF3C7; color: #B45309; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCD34D; white-space: nowrap; flex-shrink: 0;">
-                                        ⚠ VENCIDA
-                                    </span>
-                                @endif
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; color: #555; font-size: 1em;">
-                                <i class="fa-regular fa-clock"
-                                    style="color: {{ $esVencida ? '#D97706' : 'var(--primary-color)' }};"></i>
-                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
-                                <span style="margin: 0 5px; color: #ddd;">|</span>
-                                <span style="color: var(--secondary-color); font-weight: 600;">
-                                    {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
-                                </span>
-                            </div>
-                        </div>
-
-                        {{-- Botón Marcar Completada --}}
-                        <button type="button" id="btn-completar-{{ $cita->id_cita }}"
-                            onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
-                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
-                            onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
-                            onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
-                            <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
-                            Marcar completada
-                        </button>
-                    </div>
+                {{-- Overlay de checkmark --}}
+                <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
+                    style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(240,255,246,0.97); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0; transition: opacity 0.3s ease;">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="28" fill="#22C55E" />
+                        <path id="check-path-{{ $cita->id_cita }}" d="M16 30 L26 42 L44 20" stroke="white" stroke-width="5"
+                            fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55"
+                            stroke-dashoffset="55" style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
+                    </svg>
+                    <span style="font-weight: 800; color: #15803D; font-size: 1.05em;">¡Cita completada!</span>
                 </div>
-            @empty
-                <p style="text-align: center; color: #888; padding: 30px;">No hay citas próximas agendadas.</p>
-            @endforelse
-        </div>
+
+                <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
+                    {{-- Bloque fecha --}}
+                    <div style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
+                        <span style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : 'var(--primary-color)' }}; font-size: 1.4em;">
+                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
+                        </span>
+                        <small style="color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em;">
+                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
+                        </small>
+                    </div>
+
+                    {{-- Info --}}
+                    <div style="flex: 1; overflow: hidden;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            <h4 style="margin: 0; font-size: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;">
+                                {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
+                            </h4>
+                            @if($esVencida)
+                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCD34D; white-space: nowrap; flex-shrink: 0;">
+                                    ⚠ VENCIDA
+                                </span>
+                            @endif
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; color: #555; font-size: 1em;">
+                            <i class="fa-regular fa-clock" style="color: {{ $esVencida ? '#D97706' : 'var(--primary-color)' }};"></i>
+                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
+                            <span style="margin: 0 5px; color: #ddd;">|</span>
+                            <span style="color: var(--secondary-color); font-weight: 600;">
+                                {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Botón Marcar Completada --}}
+                    <button type="button" id="btn-completar-{{ $cita->id_cita }}"
+                        onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
+                        style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
+                        onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
+                        onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+                        <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
+                        Marcar completada
+                    </button>
+                </div>
+            </div>
+        @empty
+            <p style="text-align: center; color: #888; padding: 30px;">No hay citas próximas agendadas.</p>
+        @endforelse
     </div>
+</div>
 
     <div class="modal-overlay" id="modal-detalle-cita">
         <div class="modal-glass modal-xl"

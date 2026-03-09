@@ -17,12 +17,6 @@ use App\Http\Controllers\Api\PacienteHistorialController;
 |--------------------------------------------------------------------------
 */
 
-/**
- * Rutas Públicas de Autenticación.
- *
- * Manejan el inicio de sesión, registro y cierre de sesión.
- * No requieren autenticación previa.
- */
 // Rutas Públicas (Login/Registro)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -39,17 +33,10 @@ Route::get('/recuperar-password', function () {
     return view('auth.reset-password');
 })->name('password.reset');
 
-// Redirigir la raíz al dashboard o login según corresponda
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-/**
- * Rutas Privadas / Protegidas.
- *
- * Requieren que el usuario esté autenticado (middleware 'auth').
- * Incluyen el dashboard, gestión de pacientes, tratamientos, configuración y APIs internas.
- */
 // Rutas Privadas (Requieren Login)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -61,11 +48,17 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('tratamientos', TratamientoController::class)
     ->parameters(['tratamientos' => 'id']) 
     ->except(['create', 'edit', 'show']);
+
+    // Gestión de Citas desde el Dashboard
+    Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
     Route::post('/citas/{id}/actualizar', [DashboardController::class, 'actualizarCita'])->name('citas.actualizar');
+    
+    // ESTA ES LA RUTA PARA EL FETCH DE COMPLETAR (5 SEGUNDOS)
+    Route::post('/citas/{id}/completar', [DashboardController::class, 'completarCita'])->name('citas.completar');
 
     // Publicidad
+    Route::resource('publicidad', PublicidadController::class)->only(['index', 'store', 'destroy']);
 
-    Route::resource('publicidad', App\Http\Controllers\PublicidadController::class)->only(['index', 'store', 'destroy']);
     // Configuración
     Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
     Route::post('/configuracion/clinica', [ConfiguracionController::class, 'updateClinica'])->name('configuracion.updateClinica');
@@ -73,34 +66,26 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/configuracion/recepcionista', [ConfiguracionController::class, 'storeRecepcionista'])->name('configuracion.storeRecepcionista');
 
     /**
-     * API Interna para consumo AJAX.
-     *
-     * Rutas que devuelven JSON para poblar modales y calendarios sin recargar la página.
+     * API Interna para consumo AJAX
      */
-    // API Interna
     Route::get('/api/citas/{id}/modal-detalles', [DashboardController::class, 'obtenerDatosModal'])->name('api.cita.detalles');
-    Route::post('/api/citas/{id}/completar', [DashboardController::class, 'completarCita'])->name('api.cita.completar');
     Route::get('/api/calendario/disponibilidad', [DashboardController::class, 'obtenerDisponibilidadMes'])->name('api.calendario');
 
-    // API de Odontograma (CRUD completo)
+    // API de Odontograma
     Route::get('/api/odontograma/paciente/{id_paciente}', [OdontogramaController::class, 'index']);
     Route::post('/api/odontograma', [OdontogramaController::class, 'store']);
     Route::patch('/api/odontograma/{id_odontograma}', [OdontogramaController::class, 'update']);
     Route::delete('/api/odontograma/{id_odontograma}', [OdontogramaController::class, 'destroy']);
 
-    // APIs de Historial Clínico del Paciente
-    Route::get('/api/pacientes/{idPaciente}/signos-vitales', [PacienteHistorialController::class, 'signosVitales']);
+    // APIs de Historial Clínico
+    Route::get('/api/pacientes/{idPaciente}/signos-vitales', [PacienteHistorialController::class, 'signos_vitales']);
     Route::get('/api/pacientes/{idPaciente}/evoluciones', [PacienteHistorialController::class, 'evoluciones']);
     Route::post('/api/pacientes/{idPaciente}/evoluciones', [PacienteHistorialController::class, 'storeEvolucion']);
     Route::post('/api/pacientes/{idPaciente}/foto', [PacienteHistorialController::class, 'subirFotoProgreso']);
     Route::get('/api/pacientes/{idPaciente}/citas', [PacienteHistorialController::class, 'historialCitas']);
-
-    // Citas
-    Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
-
 });
 
-// Fallback route para servir imágenes del storage público cuando el enlace simbólico no está disponible (ej. en Railway)
+// Fallback para Storage
 Route::get('/storage/{path}', function (string $path) {
     if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
         abort(404);
