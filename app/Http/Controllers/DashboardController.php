@@ -271,17 +271,34 @@ class DashboardController extends Controller
     }
 
     // --- FUNCIÓN 3: Marcar cita como completada (AJAX) ---
-    public function completarCita($idCita)
-    {
-        $cita = Cita::findOrFail($idCita);
-        $cita->estado_cita = 'completada';
+   public function completarCita($idCita)
+{
+    try {
+        // Buscamos la cita asegurándonos de que pertenezca a la clínica del doctor actual
+        $idClinica = Auth::user()->id_clinica;
+        
+        $cita = Cita::where('id_cita', $idCita)
+            ->whereHas('paciente.usuario', function ($query) use ($idClinica) {
+                $query->where('id_clinica', $idClinica);
+            })
+            ->firstOrFail();
+
+        // Actualizamos el estado exacto que usa tu base de datos
+        $cita->estado_cita = 'completada'; 
         $cita->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Cita marcada como completada.'
         ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se pudo actualizar la cita: ' . $e->getMessage()
+        ], 404);
     }
+}
 
     // --- FUNCIÓN 4: Disponibilidad del mes para el calendario ---
     /**
