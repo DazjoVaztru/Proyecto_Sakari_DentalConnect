@@ -1292,27 +1292,35 @@
         // MARCAR CITA COMO COMPLETADA
         // ==========================================
         function completarCita(idCita) {
-            const btn = document.getElementById('btn-completar-' + idCita);
+    fetch(`/api/citas/${idCita}/completar`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 1. Mostrar visualmente que se completó (el check verde que ya tienes)
+            const fila = document.getElementById(`cita-fila-${idCita}`);
+            fila.innerHTML = `
+                <div class="text-center p-4 w-full">
+                    <span class="text-green-500 font-bold">¡Cita completada!</span>
+                </div>
+            `;
 
-            // Evitar doble clic
-            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
-
-            // ── Llamada AJAX ───────────────────────────────────────────
-            fetch('/api/citas/' + idCita + '/completar', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) {
-                        alert('Error: ' + (data.message || 'No se pudo completar la cita.'));
-                        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-                        return;
-                    }
+            // 2. Esperar 5 segundos y luego recargar o quitar
+            setTimeout(() => {
+                // Opción A: Recargar la página para que desaparezca de la lista
+                window.location.reload(); 
+                
+                // Opción B: Si quieres abrir el modal de detalles automáticamente:
+                // abrirModalDetalles(idCita); 
+            }, 5000); 
+        }
+    });
+}
 
                     // ── ACTUALIZAR EL ESTADO EN window.citasData (si existe) ────────────
                     if (window.citasData) {
