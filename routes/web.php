@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     // Gestión de Citas desde el Dashboard
     Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
     Route::post('/citas/{id}/actualizar', [DashboardController::class, 'actualizarCita'])->name('citas.actualizar');
+    Route::post('/api/citas/{id}/completar', [DashboardController::class, 'completarCita'])->name('citas.completar');
     
     // ESTA ES LA RUTA PARA EL FETCH DE COMPLETAR (5 SEGUNDOS)
     Route::post('/citas/{id}/completar', [DashboardController::class, 'completarCita'])->name('citas.completar');

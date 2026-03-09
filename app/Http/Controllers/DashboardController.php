@@ -271,32 +271,51 @@ class DashboardController extends Controller
     }
 
     // --- FUNCIÓN 3: Marcar cita como completada (AJAX) ---
-   public function completarCita($idCita)
+   public function completarCita($id) // Asegúrate que coincida con el {id} de la ruta
 {
     try {
-        // Buscamos la cita asegurándonos de que pertenezca a la clínica del doctor actual
         $idClinica = Auth::user()->id_clinica;
         
-        $cita = Cita::where('id_cita', $idCita)
+        // Buscamos la cita validando la relación con la clínica
+        $cita = Cita::where('id_cita', $id)
             ->whereHas('paciente.usuario', function ($query) use ($idClinica) {
                 $query->where('id_clinica', $idClinica);
             })
             ->firstOrFail();
 
-        // Actualizamos el estado exacto que usa tu base de datos
+        // 1. Actualizamos el estado
         $cita->estado_cita = 'completada'; 
+
+        // 2. Opcional: Si tienes un campo para marcar la hora real de cierre
+        // $cita->fecha_finalizada = now(); 
+
         $cita->save();
+
+        // 3. Opcional: Podrías retornar el nuevo total de ingresos del mes 
+        // para que se actualice en el Dashboard sin recargar
+        $ingresosMes = Cita::whereHas('paciente.usuario', function ($q) use ($idClinica) {
+                $q->where('id_clinica', $idClinica);
+            })
+            ->where('estado_cita', 'completada')
+            ->whereMonth('fecha_hora_inicio', now()->month)
+            ->sum('monto_total'); // Cambia 'monto_total' por tu columna de dinero
 
         return response()->json([
             'success' => true,
-            'message' => 'Cita marcada como completada.'
+            'message' => 'Cita marcada como completada.',
+            'nuevoIngreso' => number_format($ingresosMes, 0) // Para el label de ingresos
         ]);
 
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'La cita no existe o no tienes permiso para verla.'
+        ], 404);
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
-            'message' => 'No se pudo actualizar la cita: ' . $e->getMessage()
-        ], 404);
+            'message' => 'Error inesperado: ' . $e->getMessage()
+        ], 500);
     }
 }
 
