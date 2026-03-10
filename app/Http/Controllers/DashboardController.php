@@ -23,10 +23,9 @@ class DashboardController extends Controller
         $user = Auth::user();
         $idClinica = $user->id_clinica;
         $hoy = Carbon::today();
-
-        // --- Citas pendientes: futuras primero, vencidas al final ---
         $ahora = Carbon::now();
 
+        // 1. Citas Futuras
         $citasFuturas = Cita::with(['paciente', 'servicio'])
             ->where('id_clinica', $idClinica)
             ->where('fecha_hora_inicio', '>=', $ahora)
@@ -34,6 +33,7 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'asc')
             ->get();
 
+        // 2. Citas Vencidas
         $citasVencidas = Cita::with(['paciente', 'servicio'])
             ->where('id_clinica', $idClinica)
             ->where('fecha_hora_inicio', '<', $ahora)
@@ -41,7 +41,16 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'desc')
             ->get();
 
-        $proximasCitas = $citasFuturas->concat($citasVencidas)->take(15);
+        // 3. ¡LA MAGIA! Rescatar citas Completadas pero que tienen DEUDA
+        $citasConDeuda = Cita::with(['paciente', 'servicio'])
+            ->where('id_clinica', $idClinica)
+            ->where('estado_cita', 'completada')
+            ->whereRaw('costo_estimado > (SELECT COALESCE(SUM(monto), 0) FROM ingresos_caja WHERE id_cita = citas.id_cita)')
+            ->orderBy('fecha_hora_inicio', 'desc')
+            ->get();
+
+        // Unimos en el Dashboard: Primero las Deudas, luego Futuras, luego Vencidas.
+        $proximasCitas = $citasConDeuda->concat($citasFuturas)->concat($citasVencidas)->take(20);
 
         // --- Citas de hoy ---
         $citasHoyCount = Cita::where('id_clinica', $idClinica)
@@ -216,12 +225,34 @@ class DashboardController extends Controller
         if ($request->filled('costo_estimado'))
             $cita->costo_estimado = $request->costo_estimado;
 
-        // 2. Reprogramación de fecha y hora
+        // 2. ¿Reprogramar o Agendar Siguiente Cita? (ANTI-VIAJE EN EL TIEMPO)
+        $nuevaCitaGenerada = false;
         if ($request->filled('nueva_fecha')) {
             $fecha = $request->nueva_fecha;
             $hora = $request->filled('nueva_hora') ? $request->nueva_hora : Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
-            $cita->fecha_hora_inicio = $fecha . ' ' . $hora;
-            $cita->fecha_hora_fin = Carbon::parse($cita->fecha_hora_inicio)->addMinutes(30);
+            $nuevaFechaHora = $fecha . ' ' . $hora;
+
+            // Regla de Oro: Si la cita es de hoy o del pasado, NO sobrescribimos su fecha. CREAMOS la siguiente cita.
+            if (Carbon::parse($cita->fecha_hora_inicio)->isPast() || Carbon::parse($cita->fecha_hora_inicio)->isToday() || $cita->estado_cita === 'completada') {
+
+                Cita::create([
+                    'id_clinica' => $cita->id_clinica,
+                    'id_paciente' => $cita->id_paciente,
+                    'id_doctor' => $cita->id_doctor,
+                    'id_servicio' => $cita->id_servicio,
+                    'fecha_hora_inicio' => $nuevaFechaHora,
+                    'fecha_hora_fin' => Carbon::parse($nuevaFechaHora)->addMinutes(30),
+                    'estado_cita' => 'pendiente',
+                    'motivo' => 'Seguimiento programado',
+                    'costo_estimado' => 0
+                ]);
+                $nuevaCitaGenerada = true;
+
+            } else {
+                // Si la cita original era para el mes que viene, sí la estamos reprogramando.
+                $cita->fecha_hora_inicio = $nuevaFechaHora;
+                $cita->fecha_hora_fin = Carbon::parse($nuevaFechaHora)->addMinutes(30);
+            }
         }
 
         $cita->save();
