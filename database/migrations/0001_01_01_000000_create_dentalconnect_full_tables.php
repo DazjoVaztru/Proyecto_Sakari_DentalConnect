@@ -70,6 +70,15 @@ return new class extends Migration {
             $table->string('correo_electronico', 100)->nullable();
             $table->string('tipo_sangre', 5)->nullable();
             $table->decimal('peso', 5, 2)->nullable();
+
+            // Dirección
+            $table->string('direccion', 255)->nullable();
+            $table->string('calle', 100)->nullable();
+            $table->string('num_exterior', 20)->nullable();
+            $table->string('num_interior', 20)->nullable();
+            $table->string('colonia', 100)->nullable();
+            $table->string('municipio', 100)->nullable();
+
             $table->string('ocupacion', 100)->nullable();
             $table->text('enfermedades_cronicas')->nullable();
             $table->text('alergias')->nullable();
