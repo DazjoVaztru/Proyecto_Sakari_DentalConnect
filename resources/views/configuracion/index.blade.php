@@ -37,7 +37,7 @@
                             class="modern-input" maxlength="12" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                     </div>
                     <div>
-                        <label>Ciudad / Localidad</label>
+                        <label>Localidad</label>
                         <input type="text" name="localidad" value="{{ $clinica->localidad }}" class="modern-input"
                             oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
                     </div>
