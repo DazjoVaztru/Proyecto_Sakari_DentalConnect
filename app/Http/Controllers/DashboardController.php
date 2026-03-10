@@ -305,52 +305,52 @@ class DashboardController extends Controller
 
 
     /**
-     * COMPLETAR CITA
-     */
-    public function completarCita($idCita)
-    {
+ * COMPLETAR CITA
+ */
+public function completarCita($idCita)
+{
+    try {
 
-        try{
+        $cita = Cita::findOrFail($idCita);
 
-            $cita = Cita::findOrFail($idCita);
+        // Marcar como completada
+        $cita->estado_cita = 'completada';
+        $cita->save();
 
-            $cita->estado_cita = 'completada';
-            $cita->save();
+        $idClinica = Auth::user()->id_clinica;
+        $hoy = Carbon::today();
 
-            $idClinica = Auth::user()->id_clinica;
-            $hoy = Carbon::today();
+        // Contar citas pendientes hoy
+        $pendientes = Cita::where('id_clinica', $idClinica)
+            ->whereDate('fecha_hora_inicio', $hoy)
+            ->whereIn('estado_cita', ['pendiente', 'confirmada'])
+            ->count();
 
-            $pendientes = Cita::where('id_clinica',$idClinica)
-                ->whereDate('fecha_hora_inicio',$hoy)
-                ->whereIn('estado_cita',['pendiente','confirmada'])
-                ->count();
+        // Calcular ingresos del mes
+        $ingresosMes = IngresoCaja::where('id_clinica', $idClinica)
+            ->whereMonth('fecha_ingreso', now()->month)
+            ->whereYear('fecha_ingreso', now()->year)
+            ->sum('monto');
 
-            $ingresosMes = IngresoCaja::where('id_clinica',$idClinica)
-                ->whereMonth('fecha_ingreso',now()->month)
-                ->whereYear('fecha_ingreso',now()->year)
-                ->sum('monto');
+        return response()->json([
+            'success' => true,
+            'message' => 'Cita completada',
+            'stats' => [
+                'pendientes_hoy' => $pendientes,
+                'ingresos_mes' => number_format($ingresosMes, 2, '.', ',')
+            ]
+        ]);
 
-            return response()->json([
-                'success'=>true,
-                'message'=>'Cita completada',
-                'stats'=>[
-                    'pendientes_hoy'=>$pendientes,
-                    'ingresos_mes'=>number_format($ingresosMes,2,'.',',')
-                ]
-            ]);
+    } catch (\Exception $e) {
 
-        }catch(\Exception $e){
+        Log::error("Error completar cita: " . $e->getMessage());
 
-            Log::error("Error completar cita: ".$e->getMessage());
-
-            return response()->json([
-                'success'=>false,
-                'message'=>'Error del servidor'
-            ],500);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error del servidor'
+        ], 500);
     }
-
-
+}
 
     /**
      * DISPONIBILIDAD DEL MES

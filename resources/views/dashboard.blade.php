@@ -148,12 +148,12 @@
                     </div>
 {{-- 3. TU BOTÓN (Tal cual lo pusiste, solo verifica el ID) --}}
 <button 
-    type="button" 
+    type="button"
     id="btn-completar-{{ $cita->id_cita }}"
     class="btn-marcar-completada"
-    {{-- Agregamos el event y el ID --}}
-    onclick="completarCita(event, {{ $cita->id_cita }})" 
-    style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer;">
+    onclick="completarCita({{ $cita->id_cita }}, event)"
+    style="background:#22C55E;color:white;border:none;border-radius:8px;padding:12px 20px;cursor:pointer;"
+>
     <i class="fa-regular fa-circle-check"></i>
     Marcar completada
 </button>
@@ -1358,10 +1358,6 @@
             // Update Label
             document.getElementById('lbl-restante').innerText = restanteVirtual.toFixed(2);
         }
-
-        // ==========================================
-        // MARCAR CITA COMO COMPLETADA
-        // ==========================================
       // ==========================================
 // MARCAR CITA COMO COMPLETADA
 // ==========================================
