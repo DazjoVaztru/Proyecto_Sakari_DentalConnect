@@ -23,9 +23,10 @@ class DashboardController extends Controller
         $user = Auth::user();
         $idClinica = $user->id_clinica;
         $hoy = Carbon::today();
+
+        // --- Citas pendientes: futuras primero, vencidas al final ---
         $ahora = Carbon::now();
 
-        // 1. Citas Futuras
         $citasFuturas = Cita::with(['paciente', 'servicio'])
             ->where('id_clinica', $idClinica)
             ->where('fecha_hora_inicio', '>=', $ahora)
@@ -33,7 +34,6 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'asc')
             ->get();
 
-        // 2. Citas Vencidas
         $citasVencidas = Cita::with(['paciente', 'servicio'])
             ->where('id_clinica', $idClinica)
             ->where('fecha_hora_inicio', '<', $ahora)
@@ -41,16 +41,7 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'desc')
             ->get();
 
-        // 3. ¡LA MAGIA! Rescatar citas Completadas pero que tienen DEUDA
-        $citasConDeuda = Cita::with(['paciente', 'servicio'])
-            ->where('id_clinica', $idClinica)
-            ->where('estado_cita', 'completada')
-            ->whereRaw('costo_estimado > (SELECT COALESCE(SUM(monto), 0) FROM ingresos_caja WHERE id_cita = citas.id_cita)')
-            ->orderBy('fecha_hora_inicio', 'desc')
-            ->get();
-
-        // Unimos en el Dashboard: Primero las Deudas, luego Futuras, luego Vencidas.
-        $proximasCitas = $citasConDeuda->concat($citasFuturas)->concat($citasVencidas)->take(20);
+        $proximasCitas = $citasFuturas->concat($citasVencidas)->take(15);
 
         // --- Citas de hoy ---
         $citasHoyCount = Cita::where('id_clinica', $idClinica)
@@ -67,11 +58,6 @@ class DashboardController extends Controller
         $ingresosMes = IngresoCaja::where('id_clinica', $idClinica)
             ->whereMonth('fecha_ingreso', $hoy->month)
             ->whereYear('fecha_ingreso', $hoy->year)
-            ->sum('monto');
-
-        // --- Ingresos del día actual ---
-        $ingresosDia = IngresoCaja::where('id_clinica', $idClinica)
-            ->whereDate('fecha_ingreso', $hoy)
             ->sum('monto');
 
         // --- Ítems de inventario con stock bajo (< 5 unidades) ---
@@ -94,7 +80,6 @@ class DashboardController extends Controller
             'citasHoyCount',
             'totalPacientes',
             'ingresosMes',
-            'ingresosDia',
             'itemsBajoStock',
             'notificacionesPendientes',
             'servicios'
@@ -111,12 +96,6 @@ class DashboardController extends Controller
 
         $p = $cita->paciente;
         $costoTotal = floatval($cita->costo_estimado ?? 0);
-
-        // ¡NUEVA MAGIA! Si el costo es 0, jalamos el precio del catálogo automáticamente
-        if ($costoTotal == 0 && $cita->servicio) {
-            $costoTotal = floatval($cita->servicio->precio_base);
-        }
-
         $totalPagado = $cita->ingresos ? $cita->ingresos->sum('monto') : 0;
         $saldo = max(0, $costoTotal - $totalPagado);
 
@@ -169,7 +148,7 @@ class DashboardController extends Controller
         ];
 
         // ── Historial odontograma ─────────────────────────────────────────
-        $odontograma = \App\Models\Odontograma::where('id_paciente', $p->id_paciente ?? -1)
+        $odontograma = \App\Models\Odontograma::where('id_paciente', $p?->id_paciente)
             ->orderBy('id_odontograma', 'desc')
             ->get();
 
@@ -180,9 +159,11 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'desc')
             ->get()
             ->map(function ($c) use ($idCita, $hoy) {
-                // Abono: mostrar lo abonado en cada cita sin importar la fecha
-                $abonadoEnCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
-
+                // Abono: solo mostrar si la cita es de HOY, sino 0.00
+                $fechaCita = Carbon::parse($c->fecha_hora_inicio)->startOfDay();
+                $esHoy = $fechaCita->equalTo($hoy);
+                $abonadoEnCita = $esHoy ? ($c->ingresos ? $c->ingresos->sum('monto') : 0) : 0;
+                
                 // Estado: solo "Completada" o "Pendiente"
                 $estadoBadge = match ($c->estado_cita) {
                     'completada' => 'Completada',
@@ -237,36 +218,12 @@ class DashboardController extends Controller
         if ($request->filled('costo_estimado'))
             $cita->costo_estimado = $request->costo_estimado;
 
-        // 2. ¿Reprogramar o Agendar Siguiente Cita? (ANTI-VIAJE EN EL TIEMPO)
+        // 2. Reprogramación de fecha y hora
         if ($request->filled('nueva_fecha')) {
             $fecha = $request->nueva_fecha;
             $hora = $request->filled('nueva_hora') ? $request->nueva_hora : Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
-            $nuevaFechaHora = $fecha . ' ' . $hora;
-
-            // Regla de Oro: Si la cita es de hoy o del pasado, O si estamos abonando un monto hoy,
-            // NO sobrescribimos su fecha. CREAMOS la siguiente cita (seguimiento).
-            $esHoyOPasado = Carbon::parse($cita->fecha_hora_inicio)->isPast() || Carbon::parse($cita->fecha_hora_inicio)->isToday();
-            $hayAbono = $request->filled('monto_abono') && $request->monto_abono > 0;
-
-            if ($esHoyOPasado || $hayAbono || $cita->estado_cita === 'completada') {
-                Cita::create([
-                    'id_clinica' => $cita->id_clinica,
-                    'id_paciente' => $cita->id_paciente,
-                    'id_doctor' => $cita->id_doctor,
-                    'id_servicio' => $cita->id_servicio,
-                    'fecha_hora_inicio' => $nuevaFechaHora,
-                    'fecha_hora_fin' => Carbon::parse($nuevaFechaHora)->addMinutes(30),
-                    'estado_cita' => 'pendiente',
-                    'motivo' => 'Seguimiento programado',
-                    'costo_estimado' => 0
-                ]);
-                $nuevaCitaGenerada = true;
-            } else {
-                // Si la cita original era para el mes que viene y NO hay abono, 
-                // sí la estamos simplemente reprogramando.
-                $cita->fecha_hora_inicio = $nuevaFechaHora;
-                $cita->fecha_hora_fin = Carbon::parse($nuevaFechaHora)->addMinutes(30);
-            }
+            $cita->fecha_hora_inicio = $fecha . ' ' . $hora;
+            $cita->fecha_hora_fin = Carbon::parse($cita->fecha_hora_inicio)->addMinutes(30);
         }
 
         $cita->save();
@@ -292,9 +249,6 @@ class DashboardController extends Controller
                 'metodo_pago' => 'efectivo',
                 'descripcion' => 'Abono en cita: ' . $cita->motivo
             ]);
-
-            // Refrescar la relación para que los cálculos usen datos actualizados
-            $cita->load('ingresos');
         }
 
         // 5. Cálculos para responder al front-end 
@@ -333,76 +287,45 @@ class DashboardController extends Controller
     /**
      * Retorna los días del mes con citas agendadas para colorear el calendario.
      * 
-     * Ahora respeta los horarios configurados por clínica:
-     * - Días cerrados (activo=false) → gris, no clickeables
-     * - Slots calculados dinámicamente desde hora_inicio/hora_fin
-     * - Fallback: 8 horas (16 slots) si no hay horarios configurados
+     * REGLAS:
+     * - Verde (libre): Sin citas o con citas pero horas disponibles
+     * - Amarillo (ocupado): Algunas citas pero aún hay horas libres
+     * - Rojo (lleno): Todas las horas disponibles del día están ocupadas (8 horas = 16 slots de 30 min)
+     * - Gris: Días pasados (no pueden agendar)
      */
     public function obtenerDisponibilidadMes(Request $request)
     {
         $mes = $request->input('mes', Carbon::now()->month);
         $anio = $request->input('anio', Carbon::now()->year);
-        $idClinica = Auth::user()->id_clinica;
 
         $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
-
-        // Cargar horarios configurados de la clínica (indexados por dia_semana)
-        $horariosClinica = \App\Models\HorarioClinica::where('id_clinica', $idClinica)
-            ->get()
-            ->keyBy('dia_semana');
+        
+        // Horas operativas: 8 horas (08:00 - 17:00) = 16 slots de 30 minutos
+        $slotsDisponiblesPorDia = 16;
 
         $eventos = [];
-
+        
         for ($i = 1; $i <= $diasDelMes; $i++) {
             $fecha = Carbon::createFromDate($anio, $mes, $i);
-            $diaSemana = $fecha->dayOfWeek; // 0=Domingo, 1=Lunes, ... 6=Sábado
-
-            // Verificar si este día está activo en la configuración
-            $horarioDia = $horariosClinica->get($diaSemana);
-            $diaActivo = $horarioDia ? (bool) $horarioDia->activo : true; // Fallback: activo
-
-            // Calcular slots disponibles según horario configurado
-            if ($horarioDia && $horarioDia->hora_inicio && $horarioDia->hora_fin) {
-                $inicio = Carbon::parse($horarioDia->hora_inicio);
-                $fin = Carbon::parse($horarioDia->hora_fin);
-                $minutosDisponibles = max(0, $fin->diffInMinutes($inicio));
-                $slotsDisponiblesPorDia = intval($minutosDisponibles / 30);
-            } else {
-                // Fallback: 8 horas = 16 slots de 30 min
-                $slotsDisponiblesPorDia = 16;
-            }
-
-            // Si el día está cerrado, marcar como gris
-            if (!$diaActivo) {
-                $eventos[$i] = [
-                    'estado' => 'gris',
-                    'clickable' => false,
-                    'total_citas' => 0,
-                    'horas_ocupadas' => 0,
-                    'horas_disponibles' => 0,
-                    'slots_ocupados' => 0,
-                    'slots_totales' => 0,
-                    'cerrado' => true,
-                ];
-                continue;
-            }
-
+            
             // Contar citas del día (solo no canceladas)
-            $citasDelDia = Cita::where('id_clinica', $idClinica)
+            $citasDelDia = Cita::where('id_clinica', Auth::user()->id_clinica)
                 ->whereDate('fecha_hora_inicio', $fecha)
                 ->where('estado_cita', '!=', 'cancelada')
                 ->get();
-
+            
             $totalCitas = $citasDelDia->count();
-
+            
             // Estado del día basado en disponibilidad de slots
             $estado = 'verde'; // Por defecto libre
             $clickable = true;
-
+            
             if ($totalCitas > 0 && $totalCitas < $slotsDisponiblesPorDia) {
+                // Está ocupado pero aún hay horas disponibles
                 $estado = 'amarillo';
                 $clickable = true;
-            } elseif ($slotsDisponiblesPorDia > 0 && $totalCitas >= $slotsDisponiblesPorDia) {
+            } elseif ($totalCitas >= $slotsDisponiblesPorDia) {
+                // Todas las horas están ocupadas
                 $estado = 'rojo';
                 $clickable = false;
             }
@@ -416,8 +339,7 @@ class DashboardController extends Controller
 
             // Información sobre horas ocupadas y disponibles
             $horasOcupadas = ceil($totalCitas / 2); // 2 slots = 1 hora
-            $totalHoras = ceil($slotsDisponiblesPorDia / 2);
-            $horasDisponibles = max(0, $totalHoras - $horasOcupadas);
+            $horasDisponibles = max(0, 8 - $horasOcupadas);
 
             $eventos[$i] = [
                 'estado' => $estado,
@@ -426,9 +348,7 @@ class DashboardController extends Controller
                 'horas_ocupadas' => $horasOcupadas,
                 'horas_disponibles' => $horasDisponibles,
                 'slots_ocupados' => $totalCitas,
-                'slots_totales' => $slotsDisponiblesPorDia,
-                'hora_inicio' => $horarioDia ? ($horarioDia->hora_inicio ? Carbon::parse($horarioDia->hora_inicio)->format('H:i') : '09:00') : '09:00',
-                'hora_fin' => $horarioDia ? ($horarioDia->hora_fin ? Carbon::parse($horarioDia->hora_fin)->format('H:i') : '18:00') : '18:00'
+                'slots_totales' => $slotsDisponiblesPorDia
             ];
         }
 
