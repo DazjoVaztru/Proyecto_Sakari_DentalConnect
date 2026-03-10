@@ -92,6 +92,15 @@
         <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
             @forelse($proximasCitas as $cita)
                 @php
+                    // Banderas de estado
+                    $esDeuda = $cita->estado_cita === 'completada';
+                    $esVencida = !$esDeuda && \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
+
+                    // Colores dinámicos
+                    $borderColor = $esDeuda ? '#FCA5A5' : ($esVencida ? '#FCD34D' : '#eee');
+                    $bgColor = $esDeuda ? '#FEF2F2' : ($esVencida ? '#FFFBF0' : '#fff');
+                    $hoverColor = $esDeuda ? '#EF4444' : ($esVencida ? '#FCD34D' : '#00D1FF');
+                @endphp
 
                 <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
                     onclick="cargarModalCita({{ $cita->id_cita }})"
@@ -113,7 +122,12 @@
 
                     <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
                         {{-- Bloque fecha --}}
-                           
+                        <div
+                            style="background: {{ $esDeuda ? '#FEE2E2' : ($esVencida ? '#FEF3C7' : '#e0fbfc') }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
+                            <span
+                                style="display: block; font-weight: 800; color: {{ $esDeuda ? '#DC2626' : ($esVencida ? '#B45309' : 'var(--primary-color)') }}; font-size: 1.4em;">
+                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
+                            </span>
                             <small style="color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em;">
                                 {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
                             </small>
@@ -128,7 +142,11 @@
                                 </h4>
 
                                 {{-- Badges Dinámicos --}}
-                               
+                                @if($esDeuda)
+                                    <span
+                                        style="background: #FEE2E2; color: #DC2626; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCA5A5; white-space: nowrap; flex-shrink: 0;">
+                                        ⚠ SALDO PENDIENTE
+                                    </span>
                                 @elseif($esVencida)
                                     <span
                                         style="background: #FEF3C7; color: #B45309; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCD34D; white-space: nowrap; flex-shrink: 0;">
@@ -147,7 +165,16 @@
                             </div>
                         </div>
 
-                        
+                        {{-- Botón Marcar Completada o COBRAR --}}
+                        @if($esDeuda)
+                            <button type="button"
+                                onclick="event.stopPropagation(); cargarModalCita({{ $cita->id_cita }}); setTimeout(()=>openWidget('widget-pago'), 600);"
+                                style="background: #DC2626; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(220,38,38,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
+                                onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
+                                onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+                                <i class="fa-solid fa-hand-holding-dollar" style="font-size:1em;"></i>
+                                Cobrar
+                            </button>
                         @else
                             <button type="button" id="btn-completar-{{ $cita->id_cita }}"
                                 onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
