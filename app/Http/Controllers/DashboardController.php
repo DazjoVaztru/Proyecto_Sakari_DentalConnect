@@ -238,15 +238,17 @@ class DashboardController extends Controller
             $cita->costo_estimado = $request->costo_estimado;
 
         // 2. ¿Reprogramar o Agendar Siguiente Cita? (ANTI-VIAJE EN EL TIEMPO)
-        $nuevaCitaGenerada = false;
         if ($request->filled('nueva_fecha')) {
             $fecha = $request->nueva_fecha;
             $hora = $request->filled('nueva_hora') ? $request->nueva_hora : Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
             $nuevaFechaHora = $fecha . ' ' . $hora;
 
-            // Regla de Oro: Si la cita es de hoy o del pasado, NO sobrescribimos su fecha. CREAMOS la siguiente cita.
-            if (Carbon::parse($cita->fecha_hora_inicio)->isPast() || Carbon::parse($cita->fecha_hora_inicio)->isToday() || $cita->estado_cita === 'completada') {
+            // Regla de Oro: Si la cita es de hoy o del pasado, O si estamos abonando un monto hoy,
+            // NO sobrescribimos su fecha. CREAMOS la siguiente cita (seguimiento).
+            $esHoyOPasado = Carbon::parse($cita->fecha_hora_inicio)->isPast() || Carbon::parse($cita->fecha_hora_inicio)->isToday();
+            $hayAbono = $request->filled('monto_abono') && $request->monto_abono > 0;
 
+            if ($esHoyOPasado || $hayAbono || $cita->estado_cita === 'completada') {
                 Cita::create([
                     'id_clinica' => $cita->id_clinica,
                     'id_paciente' => $cita->id_paciente,
@@ -259,9 +261,9 @@ class DashboardController extends Controller
                     'costo_estimado' => 0
                 ]);
                 $nuevaCitaGenerada = true;
-
             } else {
-                // Si la cita original era para el mes que viene, sí la estamos reprogramando.
+                // Si la cita original era para el mes que viene y NO hay abono, 
+                // sí la estamos simplemente reprogramando.
                 $cita->fecha_hora_inicio = $nuevaFechaHora;
                 $cita->fecha_hora_fin = Carbon::parse($nuevaFechaHora)->addMinutes(30);
             }

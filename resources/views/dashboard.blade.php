@@ -1222,49 +1222,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // --- ACTUALIZAR SEGUIMIENTO EN LA TABLA (CITA DE HOY) ---
-                        const nuevoSeguimiento = document.querySelector('textarea[name="notas_seguimiento"]').value || '';
-                        if (nuevoSeguimiento) {
-                            // Buscar la fila marcada como cita actual
-                            if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                                const filaActual = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
-                                if (filaActual && filaActual.cells.length >= 3) {
-                                    filaActual.cells[2].innerText = nuevoSeguimiento;
-                                    renderizarPagina();
-                                }
-                            }
-                        }
-
-                        // --- ACTUALIZAR ABONO EN LA TABLA (CITA DE HOY) ---
-                        const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
-
-                        // Buscar la fila actual (cita de hoy) en todas las filas
-                        const filaActualAbono = window.todasLasFilas.find(f => f.getAttribute('data-cita-actual') === 'true');
-
-                        if (filaActualAbono && montoAbonado > 0) {
-                            // Actualizar la celda de abono (columna 4, índice 3)
-                            filaActualAbono.cells[3].innerText = '$' + montoAbonado.toFixed(2);
-                            filaActualAbono.cells[3].style.fontWeight = '800';
-                            filaActualAbono.cells[3].style.color = 'var(--primary-color)';
-
-                            // Re-renderizar la página para reflejar los cambios
-                            renderizarPagina();
-                        }
-
-                        // Limpiar el input de abono
-                        document.querySelector('input[name="monto_abono"]').value = '';
-
-                        // --- ACTUALIZAR TOTALES ---
-                        document.getElementById('lbl-total').innerText = data.data.costo_total;
-                        document.getElementById('lbl-restante').innerText = data.data.restante;
-
-                        // Actualizar datos crudos para el widget en futuras adiciones
-                        const nRawCosto = parseFloat(data.data.costo_total.replace('$', '').replace(/,/g, ''));
-                        const nRawRestante = parseFloat(data.data.restante.replace('$', '').replace(/,/g, ''));
-                        document.getElementById('raw-costo-total').value = nRawCosto;
-                        document.getElementById('raw-total-abonado').value = nRawCosto - nRawRestante;
+// --- RECARGAR TODO EL MODAL DESDE EL SERVIDOR ---
+                        // Esto asegura que si se creó una nueva cita de seguimiento, aparezca en la lista
+                        const pathSegments = actionUrl.split('/');
+                        const currentIdCita = pathSegments[pathSegments.length - 2];
+                        
+                        cargarModalCita(currentIdCita);
 
                         // --- ACTUALIZAR TARJETA DE INGRESOS DEL MES EN TIEMPO REAL ---
+                        const montoAbonado = parseFloat(document.querySelector('input[name="monto_abono"]').value) || 0;
                         if (montoAbonado > 0) {
                             const lblIngresos = document.getElementById('lbl-ingresos-mes');
                             if (lblIngresos) {
@@ -1280,25 +1246,15 @@
                             }
                         }
 
-                        // Actualizar visualmente la fila activa en la tabla si se reprogramó
-                        if (data.data.nueva_fecha || data.data.nueva_hora || data.data.seguimiento) {
-                            const tbody2 = document.getElementById('cita-tabla-body');
-                            if (tbody2) {
-                                const filaActiva = Array.from(tbody2.rows).find(r => r.style.background === 'rgb(232, 255, 244)') || tbody2.lastElementChild;
-                                if (filaActiva && filaActiva.cells.length >= 3) {
-                                    if (data.data.nueva_fecha) filaActiva.cells[0].innerText = data.data.nueva_fecha;
-                                    if (data.data.nueva_hora) filaActiva.cells[1].innerText = data.data.nueva_hora;
-                                    if (data.data.seguimiento) filaActiva.cells[2].innerText = data.data.seguimiento;
-                                }
-                            }
-                        }
-
                         // Show success
                         alert('¡Actualizado correctamente!');
 
                         // Limpiar inputs
                         document.querySelector('input[name="monto_abono"]').value = '';
                         document.querySelector('textarea[name="notas_seguimiento"]').value = '';
+                        document.getElementById('input-nueva-fecha').value = '';
+                        document.getElementById('input-nueva-hora').value = '';
+                        closeWidgets();
                     } else {
                         alert('Error: ' + data.message);
                     }
