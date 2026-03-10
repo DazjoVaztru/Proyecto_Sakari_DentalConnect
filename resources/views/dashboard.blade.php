@@ -1291,7 +1291,7 @@
         // ==========================================
         // MARCAR CITA COMO COMPLETADA
         // ==========================================
-        function completarCita(idCita) {
+       function completarCita(idCita) {
     fetch(`/api/citas/${idCita}/completar`, {
         method: 'POST',
         headers: {
@@ -1318,8 +1318,7 @@
                 // Opción B: Si quieres abrir el modal de detalles automáticamente:
                 // abrirModalDetalles(idCita); 
             }, 5000); 
-        }
-    });
+        
 }
 
                     // ── ACTUALIZAR EL ESTADO EN window.citasData (si existe) ────────────
