@@ -738,14 +738,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                                                                const file = this.files[0];
-                                                                                                if(file) {
-                                                                                                    document.getElementById('label-ev-foto').innerText = file.name;
-                                                                                                    document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                                                                } else {
-                                                                                                    document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                                                                    document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                                                                }">
+                                                                                                        const file = this.files[0];
+                                                                                                        if(file) {
+                                                                                                            document.getElementById('label-ev-foto').innerText = file.name;
+                                                                                                            document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                                                                        } else {
+                                                                                                            document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                                                                            document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                                                                        }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -1029,9 +1029,9 @@
                     icon: 'error',
                     title: 'Campos obligatorios faltantes',
                     html: `<p style="text-align:left;font-size:0.95rem;">Para crear el expediente clínico, debes completar:</p>
-                                           <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
-                                               ${faltantes.map(f => `<li>${f}</li>`).join('')}
-                                           </ul>`,
+                                                   <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
+                                                       ${faltantes.map(f => `<li>${f}</li>`).join('')}
+                                                   </ul>`,
                     confirmButtonColor: '#ef4444',
                     confirmButtonText: 'Entendido'
                 });
@@ -1124,7 +1124,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                                                                                <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1204,15 +1204,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                                                                            <div>
-                                                                                                <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                                                                <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                                                                ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                                                                            </div>
-                                                                                            <div style="text-align: right;">
-                                                                                                <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                                                                            </div>
-                                                                                        </div>`;
+                                                                                                    <div>
+                                                                                                        <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                                                                        <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                                                                        ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                                                                    </div>
+                                                                                                    <div style="text-align: right;">
+                                                                                                        <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                                                                    </div>
+                                                                                                </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1240,20 +1240,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                                                                    <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                                                                        <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                                                                    </a>
-                                                                                                 </div>`;
+                                                                                                            <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                                                                                <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                                                                            </a>
+                                                                                                         </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                                                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                                                                            </div>
-                                                                                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                                                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                                                                            ${imageHtml}
-                                                                                                        </div>`;
+                                                                                                                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                                                                        <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                                                                    </div>
+                                                                                                                    <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                                                                    ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                                                                    ${imageHtml}
+                                                                                                                </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -1320,310 +1320,334 @@
             document.getElementById('form-cita-paciente-id').value = currentPaciente.id_paciente;
             document.getElementById('form-cita-paciente-nombre').value = `${currentPaciente.nombre} ${currentPaciente.apellido_paterno}`;
             // Resetear estado del calendario de reserva
-                document.getElementById('input-reserva-fecha').value = '';
-                document.getElementById('input-reserva-hora').value = '';
-                document.getElementById('lbl-fecha-seleccionada').innerHTML = 'Selecciona un día en el calendario primero.';
-                document.getElementById('reserva-contenedor-horarios').innerHTML = '<div style="grid-column: 1 / -1; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: #aaa; font-weight: 600; text-align: center; height: 100%;"><p>Esperando selección de fecha...</p></div>';
+            document.getElementById('input-reserva-fecha').value = '';
+            document.getElementById('input-reserva-hora').value = '';
+            document.getElementById('lbl-fecha-seleccionada').innerHTML = 'Selecciona un día en el calendario primero.';
+            document.getElementById('reserva-contenedor-horarios').innerHTML = '<div style="grid-column: 1 / -1; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: #aaa; font-weight: 600; text-align: center; height: 100%;"><p>Esperando selección de fecha...</p></div>';
 
-                // Inicializar calendario al mes actual
-                reservaMes = new Date().getMonth() + 1;
-                reservaAnio = new Date().getFullYear();
-                cargarCalendarioReserva(reservaMes, reservaAnio);
+            // Inicializar calendario al mes actual
+            reservaMes = new Date().getMonth() + 1;
+            reservaAnio = new Date().getFullYear();
+            cargarCalendarioReserva(reservaMes, reservaAnio);
 
-                openModal('modal-add-cita');
+            openModal('modal-add-cita');
+        }
+
+        // ─── CRUD (Edit / Delete) ────────────────────────────────────────────────
+        function abrirModalEdit() {
+            if (!currentPaciente) return;
+            closeModal('modal-patient-profile'); // Cierra perfil
+            openModal('modal-edit-patient'); // Abre edicion
+
+            document.getElementById('form-edit-patient').action = `/pacientes/${currentPaciente.id_paciente}`;
+
+            // Campos de Solo Lectura
+            document.getElementById('edit-nombre').value = currentPaciente.nombre;
+            document.getElementById('edit-apellidos').value = `${currentPaciente.apellido_paterno} ${currentPaciente.apellido_materno || ''}`;
+            document.getElementById('edit-fecha-nac').value = currentPaciente.fecha_nacimiento || '';
+            document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || 'N/A';
+
+            // Campos Editables
+            document.getElementById('edit-email').value = currentPaciente.correo_electronico || '';
+            document.getElementById('edit-telefono').value = currentPaciente.telefono || '';
+            document.getElementById('edit-peso').value = currentPaciente.peso ? parseInt(currentPaciente.peso) : '';
+            document.getElementById('edit-direccion').value = currentPaciente.direccion || '';
+            document.getElementById('edit-ocupacion').value = currentPaciente.ocupacion || '';
+            document.getElementById('edit-enfermedades').value = currentPaciente.enfermedades_cronicas || '';
+            document.getElementById('edit-alergias').value = currentPaciente.alergias || '';
+
+            // Contacto Emergencia
+            const ce = currentPaciente.contacto_emergencia;
+            if (ce) {
+                document.getElementById('edit-em-nombre').value = ce.nombre || '';
+                document.getElementById('edit-em-paterno').value = ce.apellido_paterno || '';
+                document.getElementById('edit-em-materno').value = ce.apellido_materno || '';
+                document.getElementById('edit-em-telefono').value = ce.numero_telefono || '';
             }
+        }
+        function formatearNombre(input) {
+            let valor = input.value.trim().toLowerCase();
+            valor = valor.split(' ').map(palabra => {
+                if (palabra.length === 0) return '';
+                return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+            }).join(' ');
+            input.value = valor;
+        }
 
-            // ─── CRUD (Edit / Delete) ────────────────────────────────────────────────
-            function abrirModalEdit() {
-                if (!currentPaciente) return;
-                closeModal('modal-patient-profile'); // Cierra perfil
-                openModal('modal-edit-patient'); // Abre edicion
-
-                document.getElementById('form-edit-patient').action = `/pacientes/${currentPaciente.id_paciente}`;
-
-                // Campos de Solo Lectura
-                document.getElementById('edit-nombre').value = currentPaciente.nombre;
-                document.getElementById('edit-apellidos').value = `${currentPaciente.apellido_paterno} ${currentPaciente.apellido_materno || ''}`;
-                document.getElementById('edit-fecha-nac').value = currentPaciente.fecha_nacimiento || '';
-                document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || 'N/A';
-
-                // Campos Editables
-                document.getElementById('edit-email').value = currentPaciente.correo_electronico || '';
-                document.getElementById('edit-telefono').value = currentPaciente.telefono || '';
-                document.getElementById('edit-peso').value = currentPaciente.peso ? parseInt(currentPaciente.peso) : '';
-                document.getElementById('edit-direccion').value = currentPaciente.direccion || '';
-                document.getElementById('edit-ocupacion').value = currentPaciente.ocupacion || '';
-                document.getElementById('edit-enfermedades').value = currentPaciente.enfermedades_cronicas || '';
-                document.getElementById('edit-alergias').value = currentPaciente.alergias || '';
-
-                // Contacto Emergencia
-                const ce = currentPaciente.contacto_emergencia;
-                if (ce) {
-                    document.getElementById('edit-em-nombre').value = ce.nombre || '';
-                    document.getElementById('edit-em-paterno').value = ce.apellido_paterno || '';
-                    document.getElementById('edit-em-materno').value = ce.apellido_materno || '';
-                    document.getElementById('edit-em-telefono').value = ce.numero_telefono || '';
-                }
-            }
-            function formatearNombre(input) {
-                let valor = input.value.trim().toLowerCase();
-                valor = valor.split(' ').map(palabra => {
-                    if (palabra.length === 0) return '';
-                    return palabra.charAt(0).toUpperCase() + palabra.slice(1);
-                }).join(' ');
-                input.value = valor;
-            }
-
-            // Eliminación de pacientes deshabilitada por cumplimiento NOM-004-SSA3-2012
-            function eliminarPaciente() {
-                Swal.fire({
-                    title: 'Acción no permitida',
-                    html: '<b>NOM-004-SSA3-2012:</b> Los expedientes clínicos deben conservarse un mínimo de 5 años tras la última consulta.<br><br>La eliminación de registros médicos electrónicos no está permitida por la normativa mexicana.',
-                    icon: 'info',
-                    confirmButtonColor: '#00b4d8',
-                    confirmButtonText: 'Entendido'
-                });
-            }
-
-            // ─── Protección anti doble submit en el formulario de cita ───────────
-            document.getElementById('form-add-cita').addEventListener('submit', function () {
-                const btn = document.getElementById('btn-confirmar-cita');
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-                    btn.style.opacity = '0.7';
-                    btn.style.cursor = 'not-allowed';
-                }
+        // Eliminación de pacientes deshabilitada por cumplimiento NOM-004-SSA3-2012
+        function eliminarPaciente() {
+            Swal.fire({
+                title: 'Acción no permitida',
+                html: '<b>NOM-004-SSA3-2012:</b> Los expedientes clínicos deben conservarse un mínimo de 5 años tras la última consulta.<br><br>La eliminación de registros médicos electrónicos no está permitida por la normativa mexicana.',
+                icon: 'info',
+                confirmButtonColor: '#00b4d8',
+                confirmButtonText: 'Entendido'
             });
-            // ─────────────────────────────────────────────
-            // SOLO LETRAS (bloquea números en tiempo real)
-            // ─────────────────────────────────────────────
-            function soloLetras(e) {
-                let tecla = e.key;
-                let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
+        }
 
-                if (!regex.test(tecla)) {
-                    return false;
+        // ─── Protección anti doble submit en el formulario de cita ───────────
+        document.getElementById('form-add-cita').addEventListener('submit', function () {
+            const btn = document.getElementById('btn-confirmar-cita');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+                btn.style.opacity = '0.7';
+                btn.style.cursor = 'not-allowed';
+            }
+        });
+        // ─────────────────────────────────────────────
+        // SOLO LETRAS (bloquea números en tiempo real)
+        // ─────────────────────────────────────────────
+        function soloLetras(e) {
+            let tecla = e.key;
+            let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
+
+            if (!regex.test(tecla)) {
+                return false;
+            }
+        }
+
+        function formatearEnVivo(input) {
+
+            let valor = input.value.toLowerCase();
+
+            valor = valor.replace(/\b\w/g, function (letra) {
+                return letra.toUpperCase();
+            });
+
+            input.value = valor;
+        }
+
+        // ─────────────────────────────────────────────
+        // Evita doble espacio
+        // ─────────────────────────────────────────────
+        function limpiarEspacios(input) {
+            input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
+                .replace(/\s{2,}/g, ' ');
+        }
+
+        // ─────────────────────────────────────────────
+        // Primera letra mayúscula
+        // ─────────────────────────────────────────────
+        function formatearNombre(input) {
+            let valor = input.value.trim().toLowerCase();
+
+            valor = valor.split(' ').map(palabra => {
+                if (palabra.length === 0) return '';
+                return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+            }).join(' ');
+
+            input.value = valor;
+        }
+
+        // ─── Auto-abrir modal si hay errores de validación ──────────────
+        @if($errors->any())
+            openModal('modal-new-patient');
+        @endif
+
+        // ==========================================
+        // CALENDARIO DE RESERVA DE CITAS
+        // ==========================================
+        let reservaMes = new Date().getMonth() + 1;
+        let reservaAnio = new Date().getFullYear();
+        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        function cambiarMesReserva(delta) {
+            reservaMes += delta;
+            if (reservaMes > 12) { reservaMes = 1; reservaAnio++; }
+            if (reservaMes < 1) { reservaMes = 12; reservaAnio--; }
+            cargarCalendarioReserva(reservaMes, reservaAnio);
+        }
+
+        function cargarCalendarioReserva(mes, anio) {
+            document.getElementById('reserva-mes-anio').innerText = `${nombresMeses[mes - 1]} ${anio}`;
+            const grid = document.getElementById('reserva-grid-dias');
+
+            // Loader elegante
+            grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:30px;"><i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-color); font-size: 2rem;"></i></div>';
+
+            // Reutilizamos la API del DashboardController
+            fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
+                .then(res => res.json())
+                .then(disponibilidad => {
+                    grid.innerHTML = '';
+
+                    const hoy = new Date();
+                    hoy.setHours(0, 0, 0, 0);
+
+                    // Rellenar espacios vacíos del inicio del mes
+                    const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
+                    for (let i = 0; i < primerDiaSemana; i++) {
+                        grid.appendChild(document.createElement('div'));
+                    }
+
+                    // Crear los días
+                    for (const [dia, data] of Object.entries(disponibilidad)) {
+                        let div = document.createElement('div');
+                        div.innerText = dia;
+                        div.style.padding = '10px 5px';
+                        div.style.borderRadius = '10px';
+                        div.style.fontWeight = '700';
+                        div.style.transition = 'all 0.2s ease';
+                        div.style.userSelect = 'none';
+
+                        const estaFecha = new Date(anio, mes - 1, parseInt(dia));
+                        estaFecha.setHours(0, 0, 0, 0);
+                        const esPasado = estaFecha < hoy;
+
+                        if (esPasado) {
+                            div.style.background = '#f3f4f6';
+                            div.style.color = '#d1d5db';
+                            div.style.cursor = 'not-allowed';
+                        } else if (data.estado === 'verde') {
+                            div.style.background = 'rgba(50, 215, 75, 0.1)';
+                            div.style.color = '#15803d';
+                            div.style.border = '1px solid rgba(50, 215, 75, 0.3)';
+                        } else if (data.estado === 'amarillo') {
+                            div.style.background = 'rgba(255, 193, 7, 0.1)';
+                            div.style.color = '#b45309';
+                            div.style.border = '1px solid rgba(255, 193, 7, 0.3)';
+                        } else if (data.estado === 'rojo') {
+                            div.style.background = '#EF4444';
+                            div.style.color = 'white';
+                            div.style.boxShadow = '0 2px 8px rgba(239,68,68,0.3)';
+                        } else {
+                            div.style.background = '#fff';
+                            div.style.color = '#333';
+                        }
+
+                        // Interactividad
+                        if (!esPasado && data.estado !== 'rojo') {
+                            div.style.cursor = 'pointer';
+                            div.onmouseover = () => { div.style.transform = 'translateY(-2px)'; div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)'; };
+                            div.onmouseout = () => { div.style.transform = 'translateY(0)'; div.style.boxShadow = 'none'; };
+
+                            div.onclick = () => {
+                                // Limpiar selecciones previas
+                                document.querySelectorAll('#reserva-grid-dias div').forEach(d => {
+                                    if (d.style.outline) d.style.outline = 'none';
+                                });
+                                // Marcar como seleccionado
+                                div.style.outline = '3px solid var(--primary-color)';
+                                div.style.outlineOffset = '1px';
+                                seleccionarFechaReserva(dia, mes, anio, data.hora_inicio, data.hora_fin);
+                            };
+                        } else if (!esPasado && data.estado === 'rojo') {
+                            div.style.cursor = 'not-allowed';
+                            div.onclick = () => alert('❌ Este día no tiene horarios disponibles.');
+                        }
+
+                        grid.appendChild(div);
+                    }
+                });
+        }
+
+        function seleccionarFechaReserva(dia, mes, anio, horaInicio, horaFin) {
+            const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+            // Actualizar inputs
+            document.getElementById('input-reserva-fecha').value = fechaString;
+            document.getElementById('input-reserva-hora').value = ''; // Limpiar hora anterior
+
+            // Mostrar fecha amigable
+            const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const fechaObj = new Date(anio, mes - 1, dia);
+            let fechaBonita = fechaObj.toLocaleDateString('es-MX', opciones);
+            document.getElementById('lbl-fecha-seleccionada').innerHTML = `<span style="color:var(--primary-color);">Fecha:</span> ${fechaBonita}`;
+
+            generarHorasReserva(fechaString, horaInicio, horaFin);
+        }
+
+        function generarHorasReserva(fecha, horaInicioStr, horaFinStr) {
+            const contenedor = document.getElementById('reserva-contenedor-horarios');
+            contenedor.innerHTML = '';
+
+            let horariosClinica = [];
+
+            // Generar slots de 30 min desde horaInicioStr hasta horaFinStr
+            if (horaInicioStr && horaFinStr) {
+                let [hInicio, mInicio] = horaInicioStr.split(':').map(Number);
+                let [hFin, mFin] = horaFinStr.split(':').map(Number);
+
+                let currentDate = new Date();
+                currentDate.setHours(hInicio, mInicio, 0, 0);
+
+                let endDate = new Date();
+                endDate.setHours(hFin, mFin, 0, 0);
+
+                // Prevenir loop infinito si la configuración es rara
+                while (currentDate < endDate && horariosClinica.length < 48) {
+                    let h = String(currentDate.getHours()).padStart(2, '0');
+                    let m = String(currentDate.getMinutes()).padStart(2, '0');
+                    horariosClinica.push(`${h}:${m}`);
+
+                    // Añadir 30 mins
+                    currentDate.setMinutes(currentDate.getMinutes() + 30);
                 }
             }
 
-            function formatearEnVivo(input) {
-
-                let valor = input.value.toLowerCase();
-
-                valor = valor.replace(/\b\w/g, function (letra) {
-                    return letra.toUpperCase();
-                });
-
-                input.value = valor;
+            if (horariosClinica.length === 0) {
+                contenedor.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #888; font-style: italic;">No hay horarios configurados para este día.</p>';
+                return;
             }
 
-            // ─────────────────────────────────────────────
-            // Evita doble espacio
-            // ─────────────────────────────────────────────
-            function limpiarEspacios(input) {
-                input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
-                    .replace(/\s{2,}/g, ' ');
-            }
+            horariosClinica.forEach(hora => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'reserva-hora-btn';
 
-            // ─────────────────────────────────────────────
-            // Primera letra mayúscula
-            // ─────────────────────────────────────────────
-            function formatearNombre(input) {
-                let valor = input.value.trim().toLowerCase();
+                // Formato 12 hrs
+                const [h, m] = hora.split(':');
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+                btn.innerText = hora12;
 
-                valor = valor.split(' ').map(palabra => {
-                    if (palabra.length === 0) return '';
-                    return palabra.charAt(0).toUpperCase() + palabra.slice(1);
-                }).join(' ');
+                // Estilo de las píldoras
+                btn.style.padding = '12px 0';
+                btn.style.background = '#fff';
+                btn.style.border = '1px solid #ccc';
+                btn.style.borderRadius = '10px';
+                btn.style.color = '#333';
+                btn.style.fontWeight = '700';
+                btn.style.cursor = 'pointer';
+                btn.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
 
-                input.value = valor;
-            }
-
-            // ─── Auto-abrir modal si hay errores de validación ──────────────
-            @if($errors->any())
-                openModal('modal-new-patient');
-            @endif
-
-            // ==========================================
-            // CALENDARIO DE RESERVA DE CITAS
-            // ==========================================
-            let reservaMes = new Date().getMonth() + 1;
-            let reservaAnio = new Date().getFullYear();
-            const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-            function cambiarMesReserva(delta) {
-                reservaMes += delta;
-                if (reservaMes > 12) { reservaMes = 1; reservaAnio++; }
-                if (reservaMes < 1) { reservaMes = 12; reservaAnio--; }
-                cargarCalendarioReserva(reservaMes, reservaAnio);
-            }
-
-            function cargarCalendarioReserva(mes, anio) {
-                document.getElementById('reserva-mes-anio').innerText = `${nombresMeses[mes - 1]} ${anio}`;
-                const grid = document.getElementById('reserva-grid-dias');
-
-                // Loader elegante
-                grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:30px;"><i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-color); font-size: 2rem;"></i></div>';
-
-                // Reutilizamos la API del DashboardController
-                fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
-                    .then(res => res.json())
-                    .then(disponibilidad => {
-                        grid.innerHTML = '';
-
-                        const hoy = new Date();
-                        hoy.setHours(0,0,0,0);
-
-                        // Rellenar espacios vacíos del inicio del mes
-                        const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
-                        for (let i = 0; i < primerDiaSemana; i++) {
-                            grid.appendChild(document.createElement('div'));
-                        }
-
-                        // Crear los días
-                        for (const [dia, data] of Object.entries(disponibilidad)) {
-                            let div = document.createElement('div');
-                            div.innerText = dia;
-                            div.style.padding = '10px 5px';
-                            div.style.borderRadius = '10px';
-                            div.style.fontWeight = '700';
-                            div.style.transition = 'all 0.2s ease';
-                            div.style.userSelect = 'none';
-
-                            const estaFecha = new Date(anio, mes - 1, parseInt(dia));
-                            estaFecha.setHours(0,0,0,0);
-                            const esPasado = estaFecha < hoy;
-
-                            if (esPasado) {
-                                div.style.background = '#f3f4f6';
-                                div.style.color = '#d1d5db';
-                                div.style.cursor = 'not-allowed';
-                            } else if (data.estado === 'verde') {
-                                div.style.background = 'rgba(50, 215, 75, 0.1)';
-                                div.style.color = '#15803d';
-                                div.style.border = '1px solid rgba(50, 215, 75, 0.3)';
-                            } else if (data.estado === 'amarillo') {
-                                div.style.background = 'rgba(255, 193, 7, 0.1)';
-                                div.style.color = '#b45309';
-                                div.style.border = '1px solid rgba(255, 193, 7, 0.3)';
-                            } else if (data.estado === 'rojo') {
-                                div.style.background = '#EF4444';
-                                div.style.color = 'white';
-                                div.style.boxShadow = '0 2px 8px rgba(239,68,68,0.3)';
-                            } else {
-                                div.style.background = '#fff';
-                                div.style.color = '#333';
-                            }
-
-                            // Interactividad
-                            if (!esPasado && data.estado !== 'rojo') {
-                                div.style.cursor = 'pointer';
-                                div.onmouseover = () => { div.style.transform = 'translateY(-2px)'; div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)'; };
-                                div.onmouseout = () => { div.style.transform = 'translateY(0)'; div.style.boxShadow = 'none'; };
-
-                                div.onclick = () => {
-                                    // Limpiar selecciones previas
-                                    document.querySelectorAll('#reserva-grid-dias div').forEach(d => {
-                                        if(d.style.outline) d.style.outline = 'none';
-                                    });
-                                    // Marcar como seleccionado
-                                    div.style.outline = '3px solid var(--primary-color)';
-                                    div.style.outlineOffset = '1px';
-                                    seleccionarFechaReserva(dia, mes, anio);
-                                };
-                            } else if (!esPasado && data.estado === 'rojo') {
-                                div.style.cursor = 'not-allowed';
-                                div.onclick = () => alert('❌ Este día no tiene horarios disponibles.');
-                            }
-
-                            grid.appendChild(div);
-                        }
-                    });
-            }
-
-            function seleccionarFechaReserva(dia, mes, anio) {
-                const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-
-                // Actualizar inputs
-                document.getElementById('input-reserva-fecha').value = fechaString;
-                document.getElementById('input-reserva-hora').value = ''; // Limpiar hora anterior
-
-                // Mostrar fecha amigable
-                const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const fechaObj = new Date(anio, mes - 1, dia);
-                let fechaBonita = fechaObj.toLocaleDateString('es-MX', opciones);
-                document.getElementById('lbl-fecha-seleccionada').innerHTML = `<span style="color:var(--primary-color);">Fecha:</span> ${fechaBonita}`;
-
-                generarHorasReserva(fechaString);
-            }
-
-            function generarHorasReserva(fecha) {
-                const contenedor = document.getElementById('reserva-contenedor-horarios');
-                contenedor.innerHTML = '';
-
-                const horariosClinica = [
-                    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
-                    "13:00", "13:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30"
-                ];
-
-                horariosClinica.forEach(hora => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'reserva-hora-btn';
-
-                    // Formato 12 hrs
-                    const [h, m] = hora.split(':');
-                    const ampm = h >= 12 ? 'PM' : 'AM';
-                    const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
-                    btn.innerText = hora12;
-
-                    // Estilo de las píldoras
-                    btn.style.padding = '12px 0';
-                    btn.style.background = '#fff';
-                    btn.style.border = '1px solid #ccc';
-                    btn.style.borderRadius = '10px';
-                    btn.style.color = '#333';
-                    btn.style.fontWeight = '700';
-                    btn.style.cursor = 'pointer';
-                    btn.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
-
-                    btn.onmouseover = () => {
-                        if (document.getElementById('input-reserva-hora').value !== hora) {
-                            btn.style.borderColor = 'var(--primary-color)';
-                            btn.style.color = 'var(--primary-color)';
-                        }
-                    };
-                    btn.onmouseout = () => {
-                        if (document.getElementById('input-reserva-hora').value !== hora) {
-                            btn.style.borderColor = '#ccc';
-                            btn.style.color = '#333';
-                        }
-                    };
-
-                    btn.onclick = () => {
-                        // Reiniciar todos al estilo original
-                        document.querySelectorAll('.reserva-hora-btn').forEach(b => {
-                            b.style.background = '#fff';
-                            b.style.color = '#333';
-                            b.style.borderColor = '#ccc';
-                            b.style.boxShadow = 'none';
-                            b.style.transform = 'scale(1)';
-                        });
-
-                        // Estilo ACTIVO
-                        btn.style.background = 'var(--primary-color)';
-                        btn.style.color = 'white';
+                btn.onmouseover = () => {
+                    if (document.getElementById('input-reserva-hora').value !== hora) {
                         btn.style.borderColor = 'var(--primary-color)';
-                        btn.style.boxShadow = '0 6px 15px rgba(0, 209, 255, 0.3)';
-                        btn.style.transform = 'scale(1.05)';
+                        btn.style.color = 'var(--primary-color)';
+                    }
+                };
+                btn.onmouseout = () => {
+                    if (document.getElementById('input-reserva-hora').value !== hora) {
+                        btn.style.borderColor = '#ccc';
+                        btn.style.color = '#333';
+                    }
+                };
 
-                        // Asignar valor para el backend
-                        document.getElementById('input-reserva-hora').value = hora;
-                    };
+                btn.onclick = () => {
+                    // Reiniciar todos al estilo original
+                    document.querySelectorAll('.reserva-hora-btn').forEach(b => {
+                        b.style.background = '#fff';
+                        b.style.color = '#333';
+                        b.style.borderColor = '#ccc';
+                        b.style.boxShadow = 'none';
+                        b.style.transform = 'scale(1)';
+                    });
 
-                    contenedor.appendChild(btn);
-                });
-            }
-        </script>
+                    // Estilo ACTIVO
+                    btn.style.background = 'var(--primary-color)';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = 'var(--primary-color)';
+                    btn.style.boxShadow = '0 6px 15px rgba(0, 209, 255, 0.3)';
+                    btn.style.transform = 'scale(1.05)';
+
+                    // Asignar valor para el backend
+                    document.getElementById('input-reserva-hora').value = hora;
+                };
+
+                contenedor.appendChild(btn);
+            });
+        }
+    </script>
 @endsection

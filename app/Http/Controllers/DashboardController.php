@@ -418,7 +418,9 @@ class DashboardController extends Controller
                 'horas_ocupadas' => $horasOcupadas,
                 'horas_disponibles' => $horasDisponibles,
                 'slots_ocupados' => $totalCitas,
-                'slots_totales' => $slotsDisponiblesPorDia
+                'slots_totales' => $slotsDisponiblesPorDia,
+                'hora_inicio' => $horarioDia ? ($horarioDia->hora_inicio ? Carbon::parse($horarioDia->hora_inicio)->format('H:i') : '09:00') : '09:00',
+                'hora_fin' => $horarioDia ? ($horarioDia->hora_fin ? Carbon::parse($horarioDia->hora_fin)->format('H:i') : '18:00') : '18:00'
             ];
         }
 

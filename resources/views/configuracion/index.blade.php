@@ -91,12 +91,6 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 15px;">
-                        <label>Horario de Atención (Texto)</label>
-                        <input type="text" name="horario_default" value="{{ $doctorPerfil->horario_default ?? '' }}"
-                            class="modern-input" placeholder="Ej: Lun-Vie 9am a 6pm">
-                    </div>
-
                     <button type="submit" class="ghost-btn"
                         style="margin-top: 20px; background: #0077b6; color: white; width: 100%;">
                         Actualizar Perfil Doctor
