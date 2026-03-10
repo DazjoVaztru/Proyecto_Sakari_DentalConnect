@@ -248,7 +248,7 @@
 
                     <button class="ghost-btn" id="btn-actualizar-cita"
                         style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
-                                                                                                                                                                                                            margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
+                                                                                                                                                                                                                    margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
                         GUARDAR CAMBIOS
                     </button>
 
@@ -361,13 +361,14 @@
                     <div
                         style="display: flex; gap: 20px; align-items: center; margin-top: 30px; justify-content: flex-end; flex-wrap: wrap; flex-shrink: 0;">
 
-                        {{-- AHORA EL TOTAL ES UN INPUT EDITABLE --}}
+                        {{-- TOTAL DE LA CITA COMO ETIQUETA ESTATICA --}}
                         <div
                             style="font-size: 1.5rem; font-weight: 700; color: #000; display: flex; align-items: center; white-space: nowrap;">
-                            Total: $
-                            <input type="number" name="costo_estimado" id="input-costo-total"
-                                style="background: #FFFFFF; padding: 8px 15px; border-radius: 8px; border: 2px solid #00D1FF; margin-left: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 140px; text-align: center; font-size: 1.4rem; font-weight: 800; color: var(--primary-color); outline: none;"
-                                step="0.01" min="0" oninput="calcularVueltoReal()" placeholder="0.00">
+                            Total:
+                            <span
+                                style="background: #FFFFFF; padding: 8px 20px; border-radius: 8px; border: 2px solid #00D1FF; margin-left: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 120px; text-align: center;">
+                                <span id="lbl-total">0.00</span>
+                            </span>
                         </div>
 
                         <div
@@ -387,9 +388,9 @@
                 <!-- WIDGET 2: HORARIO (Aparece sobre Resumen/Odontograma) -->
                 <div id="widget-horario" class="inner-widget"
                     style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                                           background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
-                                           border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-                                           padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
+                                                   background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+                                                   border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+                                                   padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
 
                     <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 5px;">
                         <i class="fa-regular fa-calendar-check"></i> Reprogramar Cita
@@ -403,7 +404,7 @@
                             <label style="font-weight: 700; color: #333;">Fecha seleccionada</label>
                             <input type="date" name="nueva_fecha" id="input-nueva-fecha"
                                 style="padding: 14px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1.1rem; 
-                                                       background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
+                                                               background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
                                 onchange="generarHorariosDisponibles(this.value)">
                         </div>
 
@@ -413,7 +414,7 @@
 
                             <div id="contenedor-horarios"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; 
-                                                        max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
+                                                                max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
                                 <div
                                     style="grid-column: 1 / -1; color: #888; text-align: center; padding: 20px; font-style: italic;">
                                     Selecciona una fecha primero...
@@ -922,12 +923,12 @@
                             }
 
                             tr.innerHTML = `
-                                                                    <td style="${tdStyle}">${fila.dia}</td>
-                                                                    <td style="${tdStyle}">${fila.hora}</td>
-                                                                    <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                                                    <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                                                    <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                                                `;
+                                                                            <td style="${tdStyle}">${fila.dia}</td>
+                                                                            <td style="${tdStyle}">${fila.hora}</td>
+                                                                            <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
+                                                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
+                                                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
+                                                                        `;
                             return tr;
                         });
 
@@ -950,7 +951,7 @@
                     document.getElementById('raw-costo-total').value = rawCosto;
                     document.getElementById('raw-total-abonado').value = rawPagado;
 
-                    document.getElementById('input-costo-total').value = rawCosto.toFixed(2);
+                    document.getElementById('lbl-total').innerText = '$' + data.finanzas.total;
                     document.getElementById('lbl-restante').innerText = data.finanzas.restante;
 
                     // 4. Guardar fecha de la cita actual para el calendario de reagendado
@@ -1016,14 +1017,14 @@
             const dientesPermInf = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const svgCaras = `
-                                                                                                                                    <svg viewBox="0 0 100 100" class="odontograma-svg">
-                                                                                                                                        <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
-                                                                                                                                        <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
-                                                                                                                                        <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
-                                                                                                                                        <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
-                                                                                                                                        <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
-                                                                                                                                    </svg>
-                                                                                                                                `;
+                                                                                                                                            <svg viewBox="0 0 100 100" class="odontograma-svg">
+                                                                                                                                                <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
+                                                                                                                                                <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
+                                                                                                                                                <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
+                                                                                                                                                <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
+                                                                                                                                                <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
+                                                                                                                                            </svg>
+                                                                                                                                        `;
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -1055,9 +1056,9 @@
 
                     const svgId = obtenerIdAnatomia(numero);
                     const divAnatomia = `
-                                                                                                                        <div class="anatomia">
-                                                                                                                            <svg><use href="${svgId}"></use></svg>
-                                                                                                                        </div>`;
+                                                                                                                                <div class="anatomia">
+                                                                                                                                    <svg><use href="${svgId}"></use></svg>
+                                                                                                                                </div>`;
                     const divNumero = `<div class="numero-diente">${numero}</div>`;
                     const divCaras = `<div class="caras-interactivas">${svgCaras}</div>`;
 
@@ -1313,8 +1314,7 @@
 
         // --- CALCULO MATEMATICO EN TIEMPO REAL ---
         function calcularVueltoReal() {
-            // AHORA LEE DIRECTAMENTE LO QUE ESCRIBAS EN EL INPUT
-            const costoTotalBase = parseFloat(document.getElementById('input-costo-total').value) || 0;
+            const costoTotalBase = parseFloat(document.getElementById('raw-costo-total').value) || 0;
             const abonoAnterior = parseFloat(document.getElementById('raw-total-abonado').value) || 0;
             const abonoActual = parseFloat(document.getElementById('input-monto-abono').value) || 0;
 
