@@ -50,6 +50,24 @@
                 <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos este mes</div>
             </div>
         </div>
+        @forelse($citas as $cita)
+    {{-- AGREGA ESTE ID AL CONTENEDOR DE CADA CITA --}}
+    <div id="cita-card-{{ $cita->id_cita }}" style="position: relative; margin-bottom: 15px; ...">
+        
+        {{-- Overlay de checkmark (Tu código original) --}}
+        <div class="check-overlay" id="overlay-{{ $cita->id_cita }}" ...>
+             </div>
+
+        {{-- Contenido de la cita --}}
+        <div style="display: flex; ...">
+             <button type="button" onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})">
+                Marcar completada
+             </button>
+        </div>
+    </div>
+@empty
+    <p>No hay citas próximas agendadas.</p>
+@endforelse
 
         {{-- Tarjeta: Notificaciones --}}
         @if($notificacionesPendientes > 0)
