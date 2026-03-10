@@ -105,6 +105,12 @@ class DashboardController extends Controller
 
         $p = $cita->paciente;
         $costoTotal = floatval($cita->costo_estimado ?? 0);
+
+        // ¡NUEVA MAGIA! Si el costo es 0, jalamos el precio del catálogo automáticamente
+        if ($costoTotal == 0 && $cita->servicio) {
+            $costoTotal = floatval($cita->servicio->precio_base);
+        }
+
         $totalPagado = $cita->ingresos ? $cita->ingresos->sum('monto') : 0;
         $saldo = max(0, $costoTotal - $totalPagado);
 
