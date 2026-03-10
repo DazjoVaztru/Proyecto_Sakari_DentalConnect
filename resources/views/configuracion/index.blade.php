@@ -14,7 +14,7 @@
         </div>
     @endif
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
 
         {{-- ═══════════════ DATOS DE LA CLÍNICA ═══════════════ --}}
         <div class="config-card"
@@ -129,12 +129,12 @@
                                     $dia = $horario->dia_semana;
                                 @endphp
                                 <tr class="horario-row {{ $horario->activo ? '' : 'row-inactive' }}" id="row-dia-{{ $dia }}">
-                                    <td>
+                                    <td data-label="Día">
                                         <span style="font-weight: 600; color: #333;">
                                             {{ $diasIcons[$dia] }} {{ $diasNombres[$dia] }}
                                         </span>
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td data-label="Activo" style="text-align: center;">
                                         <label class="switch-toggle">
                                             <input type="checkbox"
                                                    name="dias[{{ $dia }}][activo]"
@@ -144,7 +144,7 @@
                                             <span class="switch-slider"></span>
                                         </label>
                                     </td>
-                                    <td>
+                                    <td data-label="Hora Inicio">
                                         <input type="time"
                                                name="dias[{{ $dia }}][hora_inicio]"
                                                value="{{ $horario->hora_inicio ? \Carbon\Carbon::parse($horario->hora_inicio)->format('H:i') : '' }}"
@@ -152,7 +152,7 @@
                                                id="inicio-{{ $dia }}"
                                                {{ $horario->activo ? '' : 'disabled' }}>
                                     </td>
-                                    <td>
+                                    <td data-label="Hora Fin">
                                         <input type="time"
                                                name="dias[{{ $dia }}][hora_fin]"
                                                value="{{ $horario->hora_fin ? \Carbon\Carbon::parse($horario->hora_fin)->format('H:i') : '' }}"
@@ -445,6 +445,50 @@
 
         .switch-toggle input:checked + .switch-slider:before {
             transform: translateX(20px);
+        }
+
+        /* ── Responsividad (Mobile y Split PC) ── */
+        @media (max-width: 1024px) {
+            .horarios-table thead {
+                display: none;
+            }
+            .horarios-table tbody, .horarios-table tr, .horarios-table td {
+                display: block;
+                width: 100%;
+            }
+            .horario-row {
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 10px;
+                background: white;
+            }
+            .horario-row td {
+                text-align: right !important;
+                padding: 10px 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: none;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .horario-row td:last-child {
+                border-bottom: none;
+            }
+            .horario-row td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #888;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                text-align: left;
+            }
+            .horario-input {
+                max-width: 60%;
+            }
+            /* Reset border radius for mobile block */
+            .horario-row td:first-child { border-radius: 0; }
+            .horario-row td:last-child  { border-radius: 0; }
         }
     </style>
 @endsection
