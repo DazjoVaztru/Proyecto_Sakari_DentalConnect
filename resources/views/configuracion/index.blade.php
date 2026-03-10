@@ -5,7 +5,7 @@
 @section('contenido')
     <div class="header-section" style="margin-bottom: 30px;">
         <h2 class="page-title">Configuración de la Clínica {{ $clinica->nombre_comercial }}</h2>
-        <p style="color: #666;">Gestiona la información de tu consultorio y equipo de trabajo.</p>
+        <p style="color: #666;">Gestiona la información de tu consultorio y de tu equipo/p>
     </div>
 
     @if(session('success'))
