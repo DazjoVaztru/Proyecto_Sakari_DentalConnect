@@ -146,21 +146,74 @@
                             </span>
                         </div>
                     </div>
+{{-- 3. TU BOTÓN (Tal cual lo pusiste, solo verifica el ID) --}}
+<button 
+    type="button" 
+    id="btn-completar-{{ $cita->id_cita }}"
+    class="btn-marcar-completada"
+    {{-- Agregamos el event y el ID --}}
+    onclick="completarCita(event, {{ $cita->id_cita }})" 
+    style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer;">
+    <i class="fa-regular fa-circle-check"></i>
+    Marcar completada
+</button>
 
-                  {{-- 3. TU BOTÓN (Tal cual lo pusiste, solo verifica el ID) --}}
-            <button type="button" id="btn-completar-{{ $cita->id_cita }}"
-                onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
-                style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; ...">
-                <i class="fa-regular fa-circle-check"></i>
-                Marcar completada
-            </button>
-        </div>
-    </div>
+</div>
+</div>
+
+{{-- Script para manejar el click del botón --}}
+   <script>
+    // Recibimos 'e' (el evento) y el idCita
+    function completarCita(e, idCita) {
+        // CORRECCIÓN CLAVE: Esto evita que el click llegue a la tarjeta y abra el modal
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        fetch(`/api/citas/${idCita}/completar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const overlay = document.getElementById(`overlay-${idCita}`);
+                const checkPath = document.getElementById(`check-path-${idCita}`);
+                
+                overlay.style.display = 'flex';
+                setTimeout(() => {
+                    overlay.style.opacity = '1';
+                    if (checkPath) checkPath.style.strokeDashoffset = '0';
+                }, 50);
+
+                // CAMBIO A 3 SEGUNDOS (3000ms)
+                setTimeout(() => {
+                    const card = document.getElementById(`cita-card-${idCita}`);
+                    if (card) {
+                        card.style.transition = 'all 0.5s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => card.remove(), 500);
+                    }
+                    
+                    // Actualiza el contador de citas hoy si existe
+                    const contadorHoy = document.querySelector('.citas-hoy-count');
+                    if(contadorHoy && data.stats) {
+                        contadorHoy.innerText = data.stats.pendientes_hoy;
+                    }
+                }, 3000); // <--- Aquí cambié de 2000 a 3000
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
 @empty
     <p>No hay citas próximas agendadas.</p>
-@endforelse
-    </div>
-</div>
 
     <div class="modal-overlay" id="modal-detalle-cita">
         <div class="modal-glass modal-xl"

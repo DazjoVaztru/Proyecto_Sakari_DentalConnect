@@ -276,40 +276,50 @@ class DashboardController extends Controller
      * Marca la cita como completada y devuelve datos actualizados para el Dashboard.
      */
     public function completarCita($idCita)
-    {
-        try {
-            $cita = Cita::findOrFail($idCita);
-            $cita->estado_cita = 'completada';
-            $cita->save();
+{
+    try {
+        $cita = Cita::findOrFail($idCita);
+        
+        // 1. Actualizamos el estado
+        $cita->estado_cita = 'completada';
+        $cita->save();
 
-            $idClinica = Auth::user()->id_clinica;
+        $idClinica = Auth::user()->id_clinica;
+        $hoy = \Carbon\Carbon::today();
 
-            $citasPendientesHoy = Cita::where('id_clinica', $idClinica)
-                ->whereDate('fecha_hora_inicio', Carbon::today())
-                ->whereIn('estado_cita', ['pendiente', 'confirmada'])
-                ->count();
+        // 2. Recalculamos citas pendientes de HOY 
+        // Filtramos solo las que siguen pendientes o confirmadas para que el contador baje
+        $citasPendientesHoy = Cita::where('id_clinica', $idClinica)
+            ->whereDate('fecha_hora_inicio', $hoy)
+            ->whereIn('estado_cita', ['pendiente', 'confirmada'])
+            ->count();
 
-            $ingresosMes = \App\Models\IngresoCaja::where('id_clinica', $idClinica)
-                ->whereMonth('fecha_ingreso', Carbon::now()->month)
-                ->whereYear('fecha_ingreso', Carbon::now()->year)
-                ->sum('monto');
+        // 3. Recalculamos ingresos del mes (por si el dashboard necesita refrescar esa card)
+        $ingresosMes = \App\Models\IngresoCaja::where('id_clinica', $idClinica)
+            ->whereMonth('fecha_ingreso', now()->month)
+            ->whereYear('fecha_ingreso', now()->year)
+            ->sum('monto');
 
-            return response()->json([
-                'success' => true,
-                'message' => '¡Cita completada!',
-                'stats' => [
-                    'pendientes_hoy' => $citasPendientesHoy,
-                    'ingresos_mes' => number_format($ingresosMes, 2)
-                ]
-            ]);
+        // 4. Respuesta JSON que recibirá tu JavaScript
+        return response()->json([
+            'success' => true,
+            'message' => '¡Cita completada!',
+            'stats' => [
+                'pendientes_hoy' => $citasPendientesHoy,
+                'ingresos_mes'   => number_format($ingresosMes, 2, '.', ',')
+            ]
+        ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al procesar la solicitud.'
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        // Log del error por si necesitas debuguear
+        \Log::error("Error al completar cita ID {$idCita}: " . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No se pudo completar la acción en el servidor.'
+        ], 500);
     }
+}
 
     // --- FUNCIÓN 4: Disponibilidad del mes para el calendario ---
     /**
