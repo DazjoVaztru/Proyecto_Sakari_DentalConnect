@@ -57,7 +57,7 @@
                 </div>
 
                 <div style="margin-top: 15px;">
-                    <label>Porcentaje de Anticipo (%)</label>
+                    <label>Porcentaje de Anticipo</label>
                     <input type="number" step="0.01" min="0" max="100" name="config_anticipo_pct" value="{{ $clinica->config_anticipo_pct }}" class="modern-input">
                 </div>
 
