@@ -50,24 +50,6 @@
                 <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos este mes</div>
             </div>
         </div>
-        @forelse($citas as $cita)
-    {{-- AGREGA ESTE ID AL CONTENEDOR DE CADA CITA --}}
-    <div id="cita-card-{{ $cita->id_cita }}" style="position: relative; margin-bottom: 15px; ...">
-        
-        {{-- Overlay de checkmark (Tu código original) --}}
-        <div class="check-overlay" id="overlay-{{ $cita->id_cita }}" ...>
-             </div>
-
-        {{-- Contenido de la cita --}}
-        <div style="display: flex; ...">
-             <button type="button" onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})">
-                Marcar completada
-             </button>
-        </div>
-    </div>
-@empty
-    <p>No hay citas próximas agendadas.</p>
-@endforelse
 
         {{-- Tarjeta: Notificaciones --}}
         @if($notificacionesPendientes > 0)
@@ -88,132 +70,86 @@
 
     </div>
 
-<div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
-    <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
-    <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
-        @forelse($proximasCitas as $cita)
-            @php
-                $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
-            @endphp
-            {{-- Añadimos transition: opacity para el efecto de salida --}}
-            <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
-                onclick="cargarModalCita({{ $cita->id_cita }})"
-                style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.5s ease;"
-                onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
-                onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
 
-                {{-- Overlay de checkmark --}}
-                <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
-                    style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(240,255,246,0.97); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0; transition: opacity 0.3s ease;">
-                    <svg width="60" height="60" viewBox="0 0 60 60">
-                        <circle cx="30" cy="30" r="28" fill="#22C55E" />
-                        <path id="check-path-{{ $cita->id_cita }}" d="M16 30 L26 42 L44 20" stroke="white" stroke-width="5"
-                            fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55"
-                            stroke-dashoffset="55" style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
-                    </svg>
-                    <span style="font-weight: 800; color: #15803D; font-size: 1.05em;">¡Cita completada!</span>
-                </div>
+    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
+        <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
+        <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
+            @forelse($proximasCitas as $cita)
+                @php
+                    $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
+                @endphp
+                <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
+                    onclick="cargarModalCita({{ $cita->id_cita }})"
+                    style="position: relative; border: 1px solid {{ $esVencida ? '#FCD34D' : '#eee' }}; background: {{ $esVencida ? '#FFFBF0' : '#fff' }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.2s ease;"
+                    onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#00D1FF' }}'"
+                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $esVencida ? '#FCD34D' : '#eee' }}'">
 
-                <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
-                    {{-- Bloque fecha --}}
-                    <div style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
-                        <span style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : 'var(--primary-color)' }}; font-size: 1.4em;">
-                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
-                        </span>
-                        <small style="color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em;">
-                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
-                        </small>
+                    {{-- Overlay de checkmark (oculto por default) --}}
+                    <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
+                        style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(240,255,246,0.97); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                            <circle cx="30" cy="30" r="28" fill="#22C55E" />
+                            <path id="check-path-{{ $cita->id_cita }}" d="M16 30 L26 42 L44 20" stroke="white" stroke-width="5"
+                                fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55"
+                                stroke-dashoffset="55" style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
+                        </svg>
+                        <span style="font-weight: 800; color: #15803D; font-size: 1.05em;">¡Cita completada!</span>
                     </div>
 
-                    {{-- Info --}}
-                    <div style="flex: 1; overflow: hidden;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                            <h4 style="margin: 0; font-size: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;">
-                                {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
-                            </h4>
-                            @if($esVencida)
-                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCD34D; white-space: nowrap; flex-shrink: 0;">
-                                    ⚠ VENCIDA
-                                </span>
-                            @endif
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px; color: #555; font-size: 1em;">
-                            <i class="fa-regular fa-clock" style="color: {{ $esVencida ? '#D97706' : 'var(--primary-color)' }};"></i>
-                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
-                            <span style="margin: 0 5px; color: #ddd;">|</span>
-                            <span style="color: var(--secondary-color); font-weight: 600;">
-                                {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
+                    <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
+                        {{-- Bloque fecha --}}
+                        <div
+                            style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
+                            <span
+                                style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : 'var(--primary-color)' }}; font-size: 1.4em;">
+                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
                             </span>
+                            <small style="color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em;">
+                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
+                            </small>
                         </div>
+
+                        {{-- Info --}}
+                        <div style="flex: 1; overflow: hidden;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <h4
+                                    style="margin: 0; font-size: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;">
+                                    {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
+                                </h4>
+                                @if($esVencida)
+                                    <span
+                                        style="background: #FEF3C7; color: #B45309; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCD34D; white-space: nowrap; flex-shrink: 0;">
+                                        ⚠ VENCIDA
+                                    </span>
+                                @endif
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; color: #555; font-size: 1em;">
+                                <i class="fa-regular fa-clock"
+                                    style="color: {{ $esVencida ? '#D97706' : 'var(--primary-color)' }};"></i>
+                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
+                                <span style="margin: 0 5px; color: #ddd;">|</span>
+                                <span style="color: var(--secondary-color); font-weight: 600;">
+                                    {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Botón Marcar Completada --}}
+                        <button type="button" id="btn-completar-{{ $cita->id_cita }}"
+                            onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
+                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
+                            onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
+                            onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+                            <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
+                            Marcar completada
+                        </button>
                     </div>
-{{-- 3. TU BOTÓN (Tal cual lo pusiste, solo verifica el ID) --}}
-<button 
-    type="button"
-    id="btn-completar-{{ $cita->id_cita }}"
-    class="btn-marcar-completada"
-    onclick="completarCita({{ $cita->id_cita }}, event)"
-    style="background:#22C55E;color:white;border:none;border-radius:8px;padding:12px 20px;cursor:pointer;"
->
-    <i class="fa-regular fa-circle-check"></i>
-    Marcar completada
-</button>
-
-</div>
-</div>
-
-{{-- Script para manejar el click del botón --}}
-   <script>
-    // Recibimos 'e' (el evento) y el idCita
-    function completarCita(e, idCita) {
-        // CORRECCIÓN CLAVE: Esto evita que el click llegue a la tarjeta y abra el modal
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        fetch(`/api/citas/${idCita}/completar`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const overlay = document.getElementById(`overlay-${idCita}`);
-                const checkPath = document.getElementById(`check-path-${idCita}`);
-                
-                overlay.style.display = 'flex';
-                setTimeout(() => {
-                    overlay.style.opacity = '1';
-                    if (checkPath) checkPath.style.strokeDashoffset = '0';
-                }, 50);
-
-                // CAMBIO A 3 SEGUNDOS (3000ms)
-                setTimeout(() => {
-                    const card = document.getElementById(`cita-card-${idCita}`);
-                    if (card) {
-                        card.style.transition = 'all 0.5s ease';
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.95)';
-                        setTimeout(() => card.remove(), 500);
-                    }
-                    
-                    // Actualiza el contador de citas hoy si existe
-                    const contadorHoy = document.querySelector('.citas-hoy-count');
-                    if(contadorHoy && data.stats) {
-                        contadorHoy.innerText = data.stats.pendientes_hoy;
-                    }
-                }, 3000); // <--- Aquí cambié de 2000 a 3000
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-</script>
-
-@empty
-    <p>No hay citas próximas agendadas.</p>
+                </div>
+            @empty
+                <p style="text-align: center; color: #888; padding: 30px;">No hay citas próximas agendadas.</p>
+            @endforelse
+        </div>
+    </div>
 
     <div class="modal-overlay" id="modal-detalle-cita">
         <div class="modal-glass modal-xl"
@@ -1358,57 +1294,82 @@
             // Update Label
             document.getElementById('lbl-restante').innerText = restanteVirtual.toFixed(2);
         }
-      // ==========================================
-// MARCAR CITA COMO COMPLETADA
-// ==========================================
-function completarCita(idCita) {
 
-    fetch(`/api/citas/${idCita}/completar`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json'
+        // ==========================================
+        // MARCAR CITA COMO COMPLETADA
+        // ==========================================
+        function completarCita(idCita) {
+            const btn = document.getElementById('btn-completar-' + idCita);
+
+            // Evitar doble clic
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+            // ── Llamada AJAX ───────────────────────────────────────────
+            fetch('/api/citas/' + idCita + '/completar', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Error: ' + (data.message || 'No se pudo completar la cita.'));
+                        if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                        return;
+                    }
+
+                    // ── ACTUALIZAR EL ESTADO EN window.citasData (si existe) ────────────
+                    if (window.citasData) {
+                        const cita = window.citasData.find(c => c.id === idCita);
+                        if (cita) {
+                            cita.estado = 'Completada';
+                        }
+                    }
+
+                    // ── ACTUALIZAR LA TABLA SI ESTÁ ABIERTO EL MODAL ──────────────────
+                    if (window.todasLasFilas && window.todasLasFilas.length > 0) {
+                        // Buscar en todasLasFilas por idCita
+                        const indice = window.todasLasFilas.findIndex(fila => {
+                            // Verificar si tiene reference al id
+                            return fila.dataset?.citaId === String(idCita) || (fila._citaId && fila._citaId === idCita);
+                        });
+
+                        // Si no encontramos, reload para actualizar
+                        if (indice === -1) {
+                            renderizarPagina();
+                        } else {
+                            // Actualizar la fila en memoria y re-renderizar
+                            renderizarPagina();
+                        }
+                    }
+
+                    // Animar el overlay de completado
+                    const overlay = document.getElementById('overlay-' + idCita);
+                    if (overlay) {
+                        overlay.style.display = 'flex';
+                        const checkPath = document.getElementById('check-path-' + idCita);
+                        if (checkPath) {
+                            setTimeout(() => {
+                                checkPath.style.strokeDashoffset = '0';
+                            }, 100);
+                        }
+                    }
+
+                    // Re-cargar los datos para reflejar cambios en la tabla
+                    setTimeout(() => {
+                        cargarModalCita(idCita);
+                    }, 800);
+                })
+                .catch(err => {
+                    console.error('Error al completar cita:', err);
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                    alert('Error de conexión. Inténtalo de nuevo.');
+                });
         }
-    })
-    .then(response => response.json())
-    .then(data => {
 
-        if (!data.success) {
-            alert("No se pudo completar la cita");
-            return;
-        }
-
-        const fila = document.getElementById(`cita-fila-${idCita}`);
-
-        if (!fila) return;
-
-        // 1️⃣ Mostrar mensaje de completado
-        fila.innerHTML = `
-            <td colspan="6" class="text-center p-4">
-                <span style="color:#22c55e;font-weight:bold;">
-                    ✔ Cita completada
-                </span>
-            </td>
-        `;
-
-        // 2️⃣ Esperar 3 segundos y eliminar la fila
-        setTimeout(() => {
-
-            fila.style.transition = "opacity 0.5s";
-            fila.style.opacity = "0";
-
-            setTimeout(() => {
-                fila.remove();
-            }, 500);
-
-        }, 3000);
-
-    })
-    .catch(err => {
-        console.error("Error al completar cita:", err);
-        alert("Error de conexión con el servidor");
-    });
-}
         // ==========================================
         // FUNCIONES DE PAGINACIÓN
         // ==========================================
