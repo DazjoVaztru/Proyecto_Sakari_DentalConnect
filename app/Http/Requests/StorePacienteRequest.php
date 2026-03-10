@@ -64,7 +64,7 @@ class StorePacienteRequest extends FormRequest
             'tipo_sangre' => ['nullable', 'string', 'max:5'],
             'peso' => ['nullable', 'integer', 'min:1', 'max:500'],
             'direccion' => ['required', 'string', 'max:100'],
-            'ocupacion' => ['required', 'string', 'max:100'],
+            'ocupacion' => ['nullable', 'string', 'max:100'],
             'enfermedades_cronicas' => ['required', 'string', 'max:1000'],
             'alergias' => ['required', 'string', 'max:1000'],
 
