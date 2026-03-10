@@ -43,7 +43,7 @@ class DatosInicialesSeeder extends Seeder
             'nombre_completo' => 'Dr. Juan Pérez',
             'rol' => 'doctor',
             'email' => 'admin@dentalconnect.com',
-            'password_hash' => Hash::make('password123'),
+            'password' => Hash::make('password123'), // <-- CAMBIO AQUÍ
             'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
@@ -63,10 +63,9 @@ class DatosInicialesSeeder extends Seeder
             'nombre_completo' => 'Paciente Demo',
             'rol' => 'paciente',
             'email' => 'paciente@demo.com',
-            'password_hash' => Hash::make('paciente123'),
+            'password' => Hash::make('paciente123'), // <-- CAMBIO AQUÍ
             'created_at' => now(),
         ]);
-
         // Ahora los datos médicos del paciente
         $idPaciente = DB::table('pacientes')->insertGetId([
             'id_usuario' => $idUserPaciente,
