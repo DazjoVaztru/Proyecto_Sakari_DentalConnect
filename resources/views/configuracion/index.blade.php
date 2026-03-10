@@ -4,7 +4,7 @@
 
 @section('contenido')
     <div class="header-section" style="margin-bottom: 30px;">
-        <h2 class="page-title">Configuración de la Clínica Prueva FGGBPD</h2>
+        <h2 class="page-title">Configuración de la Clínica {{ $clinica->nombre_comercial }}</h2>
         <p style="color: #666;">Gestiona la información de tu consultorio y equipo de trabajo.</p>
     </div>
 
@@ -16,6 +16,7 @@
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px;">
 
+        {{-- ═══════════════ DATOS DE LA CLÍNICA ═══════════════ --}}
         <div class="config-card"
             style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
             <h3 style="color: #0077b6; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0;">
@@ -55,6 +56,7 @@
             </form>
         </div>
 
+        {{-- ═══════════════ PERFIL DEL DOCTOR ═══════════════ --}}
         @if($doctorUser)
             <div class="config-card"
                 style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
@@ -103,6 +105,86 @@
             </div>
         @endif
 
+        {{-- ═══════════════ HORARIOS DE ATENCIÓN ═══════════════ --}}
+        <div class="config-card"
+            style="grid-column: 1 / -1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 style="color: #0077b6; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0;">
+                <i class="fa-solid fa-clock"></i> Horarios de Atención
+            </h3>
+            <p style="color: #888; font-size: 0.85rem; margin-top: 0;">
+                Define los días y horas en que la clínica está abierta. Los días desactivados aparecerán como cerrados en el calendario.
+            </p>
+
+            <form action="{{ route('configuracion.updateHorarios') }}" method="POST">
+                @csrf
+                <div class="horarios-table-wrapper">
+                    <table class="horarios-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Día</th>
+                                <th style="width: 80px; text-align: center;">Activo</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($horarios as $horario)
+                                @php
+                                    $diasNombres = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 0 => 'Domingo'];
+                                    $diasIcons = [1 => '🟢', 2 => '🟢', 3 => '🟢', 4 => '🟢', 5 => '🟢', 6 => '🟡', 0 => '🔴'];
+                                    $dia = $horario->dia_semana;
+                                @endphp
+                                <tr class="horario-row {{ $horario->activo ? '' : 'row-inactive' }}" id="row-dia-{{ $dia }}">
+                                    <td>
+                                        <span style="font-weight: 600; color: #333;">
+                                            {{ $diasIcons[$dia] }} {{ $diasNombres[$dia] }}
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <label class="switch-toggle">
+                                            <input type="checkbox"
+                                                   name="dias[{{ $dia }}][activo]"
+                                                   value="1"
+                                                   {{ $horario->activo ? 'checked' : '' }}
+                                                   onchange="toggleDia({{ $dia }}, this.checked)">
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="time"
+                                               name="dias[{{ $dia }}][hora_inicio]"
+                                               value="{{ $horario->hora_inicio ? \Carbon\Carbon::parse($horario->hora_inicio)->format('H:i') : '' }}"
+                                               class="modern-input horario-input"
+                                               id="inicio-{{ $dia }}"
+                                               {{ $horario->activo ? '' : 'disabled' }}>
+                                    </td>
+                                    <td>
+                                        <input type="time"
+                                               name="dias[{{ $dia }}][hora_fin]"
+                                               value="{{ $horario->hora_fin ? \Carbon\Carbon::parse($horario->hora_fin)->format('H:i') : '' }}"
+                                               class="modern-input horario-input"
+                                               id="fin-{{ $dia }}"
+                                               {{ $horario->activo ? '' : 'disabled' }}>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="aplicarHorarioSemana()" class="ghost-btn"
+                        style="background: #6c757d;">
+                        <i class="fa-solid fa-copy"></i> Aplicar Lun-Vie igual
+                    </button>
+                    <button type="submit" class="ghost-btn" style="background: #00b4d8;">
+                        <i class="fa-solid fa-save"></i> Guardar Horarios
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- ═══════════════ EQUIPO DE RECEPCIÓN ═══════════════ --}}
         @if(Auth::user()->rol == 'doctor' || Auth::user()->rol == 'admin')
             <div class="config-card"
                 style="grid-column: 1 / -1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
@@ -142,6 +224,7 @@
 
     </div>
 
+    {{-- ═══════════════ MODAL: Nueva Recepcionista ═══════════════ --}}
     <div id="modal-recep"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
         <div style="background: white; padding: 30px; border-radius: 15px; width: 400px;">
@@ -170,6 +253,7 @@
         </div>
     </div>
 
+    {{-- ═══════════════ MODAL: Editar Recepcionista ═══════════════ --}}
     <div id="modal-edit-recep"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
         <div style="background: white; padding: 30px; border-radius: 15px; width: 400px;">
@@ -202,7 +286,7 @@
     </div>
 
     <script>
-        // Script simple para abrir el modal de edición con datos
+        // ── Recepcionistas ──
         function editarRecep(id, nombre, email) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_nombre').value = nombre;
@@ -217,6 +301,50 @@
             }
             if (event.target == document.getElementById('modal-edit-recep')) {
                 document.getElementById('modal-edit-recep').style.display = "none";
+            }
+        }
+
+        // ── Horarios ──
+        function toggleDia(dia, activo) {
+            const row = document.getElementById('row-dia-' + dia);
+            const inicio = document.getElementById('inicio-' + dia);
+            const fin = document.getElementById('fin-' + dia);
+
+            if (activo) {
+                row.classList.remove('row-inactive');
+                inicio.disabled = false;
+                fin.disabled = false;
+            } else {
+                row.classList.add('row-inactive');
+                inicio.disabled = true;
+                fin.disabled = true;
+                inicio.value = '';
+                fin.value = '';
+            }
+        }
+
+        // Copiar horario del lunes al resto de días laborales (Mar-Vie)
+        function aplicarHorarioSemana() {
+            const lunesInicio = document.getElementById('inicio-1').value;
+            const lunesFin = document.getElementById('fin-1').value;
+
+            if (!lunesInicio || !lunesFin) {
+                alert('Primero configura el horario del Lunes.');
+                return;
+            }
+
+            for (let dia = 2; dia <= 5; dia++) {
+                const row = document.getElementById('row-dia-' + dia);
+                const inicio = document.getElementById('inicio-' + dia);
+                const fin = document.getElementById('fin-' + dia);
+                const checkbox = row.querySelector('input[type="checkbox"]');
+
+                checkbox.checked = true;
+                row.classList.remove('row-inactive');
+                inicio.disabled = false;
+                fin.disabled = false;
+                inicio.value = lunesInicio;
+                fin.value = lunesFin;
             }
         }
     </script>
@@ -236,6 +364,93 @@
             color: #555;
             margin-bottom: 5px;
             display: block;
+        }
+
+        /* ── Tabla de Horarios ── */
+        .horarios-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .horarios-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+        }
+
+        .horarios-table thead th {
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #888;
+            font-weight: 600;
+            border-bottom: none;
+        }
+
+        .horarios-table tbody td {
+            padding: 10px 12px;
+            border-bottom: none;
+        }
+
+        .horario-row {
+            background: #f8fafb;
+            border-radius: 8px;
+            transition: background 0.2s, opacity 0.3s;
+        }
+
+        .horario-row td:first-child { border-radius: 8px 0 0 8px; }
+        .horario-row td:last-child  { border-radius: 0 8px 8px 0; }
+
+        .horario-row:hover { background: #eef6fb; }
+
+        .row-inactive {
+            opacity: 0.45;
+            background: #f5f5f5;
+        }
+
+        .horario-input {
+            max-width: 150px;
+            padding: 8px 10px;
+            font-size: 0.9rem;
+        }
+
+        /* ── Toggle Switch ── */
+        .switch-toggle {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch-toggle input { opacity: 0; width: 0; height: 0; }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .switch-slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .switch-toggle input:checked + .switch-slider {
+            background-color: #00b4d8;
+        }
+
+        .switch-toggle input:checked + .switch-slider:before {
+            transform: translateX(20px);
         }
     </style>
 @endsection

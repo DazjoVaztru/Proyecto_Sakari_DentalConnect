@@ -258,6 +258,19 @@ return new class extends Migration {
             $table->foreign('id_doctor')->references('id_doctor')->on('doctores');
         });
 
+        // Horarios de atención por día de la semana (configurables por clínica)
+        Schema::create('horarios_clinica', function (Blueprint $table) {
+            $table->id('id_horario');
+            $table->unsignedBigInteger('id_clinica');
+            $table->tinyInteger('dia_semana')->comment('0=Domingo,1=Lunes,...,6=Sábado');
+            $table->boolean('activo')->default(true);
+            $table->time('hora_inicio')->nullable();
+            $table->time('hora_fin')->nullable();
+            $table->timestamps();
+            $table->foreign('id_clinica')->references('id_clinica')->on('clinicas')->onDelete('cascade');
+            $table->unique(['id_clinica', 'dia_semana'], 'uk_clinica_dia');
+        });
+
         Schema::create('reviews', function (Blueprint $table) {
             $table->id('id_review');
             $table->unsignedBigInteger('id_cita')->nullable();
@@ -463,6 +476,7 @@ return new class extends Migration {
         Schema::dropIfExists('config_recordatorios');
         Schema::dropIfExists('config_global');
         Schema::dropIfExists('reviews');
+        Schema::dropIfExists('horarios_clinica');
         Schema::dropIfExists('horarios_bloqueados');
         Schema::dropIfExists('inventario');
         Schema::dropIfExists('ingresos_caja');

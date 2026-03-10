@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Clinica;
 use App\Models\User;
 use App\Models\Doctor;
+use App\Models\HorarioClinica;
 
 class ConfiguracionController extends Controller
 {
@@ -36,12 +37,16 @@ class ConfiguracionController extends Controller
             ->where('rol', 'recepcionista')
             ->get();
 
+        // Horarios de atención (crear registros por defecto si no existen)
+        $horarios = $this->obtenerOCrearHorarios($clinica->id_clinica);
+
         return view('configuracion.index', compact(
             'user',
             'clinica',
             'doctorUser',
             'doctorPerfil',
-            'recepcionistas'
+            'recepcionistas',
+            'horarios'
         ));
     }
 
@@ -113,5 +118,77 @@ class ConfiguracionController extends Controller
         ]);
 
         return back()->with('success', 'Recepcionista agregada correctamente.');
+    }
+
+    /**
+     * Actualiza los horarios de atención de la clínica (7 días).
+     */
+    public function updateHorarios(Request $request)
+    {
+        $user = Auth::user();
+        $clinica = Clinica::find($user->id_clinica);
+        abort_if(!$clinica, 403, 'No tienes una clínica asignada.');
+
+        $dias = $request->input('dias', []);
+
+        // Orden esperado: 1=Lunes … 6=Sábado, 0=Domingo
+        foreach ([1, 2, 3, 4, 5, 6, 0] as $dia) {
+            $activo = isset($dias[$dia]['activo']) ? 1 : 0;
+            $horaInicio = $dias[$dia]['hora_inicio'] ?? null;
+            $horaFin = $dias[$dia]['hora_fin'] ?? null;
+
+            // Si está inactivo, limpiar horas
+            if (!$activo) {
+                $horaInicio = null;
+                $horaFin = null;
+            }
+
+            HorarioClinica::updateOrCreate(
+                [
+                    'id_clinica' => $clinica->id_clinica,
+                    'dia_semana' => $dia,
+                ],
+                [
+                    'activo' => $activo,
+                    'hora_inicio' => $horaInicio,
+                    'hora_fin' => $horaFin,
+                ]
+            );
+        }
+
+        return back()->with('success', 'Horarios de atención actualizados correctamente.');
+    }
+
+    /**
+     * Obtiene los 7 registros de horario de una clínica, creándolos con valores
+     * por defecto si no existen (Lun-Vie 09:00-18:00, Sáb-Dom cerrados).
+     */
+    private function obtenerOCrearHorarios(int $idClinica): \Illuminate\Database\Eloquent\Collection
+    {
+        $existentes = HorarioClinica::where('id_clinica', $idClinica)->count();
+
+        if ($existentes < 7) {
+            $defaults = [
+                1 => ['activo' => true, 'hora_inicio' => '09:00', 'hora_fin' => '18:00'], // Lunes
+                2 => ['activo' => true, 'hora_inicio' => '09:00', 'hora_fin' => '18:00'], // Martes
+                3 => ['activo' => true, 'hora_inicio' => '09:00', 'hora_fin' => '18:00'], // Miércoles
+                4 => ['activo' => true, 'hora_inicio' => '09:00', 'hora_fin' => '18:00'], // Jueves
+                5 => ['activo' => true, 'hora_inicio' => '09:00', 'hora_fin' => '18:00'], // Viernes
+                6 => ['activo' => false, 'hora_inicio' => null, 'hora_fin' => null],     // Sábado
+                0 => ['activo' => false, 'hora_inicio' => null, 'hora_fin' => null],     // Domingo
+            ];
+
+            foreach ($defaults as $dia => $vals) {
+                HorarioClinica::firstOrCreate(
+                    ['id_clinica' => $idClinica, 'dia_semana' => $dia],
+                    $vals
+                );
+            }
+        }
+
+        // Retornar ordenados: Lun(1)…Sáb(6), Dom(0)
+        return HorarioClinica::where('id_clinica', $idClinica)
+            ->orderByRaw('FIELD(dia_semana, 1, 2, 3, 4, 5, 6, 0)')
+            ->get();
     }
 }

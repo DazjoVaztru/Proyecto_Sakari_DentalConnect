@@ -325,29 +325,62 @@ class DashboardController extends Controller
     /**
      * Retorna los días del mes con citas agendadas para colorear el calendario.
      * 
-     * REGLAS:
-     * - Verde (libre): Sin citas o con citas pero horas disponibles
-     * - Amarillo (ocupado): Algunas citas pero aún hay horas libres
-     * - Rojo (lleno): Todas las horas disponibles del día están ocupadas (8 horas = 16 slots de 30 min)
-     * - Gris: Días pasados (no pueden agendar)
+     * Ahora respeta los horarios configurados por clínica:
+     * - Días cerrados (activo=false) → gris, no clickeables
+     * - Slots calculados dinámicamente desde hora_inicio/hora_fin
+     * - Fallback: 8 horas (16 slots) si no hay horarios configurados
      */
     public function obtenerDisponibilidadMes(Request $request)
     {
         $mes = $request->input('mes', Carbon::now()->month);
         $anio = $request->input('anio', Carbon::now()->year);
+        $idClinica = Auth::user()->id_clinica;
 
         $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
 
-        // Horas operativas: 8 horas (08:00 - 17:00) = 16 slots de 30 minutos
-        $slotsDisponiblesPorDia = 16;
+        // Cargar horarios configurados de la clínica (indexados por dia_semana)
+        $horariosClinica = \App\Models\HorarioClinica::where('id_clinica', $idClinica)
+            ->get()
+            ->keyBy('dia_semana');
 
         $eventos = [];
 
         for ($i = 1; $i <= $diasDelMes; $i++) {
             $fecha = Carbon::createFromDate($anio, $mes, $i);
+            $diaSemana = $fecha->dayOfWeek; // 0=Domingo, 1=Lunes, ... 6=Sábado
+
+            // Verificar si este día está activo en la configuración
+            $horarioDia = $horariosClinica->get($diaSemana);
+            $diaActivo = $horarioDia ? (bool) $horarioDia->activo : true; // Fallback: activo
+
+            // Calcular slots disponibles según horario configurado
+            if ($horarioDia && $horarioDia->hora_inicio && $horarioDia->hora_fin) {
+                $inicio = Carbon::parse($horarioDia->hora_inicio);
+                $fin = Carbon::parse($horarioDia->hora_fin);
+                $minutosDisponibles = max(0, $fin->diffInMinutes($inicio));
+                $slotsDisponiblesPorDia = intval($minutosDisponibles / 30);
+            } else {
+                // Fallback: 8 horas = 16 slots de 30 min
+                $slotsDisponiblesPorDia = 16;
+            }
+
+            // Si el día está cerrado, marcar como gris
+            if (!$diaActivo) {
+                $eventos[$i] = [
+                    'estado' => 'gris',
+                    'clickable' => false,
+                    'total_citas' => 0,
+                    'horas_ocupadas' => 0,
+                    'horas_disponibles' => 0,
+                    'slots_ocupados' => 0,
+                    'slots_totales' => 0,
+                    'cerrado' => true,
+                ];
+                continue;
+            }
 
             // Contar citas del día (solo no canceladas)
-            $citasDelDia = Cita::where('id_clinica', Auth::user()->id_clinica)
+            $citasDelDia = Cita::where('id_clinica', $idClinica)
                 ->whereDate('fecha_hora_inicio', $fecha)
                 ->where('estado_cita', '!=', 'cancelada')
                 ->get();
@@ -359,11 +392,9 @@ class DashboardController extends Controller
             $clickable = true;
 
             if ($totalCitas > 0 && $totalCitas < $slotsDisponiblesPorDia) {
-                // Está ocupado pero aún hay horas disponibles
                 $estado = 'amarillo';
                 $clickable = true;
-            } elseif ($totalCitas >= $slotsDisponiblesPorDia) {
-                // Todas las horas están ocupadas
+            } elseif ($slotsDisponiblesPorDia > 0 && $totalCitas >= $slotsDisponiblesPorDia) {
                 $estado = 'rojo';
                 $clickable = false;
             }
@@ -377,7 +408,8 @@ class DashboardController extends Controller
 
             // Información sobre horas ocupadas y disponibles
             $horasOcupadas = ceil($totalCitas / 2); // 2 slots = 1 hora
-            $horasDisponibles = max(0, 8 - $horasOcupadas);
+            $totalHoras = ceil($slotsDisponiblesPorDia / 2);
+            $horasDisponibles = max(0, $totalHoras - $horasOcupadas);
 
             $eventos[$i] = [
                 'estado' => $estado,
