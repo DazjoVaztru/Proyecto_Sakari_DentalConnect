@@ -43,10 +43,22 @@
                     </div>
                 </div>
 
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div>
+                        <label>Estado / Provincia</label>
+                        <input type="text" name="estado" value="{{ $clinica->estado }}" class="modern-input"
+                            oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    </div>
+                    <div>
+                        <label>Código Postal</label>
+                        <input type="text" name="codigo_postal" value="{{ $clinica->codigo_postal }}" class="modern-input"
+                            maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    </div>
+                </div>
+
                 <div style="margin-top: 15px;">
-                    <label>Estado / Provincia</label>
-                    <input type="text" name="estado" value="{{ $clinica->estado }}" class="modern-input"
-                        oninput="this.value=this.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g,'').replace(/  +/g,' ')">
+                    <label>Porcentaje de Anticipo (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" name="config_anticipo_pct" value="{{ $clinica->config_anticipo_pct }}" class="modern-input">
                 </div>
 
                 <button type="submit" class="ghost-btn"
@@ -202,11 +214,21 @@
                                     <strong style="display: block; color: #333;">{{ $recep->nombre_completo }}</strong>
                                     <span style="color: #666; font-size: 0.9rem;">{{ $recep->email }}</span>
                                 </div>
-                                <button
-                                    onclick="editarRecep('{{ $recep->id_usuario }}', '{{ $recep->nombre_completo }}', '{{ $recep->email }}')"
-                                    class="ghost-btn" style="background: #e0e0e0; color: #333; padding: 5px 10px;">
-                                    <i class="fa-solid fa-pen"></i> Editar
-                                </button>
+                                <div style="display: flex; gap: 10px;">
+                                    <button
+                                        onclick="editarRecep('{{ $recep->id_usuario }}', '{{ $recep->nombre_completo }}', '{{ $recep->email }}')"
+                                        class="ghost-btn" style="background: #e0e0e0; color: #333; padding: 5px 10px;">
+                                        <i class="fa-solid fa-pen"></i> Editar
+                                    </button>
+                                    
+                                    <form action="{{ route('configuracion.destroyRecepcionista', $recep->id_usuario) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas dar de baja a esta recepcionista?');" style="margin: 0;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="ghost-btn" style="background: #ff4d4d; color: white; padding: 5px 10px;">
+                                            <i class="fa-solid fa-user-minus"></i> Baja
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         @endforeach
                     </div>

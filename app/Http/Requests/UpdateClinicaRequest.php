@@ -31,6 +31,9 @@ class UpdateClinicaRequest extends FormRequest
             'numero_telefono' => 'nullable|string|max:20|regex:/^[0-9]+$/',
             'localidad' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
             'estado' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/u'],
+            // Nuevos campos
+            'codigo_postal' => ['nullable', 'string', 'max:10', 'regex:/^[0-9]+$/'],
+            'config_anticipo_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 
@@ -41,6 +44,12 @@ class UpdateClinicaRequest extends FormRequest
             'numero_telefono.regex' => 'El teléfono solo puede contener números.',
             'localidad.regex' => 'La localidad solo puede contener letras y espacios.',
             'estado.regex' => 'El estado solo puede contener letras y espacios.',
+            // Mensajes para nuevos campos
+            'codigo_postal.regex' => 'El código postal solo puede contener números.',
+            'codigo_postal.max' => 'El código postal no puede tener más de 10 caracteres.',
+            'config_anticipo_pct.numeric' => 'El porcentaje de anticipo debe ser un número.',
+            'config_anticipo_pct.min' => 'El porcentaje de anticipo no puede ser menor a 0.',
+            'config_anticipo_pct.max' => 'El porcentaje de anticipo no puede ser mayor a 100.',
         ];
     }
 }

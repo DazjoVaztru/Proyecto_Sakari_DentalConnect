@@ -35,6 +35,7 @@ class ConfiguracionController extends Controller
         // Lista de recepcionistas de la misma clínica
         $recepcionistas = User::where('id_clinica', $user->id_clinica)
             ->where('rol', 'recepcionista')
+            ->where('is_active', true)
             ->get();
 
         // Horarios de atención (crear registros por defecto si no existen)
@@ -157,6 +158,22 @@ class ConfiguracionController extends Controller
         }
 
         return back()->with('success', 'Horarios de atención actualizados correctamente.');
+    }
+
+    /**
+     * Da de baja (desactiva) a un recepcionista
+     */
+    public function destroyRecepcionista($id)
+    {
+        $usuario = User::where('id_clinica', Auth::user()->id_clinica)
+            ->where('id_usuario', $id)
+            ->where('rol', 'recepcionista')
+            ->firstOrFail();
+
+        $usuario->is_active = false;
+        $usuario->save();
+
+        return back()->with('success', 'Recepcionista dada de baja correctamente.');
     }
 
     /**
