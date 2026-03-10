@@ -1362,7 +1362,11 @@
         // ==========================================
         // MARCAR CITA COMO COMPLETADA
         // ==========================================
-       function completarCita(idCita) {
+      // ==========================================
+// MARCAR CITA COMO COMPLETADA
+// ==========================================
+function completarCita(idCita) {
+
     fetch(`/api/citas/${idCita}/completar`, {
         method: 'POST',
         headers: {
@@ -1372,75 +1376,43 @@
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            // 1. Mostrar visualmente que se completó (el check verde que ya tienes)
-            const fila = document.getElementById(`cita-fila-${idCita}`);
-            fila.innerHTML = `
-                <div class="text-center p-4 w-full">
-                    <span class="text-green-500 font-bold">¡Cita completada!</span>
-                </div>
-            `;
 
-            // 2. Esperar 5 segundos y luego recargar o quitar
-            setTimeout(() => {
-                // Opción A: Recargar la página para que desaparezca de la lista
-                window.location.reload(); 
-                
-                // Opción B: Si quieres abrir el modal de detalles automáticamente:
-                // abrirModalDetalles(idCita); 
-            }, 5000); 
-        
-}
-
-                    // ── ACTUALIZAR EL ESTADO EN window.citasData (si existe) ────────────
-                    if (window.citasData) {
-                        const cita = window.citasData.find(c => c.id === idCita);
-                        if (cita) {
-                            cita.estado = 'Completada';
-                        }
-                    }
-
-                    // ── ACTUALIZAR LA TABLA SI ESTÁ ABIERTO EL MODAL ──────────────────
-                    if (window.todasLasFilas && window.todasLasFilas.length > 0) {
-                        // Buscar en todasLasFilas por idCita
-                        const indice = window.todasLasFilas.findIndex(fila => {
-                            // Verificar si tiene reference al id
-                            return fila.dataset?.citaId === String(idCita) || (fila._citaId && fila._citaId === idCita);
-                        });
-
-                        // Si no encontramos, reload para actualizar
-                        if (indice === -1) {
-                            renderizarPagina();
-                        } else {
-                            // Actualizar la fila en memoria y re-renderizar
-                            renderizarPagina();
-                        }
-                    }
-
-                    // Animar el overlay de completado
-                    const overlay = document.getElementById('overlay-' + idCita);
-                    if (overlay) {
-                        overlay.style.display = 'flex';
-                        const checkPath = document.getElementById('check-path-' + idCita);
-                        if (checkPath) {
-                            setTimeout(() => {
-                                checkPath.style.strokeDashoffset = '0';
-                            }, 100);
-                        }
-                    }
-
-                    // Re-cargar los datos para reflejar cambios en la tabla
-                    setTimeout(() => {
-                        cargarModalCita(idCita);
-                    }, 800);
-                })
-                .catch(err => {
-                    console.error('Error al completar cita:', err);
-                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-                    alert('Error de conexión. Inténtalo de nuevo.');
-                });
+        if (!data.success) {
+            alert("No se pudo completar la cita");
+            return;
         }
 
+        const fila = document.getElementById(`cita-fila-${idCita}`);
+
+        if (!fila) return;
+
+        // 1️⃣ Mostrar mensaje de completado
+        fila.innerHTML = `
+            <td colspan="6" class="text-center p-4">
+                <span style="color:#22c55e;font-weight:bold;">
+                    ✔ Cita completada
+                </span>
+            </td>
+        `;
+
+        // 2️⃣ Esperar 3 segundos y eliminar la fila
+        setTimeout(() => {
+
+            fila.style.transition = "opacity 0.5s";
+            fila.style.opacity = "0";
+
+            setTimeout(() => {
+                fila.remove();
+            }, 500);
+
+        }, 3000);
+
+    })
+    .catch(err => {
+        console.error("Error al completar cita:", err);
+        alert("Error de conexión con el servidor");
+    });
+}
         // ==========================================
         // FUNCIONES DE PAGINACIÓN
         // ==========================================
