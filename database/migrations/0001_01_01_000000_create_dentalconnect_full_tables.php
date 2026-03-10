@@ -419,16 +419,16 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // 12. TRIGGERS (Replicamos tu Trigger exacto de auditoría)
-        // 12. TRIGGERS (Separamos el DROP y el CREATE)
+
+        // 12. TRIGGERS (Sintaxis de 1 sola línea para evitar el bug de PDO en Laravel)
         DB::unprepared("DROP TRIGGER IF EXISTS trg_citas_update;");
 
         DB::unprepared("
-            CREATE TRIGGER trg_citas_update BEFORE UPDATE ON citas FOR EACH ROW
-            BEGIN
-                INSERT INTO audit_logs (id_usuario, accion, tabla_afectada, id_registro, detalles)
-                VALUES (NULL, 'update', 'citas', OLD.id_cita, JSON_OBJECT('old_estado', OLD.estado_cita, 'new_estado', NEW.estado_cita));
-            END;
+            CREATE TRIGGER trg_citas_update 
+            BEFORE UPDATE ON citas 
+            FOR EACH ROW
+            INSERT INTO audit_logs (id_usuario, accion, tabla_afectada, id_registro, detalles)
+            VALUES (NULL, 'update', 'citas', OLD.id_cita, JSON_OBJECT('old_estado', OLD.estado_cita, 'new_estado', NEW.estado_cita));
         ");
     }
 
