@@ -60,9 +60,9 @@ class StorePacienteRequest extends FormRequest
             'fecha_nacimiento' => ['required', 'date', 'before:today'],
             'sexo' => ['required', 'in:M,F,O'],
 
-            // Datos médicos sensibles — todos obligatorios para expediente clínico
-            'tipo_sangre' => ['required', 'string', 'max:5'],
-            'peso' => ['required', 'integer', 'min:1', 'max:500'],
+            // Datos médicos sensibles — (tipo_sangre y peso opcionales)
+            'tipo_sangre' => ['nullable', 'string', 'max:5'],
+            'peso' => ['nullable', 'integer', 'min:1', 'max:500'],
             'direccion' => ['required', 'string', 'max:100'],
             'ocupacion' => ['required', 'string', 'max:100'],
             'enfermedades_cronicas' => ['required', 'string', 'max:1000'],
@@ -94,7 +94,6 @@ class StorePacienteRequest extends FormRequest
             'email.unique' => 'Este correo ya está registrado en el sistema.',
             'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
             'fecha_nacimiento.before' => 'La fecha de nacimiento debe ser anterior a hoy.',
-            'peso.required' => 'El peso del paciente es obligatorio para el expediente clínico.',
             'peso.integer' => 'El peso debe ser un valor numérico entero (sin decimales).',
             'peso.max' => 'El peso no puede exceder los 500 kg.',
             'enfermedades_cronicas.required' => 'Las enfermedades crónicas son obligatorias. Si no tiene, escriba "Ninguna".',
@@ -105,7 +104,6 @@ class StorePacienteRequest extends FormRequest
             'emergencia_apellido_materno.regex' => 'El apellido materno del contacto solo puede contener letras y espacios.',
             'emergencia_telefono.regex' => 'El teléfono del contacto de emergencia solo puede contener números.',
             'sexo.required' => 'El sexo del paciente es obligatorio.',
-            'tipo_sangre.required' => 'El tipo de sangre es obligatorio.',
             'emergencia_nombre.required' => 'El nombre del contacto de emergencia es obligatorio.',
             'emergencia_telefono.required' => 'El teléfono del contacto de emergencia es obligatorio.',
         ];
