@@ -738,14 +738,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                                                        const file = this.files[0];
-                                                                                        if(file) {
-                                                                                            document.getElementById('label-ev-foto').innerText = file.name;
-                                                                                            document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                                                        } else {
-                                                                                            document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                                                            document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                                                        }">
+                                                                                                const file = this.files[0];
+                                                                                                if(file) {
+                                                                                                    document.getElementById('label-ev-foto').innerText = file.name;
+                                                                                                    document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                                                                } else {
+                                                                                                    document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                                                                    document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                                                                }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -777,9 +777,9 @@
 
     {{-- MODAL: AGENDAR CITA (LOCAL) --}}
     <div id="modal-add-cita" class="modal-overlay">
-        <div class="modal-glass modal-md" style="width: 500px;">
+        <div class="modal-glass modal-xl" style="max-width: 1050px; width: 95vw; max-height: 95vh; overflow-y: auto;">
             <button class="close-modal" onclick="closeModal('modal-add-cita')">&times;</button>
-            <h3 style="color: var(--secondary-color); margin-bottom: 20px;">
+            <h3 style="color: var(--secondary-color); margin-bottom: 20px; font-weight: 800; font-size: 1.6rem;">
                 <i class="fa-solid fa-calendar-plus"></i> Agendar Nueva Cita
             </h3>
 
@@ -787,36 +787,109 @@
                 @csrf
                 <input type="hidden" name="id_paciente" id="form-cita-paciente-id">
 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 700;">Paciente:</label>
-                    <input type="text" id="form-cita-paciente-nombre" class="modern-input" readonly
-                        style="background: #f8f9fa;">
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 700;">Servicio:</label>
-                    <select name="id_servicio" class="modern-input" required>
-                        @foreach($servicios as $srv)
-                            <option value="{{ $srv->id_servicio }}">{{ $srv->nombre_servicio }}
-                                (${{ number_format($srv->precio_base, 2) }})</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="time-grid"
-                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 700;">Fecha:</label>
-                        <input type="date" name="fecha" class="modern-input" required value="{{ date('Y-m-d') }}">
+                {{-- Fila superior: Paciente + Servicio --}}
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 700;">Paciente:</label>
+                        <input type="text" id="form-cita-paciente-nombre" class="modern-input" readonly
+                            style="background: #f8f9fa;">
                     </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 700;">Hora:</label>
-                        <input type="time" name="hora" class="modern-input" required>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 700;">Servicio:</label>
+                        <select name="id_servicio" class="modern-input" required>
+                            @foreach($servicios as $srv)
+                                <option value="{{ $srv->id_servicio }}">{{ $srv->nombre_servicio }}
+                                    (${{ number_format($srv->precio_base, 2) }})</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
+                {{-- CONTENEDOR PRINCIPAL DE AGENDAMIENTO --}}
+                <div
+                    style="display: flex; flex-wrap: wrap; gap: 30px; background: #ffffff; padding: 0; border-radius: 20px;">
+
+                    {{-- COLUMNA IZQUIERDA: CALENDARIO --}}
+                    <div
+                        style="flex: 1; min-width: 300px; background: #F8FDFF; padding: 25px; border-radius: 16px; border: 1px solid #dceeef;">
+                        <h4 style="color: #000; font-weight: 800; margin-top: 0; margin-bottom: 20px; font-size: 1.2rem;">
+                            <i class="fa-regular fa-calendar-days" style="color: var(--primary-color);"></i> 1. Elige el Día
+                        </h4>
+
+                        {{-- Navegación del mes --}}
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 10px 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                            <button type="button" onclick="cambiarMesReserva(-1)"
+                                style="border: none; background: transparent; cursor: pointer; color: #666; font-size: 1.1rem; padding: 5px 10px; border-radius: 8px;"
+                                onmouseover="this.style.background='#f0f0f0'"
+                                onmouseout="this.style.background='transparent'">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <span id="reserva-mes-anio"
+                                style="font-weight: 800; color: var(--primary-color); font-size: 1.1rem; text-transform: capitalize;">Cargando...</span>
+                            <button type="button" onclick="cambiarMesReserva(1)"
+                                style="border: none; background: transparent; cursor: pointer; color: #666; font-size: 1.1rem; padding: 5px 10px; border-radius: 8px;"
+                                onmouseover="this.style.background='#f0f0f0'"
+                                onmouseout="this.style.background='transparent'">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        {{-- Días de la semana --}}
+                        <div
+                            style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em; font-weight: 700; color: #aaa; margin-bottom: 10px;">
+                            <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+                        </div>
+
+                        {{-- Grid dinámica del calendario --}}
+                        <div id="reserva-grid-dias"
+                            style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.95em;">
+                            {{-- Se llena con JS --}}
+                        </div>
+
+                        {{-- Leyenda --}}
+                        <div
+                            style="margin-top: 25px; display: flex; gap: 15px; justify-content: center; font-size: 0.75em; color: #666; font-weight: 600;">
+                            <div style="display:flex; align-items:center;"><span
+                                    style="width:10px;height:10px;background:#32D74B;border-radius:50%;margin-right:6px; box-shadow: 0 2px 4px rgba(50,215,75,0.3);"></span>Libre
+                            </div>
+                            <div style="display:flex; align-items:center;"><span
+                                    style="width:10px;height:10px;background:#FFC107;border-radius:50%;margin-right:6px; box-shadow: 0 2px 4px rgba(255,193,7,0.3);"></span>Pocos
+                            </div>
+                            <div style="display:flex; align-items:center;"><span
+                                    style="width:10px;height:10px;background:#EF4444;border-radius:50%;margin-right:6px; box-shadow: 0 2px 4px rgba(239,68,68,0.3);"></span>Lleno
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- COLUMNA DERECHA: HORARIOS --}}
+                    <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column;">
+                        <h4 style="color: #000; font-weight: 800; margin-top: 0; margin-bottom: 5px; font-size: 1.2rem;">
+                            <i class="fa-regular fa-clock" style="color: var(--primary-color);"></i> 2. Elige la Hora
+                        </h4>
+                        <p id="lbl-fecha-seleccionada"
+                            style="color: #888; font-weight: 600; font-size: 0.9rem; margin-bottom: 20px;">
+                            Selecciona un día en el calendario primero.
+                        </p>
+
+                        {{-- Inputs ocultos compatibles con CitaController --}}
+                        <input type="hidden" name="fecha" id="input-reserva-fecha" required>
+                        <input type="hidden" name="hora" id="input-reserva-hora" required>
+
+                        {{-- Contenedor de las píldoras --}}
+                        <div id="reserva-contenedor-horarios"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; align-content: flex-start; flex-grow: 1;">
+                            <div
+                                style="grid-column: 1 / -1; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: #aaa; font-weight: 600; text-align: center; height: 100%;">
+                                <p>Esperando selección de fecha...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Botón confirmar --}}
                 <button type="submit" id="btn-confirmar-cita" class="ghost-btn"
-                    style="width: 100%; padding: 15px; border-radius: 12px; font-weight: 800;">
+                    style="width: 100%; padding: 15px; border-radius: 12px; font-weight: 800; margin-top: 25px; font-size: 1.1rem;">
                     <i class="fa-solid fa-floppy-disk"></i> Confirmar Cita
                 </button>
             </form>
@@ -956,9 +1029,9 @@
                     icon: 'error',
                     title: 'Campos obligatorios faltantes',
                     html: `<p style="text-align:left;font-size:0.95rem;">Para crear el expediente clínico, debes completar:</p>
-                                   <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
-                                       ${faltantes.map(f => `<li>${f}</li>`).join('')}
-                                   </ul>`,
+                                           <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
+                                               ${faltantes.map(f => `<li>${f}</li>`).join('')}
+                                           </ul>`,
                     confirmButtonColor: '#ef4444',
                     confirmButtonText: 'Entendido'
                 });
@@ -1051,7 +1124,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                                                                <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                                                                        <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1131,15 +1204,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                                                                    <div>
-                                                                                        <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                                                        <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                                                        ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                                                                    </div>
-                                                                                    <div style="text-align: right;">
-                                                                                        <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                                                                    </div>
-                                                                                </div>`;
+                                                                                            <div>
+                                                                                                <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                                                                <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                                                                ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                                                            </div>
+                                                                                            <div style="text-align: right;">
+                                                                                                <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                                                            </div>
+                                                                                        </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1167,20 +1240,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                                                            <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                                                                <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                                                            </a>
-                                                                                         </div>`;
+                                                                                                    <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                                                                        <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                                                                    </a>
+                                                                                                 </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                                                                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                                                        <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                                                                    </div>
-                                                                                                    <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                                                                    ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                                                                    ${imageHtml}
-                                                                                                </div>`;
+                                                                                                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                                                                <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                                                            </div>
+                                                                                                            <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                                                            ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                                                            ${imageHtml}
+                                                                                                        </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -1246,119 +1319,311 @@
             if (!currentPaciente) return;
             document.getElementById('form-cita-paciente-id').value = currentPaciente.id_paciente;
             document.getElementById('form-cita-paciente-nombre').value = `${currentPaciente.nombre} ${currentPaciente.apellido_paterno}`;
-            openModal('modal-add-cita');
-        }
+            // Resetear estado del calendario de reserva
+                document.getElementById('input-reserva-fecha').value = '';
+                document.getElementById('input-reserva-hora').value = '';
+                document.getElementById('lbl-fecha-seleccionada').innerHTML = 'Selecciona un día en el calendario primero.';
+                document.getElementById('reserva-contenedor-horarios').innerHTML = '<div style="grid-column: 1 / -1; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: #aaa; font-weight: 600; text-align: center; height: 100%;"><p>Esperando selección de fecha...</p></div>';
 
-        // ─── CRUD (Edit / Delete) ────────────────────────────────────────────────
-        function abrirModalEdit() {
-            if (!currentPaciente) return;
-            closeModal('modal-patient-profile'); // Cierra perfil
-            openModal('modal-edit-patient'); // Abre edicion
+                // Inicializar calendario al mes actual
+                reservaMes = new Date().getMonth() + 1;
+                reservaAnio = new Date().getFullYear();
+                cargarCalendarioReserva(reservaMes, reservaAnio);
 
-            document.getElementById('form-edit-patient').action = `/pacientes/${currentPaciente.id_paciente}`;
-
-            // Campos de Solo Lectura
-            document.getElementById('edit-nombre').value = currentPaciente.nombre;
-            document.getElementById('edit-apellidos').value = `${currentPaciente.apellido_paterno} ${currentPaciente.apellido_materno || ''}`;
-            document.getElementById('edit-fecha-nac').value = currentPaciente.fecha_nacimiento || '';
-            document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || 'N/A';
-
-            // Campos Editables
-            document.getElementById('edit-email').value = currentPaciente.correo_electronico || '';
-            document.getElementById('edit-telefono').value = currentPaciente.telefono || '';
-            document.getElementById('edit-peso').value = currentPaciente.peso ? parseInt(currentPaciente.peso) : '';
-            document.getElementById('edit-direccion').value = currentPaciente.direccion || '';
-            document.getElementById('edit-ocupacion').value = currentPaciente.ocupacion || '';
-            document.getElementById('edit-enfermedades').value = currentPaciente.enfermedades_cronicas || '';
-            document.getElementById('edit-alergias').value = currentPaciente.alergias || '';
-
-            // Contacto Emergencia
-            const ce = currentPaciente.contacto_emergencia;
-            if (ce) {
-                document.getElementById('edit-em-nombre').value = ce.nombre || '';
-                document.getElementById('edit-em-paterno').value = ce.apellido_paterno || '';
-                document.getElementById('edit-em-materno').value = ce.apellido_materno || '';
-                document.getElementById('edit-em-telefono').value = ce.numero_telefono || '';
+                openModal('modal-add-cita');
             }
-        }
-        function formatearNombre(input) {
-            let valor = input.value.trim().toLowerCase();
-            valor = valor.split(' ').map(palabra => {
-                if (palabra.length === 0) return '';
-                return palabra.charAt(0).toUpperCase() + palabra.slice(1);
-            }).join(' ');
-            input.value = valor;
-        }
 
-        // Eliminación de pacientes deshabilitada por cumplimiento NOM-004-SSA3-2012
-        function eliminarPaciente() {
-            Swal.fire({
-                title: 'Acción no permitida',
-                html: '<b>NOM-004-SSA3-2012:</b> Los expedientes clínicos deben conservarse un mínimo de 5 años tras la última consulta.<br><br>La eliminación de registros médicos electrónicos no está permitida por la normativa mexicana.',
-                icon: 'info',
-                confirmButtonColor: '#00b4d8',
-                confirmButtonText: 'Entendido'
+            // ─── CRUD (Edit / Delete) ────────────────────────────────────────────────
+            function abrirModalEdit() {
+                if (!currentPaciente) return;
+                closeModal('modal-patient-profile'); // Cierra perfil
+                openModal('modal-edit-patient'); // Abre edicion
+
+                document.getElementById('form-edit-patient').action = `/pacientes/${currentPaciente.id_paciente}`;
+
+                // Campos de Solo Lectura
+                document.getElementById('edit-nombre').value = currentPaciente.nombre;
+                document.getElementById('edit-apellidos').value = `${currentPaciente.apellido_paterno} ${currentPaciente.apellido_materno || ''}`;
+                document.getElementById('edit-fecha-nac').value = currentPaciente.fecha_nacimiento || '';
+                document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || 'N/A';
+
+                // Campos Editables
+                document.getElementById('edit-email').value = currentPaciente.correo_electronico || '';
+                document.getElementById('edit-telefono').value = currentPaciente.telefono || '';
+                document.getElementById('edit-peso').value = currentPaciente.peso ? parseInt(currentPaciente.peso) : '';
+                document.getElementById('edit-direccion').value = currentPaciente.direccion || '';
+                document.getElementById('edit-ocupacion').value = currentPaciente.ocupacion || '';
+                document.getElementById('edit-enfermedades').value = currentPaciente.enfermedades_cronicas || '';
+                document.getElementById('edit-alergias').value = currentPaciente.alergias || '';
+
+                // Contacto Emergencia
+                const ce = currentPaciente.contacto_emergencia;
+                if (ce) {
+                    document.getElementById('edit-em-nombre').value = ce.nombre || '';
+                    document.getElementById('edit-em-paterno').value = ce.apellido_paterno || '';
+                    document.getElementById('edit-em-materno').value = ce.apellido_materno || '';
+                    document.getElementById('edit-em-telefono').value = ce.numero_telefono || '';
+                }
+            }
+            function formatearNombre(input) {
+                let valor = input.value.trim().toLowerCase();
+                valor = valor.split(' ').map(palabra => {
+                    if (palabra.length === 0) return '';
+                    return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+                }).join(' ');
+                input.value = valor;
+            }
+
+            // Eliminación de pacientes deshabilitada por cumplimiento NOM-004-SSA3-2012
+            function eliminarPaciente() {
+                Swal.fire({
+                    title: 'Acción no permitida',
+                    html: '<b>NOM-004-SSA3-2012:</b> Los expedientes clínicos deben conservarse un mínimo de 5 años tras la última consulta.<br><br>La eliminación de registros médicos electrónicos no está permitida por la normativa mexicana.',
+                    icon: 'info',
+                    confirmButtonColor: '#00b4d8',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+            // ─── Protección anti doble submit en el formulario de cita ───────────
+            document.getElementById('form-add-cita').addEventListener('submit', function () {
+                const btn = document.getElementById('btn-confirmar-cita');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+                    btn.style.opacity = '0.7';
+                    btn.style.cursor = 'not-allowed';
+                }
             });
-        }
+            // ─────────────────────────────────────────────
+            // SOLO LETRAS (bloquea números en tiempo real)
+            // ─────────────────────────────────────────────
+            function soloLetras(e) {
+                let tecla = e.key;
+                let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
 
-        // ─── Protección anti doble submit en el formulario de cita ───────────
-        document.getElementById('form-add-cita').addEventListener('submit', function () {
-            const btn = document.getElementById('btn-confirmar-cita');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-                btn.style.opacity = '0.7';
-                btn.style.cursor = 'not-allowed';
+                if (!regex.test(tecla)) {
+                    return false;
+                }
             }
-        });
-        // ─────────────────────────────────────────────
-        // SOLO LETRAS (bloquea números en tiempo real)
-        // ─────────────────────────────────────────────
-        function soloLetras(e) {
-            let tecla = e.key;
-            let regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;
 
-            if (!regex.test(tecla)) {
-                return false;
+            function formatearEnVivo(input) {
+
+                let valor = input.value.toLowerCase();
+
+                valor = valor.replace(/\b\w/g, function (letra) {
+                    return letra.toUpperCase();
+                });
+
+                input.value = valor;
             }
-        }
 
-        function formatearEnVivo(input) {
+            // ─────────────────────────────────────────────
+            // Evita doble espacio
+            // ─────────────────────────────────────────────
+            function limpiarEspacios(input) {
+                input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
+                    .replace(/\s{2,}/g, ' ');
+            }
 
-            let valor = input.value.toLowerCase();
+            // ─────────────────────────────────────────────
+            // Primera letra mayúscula
+            // ─────────────────────────────────────────────
+            function formatearNombre(input) {
+                let valor = input.value.trim().toLowerCase();
 
-            valor = valor.replace(/\b\w/g, function (letra) {
-                return letra.toUpperCase();
-            });
+                valor = valor.split(' ').map(palabra => {
+                    if (palabra.length === 0) return '';
+                    return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+                }).join(' ');
 
-            input.value = valor;
-        }
+                input.value = valor;
+            }
 
-        // ─────────────────────────────────────────────
-        // Evita doble espacio
-        // ─────────────────────────────────────────────
-        function limpiarEspacios(input) {
-            input.value = input.value.replace(/[^A-Za-zÀ-ÿÑñ ]/g, '')
-                .replace(/\s{2,}/g, ' ');
-        }
+            // ─── Auto-abrir modal si hay errores de validación ──────────────
+            @if($errors->any())
+                openModal('modal-new-patient');
+            @endif
 
-        // ─────────────────────────────────────────────
-        // Primera letra mayúscula
-        // ─────────────────────────────────────────────
-        function formatearNombre(input) {
-            let valor = input.value.trim().toLowerCase();
+            // ==========================================
+            // CALENDARIO DE RESERVA DE CITAS
+            // ==========================================
+            let reservaMes = new Date().getMonth() + 1;
+            let reservaAnio = new Date().getFullYear();
+            const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-            valor = valor.split(' ').map(palabra => {
-                if (palabra.length === 0) return '';
-                return palabra.charAt(0).toUpperCase() + palabra.slice(1);
-            }).join(' ');
+            function cambiarMesReserva(delta) {
+                reservaMes += delta;
+                if (reservaMes > 12) { reservaMes = 1; reservaAnio++; }
+                if (reservaMes < 1) { reservaMes = 12; reservaAnio--; }
+                cargarCalendarioReserva(reservaMes, reservaAnio);
+            }
 
-            input.value = valor;
-        }
+            function cargarCalendarioReserva(mes, anio) {
+                document.getElementById('reserva-mes-anio').innerText = `${nombresMeses[mes - 1]} ${anio}`;
+                const grid = document.getElementById('reserva-grid-dias');
 
-        // ─── Auto-abrir modal si hay errores de validación ──────────────
-        @if($errors->any())
-            openModal('modal-new-patient');
-        @endif
-    </script>
+                // Loader elegante
+                grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:30px;"><i class="fa-solid fa-circle-notch fa-spin" style="color: var(--primary-color); font-size: 2rem;"></i></div>';
+
+                // Reutilizamos la API del DashboardController
+                fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
+                    .then(res => res.json())
+                    .then(disponibilidad => {
+                        grid.innerHTML = '';
+
+                        const hoy = new Date();
+                        hoy.setHours(0,0,0,0);
+
+                        // Rellenar espacios vacíos del inicio del mes
+                        const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
+                        for (let i = 0; i < primerDiaSemana; i++) {
+                            grid.appendChild(document.createElement('div'));
+                        }
+
+                        // Crear los días
+                        for (const [dia, data] of Object.entries(disponibilidad)) {
+                            let div = document.createElement('div');
+                            div.innerText = dia;
+                            div.style.padding = '10px 5px';
+                            div.style.borderRadius = '10px';
+                            div.style.fontWeight = '700';
+                            div.style.transition = 'all 0.2s ease';
+                            div.style.userSelect = 'none';
+
+                            const estaFecha = new Date(anio, mes - 1, parseInt(dia));
+                            estaFecha.setHours(0,0,0,0);
+                            const esPasado = estaFecha < hoy;
+
+                            if (esPasado) {
+                                div.style.background = '#f3f4f6';
+                                div.style.color = '#d1d5db';
+                                div.style.cursor = 'not-allowed';
+                            } else if (data.estado === 'verde') {
+                                div.style.background = 'rgba(50, 215, 75, 0.1)';
+                                div.style.color = '#15803d';
+                                div.style.border = '1px solid rgba(50, 215, 75, 0.3)';
+                            } else if (data.estado === 'amarillo') {
+                                div.style.background = 'rgba(255, 193, 7, 0.1)';
+                                div.style.color = '#b45309';
+                                div.style.border = '1px solid rgba(255, 193, 7, 0.3)';
+                            } else if (data.estado === 'rojo') {
+                                div.style.background = '#EF4444';
+                                div.style.color = 'white';
+                                div.style.boxShadow = '0 2px 8px rgba(239,68,68,0.3)';
+                            } else {
+                                div.style.background = '#fff';
+                                div.style.color = '#333';
+                            }
+
+                            // Interactividad
+                            if (!esPasado && data.estado !== 'rojo') {
+                                div.style.cursor = 'pointer';
+                                div.onmouseover = () => { div.style.transform = 'translateY(-2px)'; div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)'; };
+                                div.onmouseout = () => { div.style.transform = 'translateY(0)'; div.style.boxShadow = 'none'; };
+
+                                div.onclick = () => {
+                                    // Limpiar selecciones previas
+                                    document.querySelectorAll('#reserva-grid-dias div').forEach(d => {
+                                        if(d.style.outline) d.style.outline = 'none';
+                                    });
+                                    // Marcar como seleccionado
+                                    div.style.outline = '3px solid var(--primary-color)';
+                                    div.style.outlineOffset = '1px';
+                                    seleccionarFechaReserva(dia, mes, anio);
+                                };
+                            } else if (!esPasado && data.estado === 'rojo') {
+                                div.style.cursor = 'not-allowed';
+                                div.onclick = () => alert('❌ Este día no tiene horarios disponibles.');
+                            }
+
+                            grid.appendChild(div);
+                        }
+                    });
+            }
+
+            function seleccionarFechaReserva(dia, mes, anio) {
+                const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+
+                // Actualizar inputs
+                document.getElementById('input-reserva-fecha').value = fechaString;
+                document.getElementById('input-reserva-hora').value = ''; // Limpiar hora anterior
+
+                // Mostrar fecha amigable
+                const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const fechaObj = new Date(anio, mes - 1, dia);
+                let fechaBonita = fechaObj.toLocaleDateString('es-MX', opciones);
+                document.getElementById('lbl-fecha-seleccionada').innerHTML = `<span style="color:var(--primary-color);">Fecha:</span> ${fechaBonita}`;
+
+                generarHorasReserva(fechaString);
+            }
+
+            function generarHorasReserva(fecha) {
+                const contenedor = document.getElementById('reserva-contenedor-horarios');
+                contenedor.innerHTML = '';
+
+                const horariosClinica = [
+                    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
+                    "13:00", "13:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30"
+                ];
+
+                horariosClinica.forEach(hora => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'reserva-hora-btn';
+
+                    // Formato 12 hrs
+                    const [h, m] = hora.split(':');
+                    const ampm = h >= 12 ? 'PM' : 'AM';
+                    const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+                    btn.innerText = hora12;
+
+                    // Estilo de las píldoras
+                    btn.style.padding = '12px 0';
+                    btn.style.background = '#fff';
+                    btn.style.border = '1px solid #ccc';
+                    btn.style.borderRadius = '10px';
+                    btn.style.color = '#333';
+                    btn.style.fontWeight = '700';
+                    btn.style.cursor = 'pointer';
+                    btn.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                    btn.onmouseover = () => {
+                        if (document.getElementById('input-reserva-hora').value !== hora) {
+                            btn.style.borderColor = 'var(--primary-color)';
+                            btn.style.color = 'var(--primary-color)';
+                        }
+                    };
+                    btn.onmouseout = () => {
+                        if (document.getElementById('input-reserva-hora').value !== hora) {
+                            btn.style.borderColor = '#ccc';
+                            btn.style.color = '#333';
+                        }
+                    };
+
+                    btn.onclick = () => {
+                        // Reiniciar todos al estilo original
+                        document.querySelectorAll('.reserva-hora-btn').forEach(b => {
+                            b.style.background = '#fff';
+                            b.style.color = '#333';
+                            b.style.borderColor = '#ccc';
+                            b.style.boxShadow = 'none';
+                            b.style.transform = 'scale(1)';
+                        });
+
+                        // Estilo ACTIVO
+                        btn.style.background = 'var(--primary-color)';
+                        btn.style.color = 'white';
+                        btn.style.borderColor = 'var(--primary-color)';
+                        btn.style.boxShadow = '0 6px 15px rgba(0, 209, 255, 0.3)';
+                        btn.style.transform = 'scale(1.05)';
+
+                        // Asignar valor para el backend
+                        document.getElementById('input-reserva-hora').value = hora;
+                    };
+
+                    contenedor.appendChild(btn);
+                });
+            }
+        </script>
 @endsection
