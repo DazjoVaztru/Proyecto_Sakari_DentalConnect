@@ -148,7 +148,7 @@ class DashboardController extends Controller
         ];
 
         // ── Historial odontograma ─────────────────────────────────────────
-        $odontograma = \App\Models\Odontograma::where('id_paciente', $p?->id_paciente)
+        $odontograma = \App\Models\Odontograma::where('id_paciente', $p->id_paciente ?? -1)
             ->orderBy('id_odontograma', 'desc')
             ->get();
 
@@ -159,11 +159,9 @@ class DashboardController extends Controller
             ->orderBy('fecha_hora_inicio', 'desc')
             ->get()
             ->map(function ($c) use ($idCita, $hoy) {
-                // Abono: solo mostrar si la cita es de HOY, sino 0.00
-                $fechaCita = Carbon::parse($c->fecha_hora_inicio)->startOfDay();
-                $esHoy = $fechaCita->equalTo($hoy);
-                $abonadoEnCita = $esHoy ? ($c->ingresos ? $c->ingresos->sum('monto') : 0) : 0;
-                
+                // Abono: mostrar lo abonado en cada cita sin importar la fecha
+                $abonadoEnCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
+
                 // Estado: solo "Completada" o "Pendiente"
                 $estadoBadge = match ($c->estado_cita) {
                     'completada' => 'Completada',
@@ -249,6 +247,9 @@ class DashboardController extends Controller
                 'metodo_pago' => 'efectivo',
                 'descripcion' => 'Abono en cita: ' . $cita->motivo
             ]);
+
+            // Refrescar la relación para que los cálculos usen datos actualizados
+            $cita->load('ingresos');
         }
 
         // 5. Cálculos para responder al front-end 
@@ -299,27 +300,27 @@ class DashboardController extends Controller
         $anio = $request->input('anio', Carbon::now()->year);
 
         $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
-        
+
         // Horas operativas: 8 horas (08:00 - 17:00) = 16 slots de 30 minutos
         $slotsDisponiblesPorDia = 16;
 
         $eventos = [];
-        
+
         for ($i = 1; $i <= $diasDelMes; $i++) {
             $fecha = Carbon::createFromDate($anio, $mes, $i);
-            
+
             // Contar citas del día (solo no canceladas)
             $citasDelDia = Cita::where('id_clinica', Auth::user()->id_clinica)
                 ->whereDate('fecha_hora_inicio', $fecha)
                 ->where('estado_cita', '!=', 'cancelada')
                 ->get();
-            
+
             $totalCitas = $citasDelDia->count();
-            
+
             // Estado del día basado en disponibilidad de slots
             $estado = 'verde'; // Por defecto libre
             $clickable = true;
-            
+
             if ($totalCitas > 0 && $totalCitas < $slotsDisponiblesPorDia) {
                 // Está ocupado pero aún hay horas disponibles
                 $estado = 'amarillo';
