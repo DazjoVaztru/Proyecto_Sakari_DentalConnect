@@ -420,13 +420,15 @@ return new class extends Migration {
         });
 
         // 12. TRIGGERS (Replicamos tu Trigger exacto de auditoría)
+        // 12. TRIGGERS (Separamos el DROP y el CREATE)
+        DB::unprepared("DROP TRIGGER IF EXISTS trg_citas_update;");
+
         DB::unprepared("
-            DROP TRIGGER IF EXISTS trg_citas_update;
             CREATE TRIGGER trg_citas_update BEFORE UPDATE ON citas FOR EACH ROW
             BEGIN
                 INSERT INTO audit_logs (id_usuario, accion, tabla_afectada, id_registro, detalles)
                 VALUES (NULL, 'update', 'citas', OLD.id_cita, JSON_OBJECT('old_estado', OLD.estado_cita, 'new_estado', NEW.estado_cita));
-            END
+            END;
         ");
     }
 
