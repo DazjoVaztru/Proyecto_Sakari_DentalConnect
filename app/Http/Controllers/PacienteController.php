@@ -64,7 +64,7 @@ class PacienteController extends Controller
                 'id_clinica' => $idClinica,
                 'nombre_completo' => $nombreCompleto,
                 'email' => $request->email,
-                'password' => 'dental123', 
+                'password' => 'dental123',
                 'rol' => 'paciente',
                 'is_active' => true,
             ]);
@@ -132,6 +132,7 @@ class PacienteController extends Controller
             DB::beginTransaction();
 
             $paciente->update([
+                'tipo_sangre' => $request->tipo_sangre,
                 'telefono' => $request->telefono,
                 'peso' => $request->peso,
                 'direccion' => $request->direccion,

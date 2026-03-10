@@ -11,9 +11,10 @@
     <div
         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
 
-        {{-- Tarjeta: Pacientes totales --}}
-        <div
-            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid var(--primary-color);">
+        {{-- Tarjeta: Pacientes totales (Acceso Rápido a Pacientes) --}}
+        <div onclick="window.location.href='{{ route('pacientes.index') }}'"
+            style="cursor: pointer; background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid var(--primary-color); transition: transform 0.2s;"
+            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
             <div
                 style="background: #e0fbfc; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <i class="fa-solid fa-users" style="color: var(--primary-color); font-size: 1.4em;"></i>
@@ -24,16 +25,31 @@
             </div>
         </div>
 
-        {{-- Tarjeta: Citas de hoy --}}
-        <div
-            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #4CAF50;">
+        {{-- Tarjeta: Citas de hoy (Generar Citas) --}}
+        <div onclick="window.location.href='{{ route('pacientes.index') }}'"
+            style="cursor: pointer; background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #4CAF50; transition: transform 0.2s;"
+            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
             <div
                 style="background: #e8f5e9; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="fa-solid fa-calendar-check" style="color: #4CAF50; font-size: 1.4em;"></i>
+                <i class="fa-solid fa-calendar-plus" style="color: #4CAF50; font-size: 1.4em;"></i>
             </div>
             <div>
                 <div style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">{{ $citasHoyCount }}</div>
-                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Citas pendientes hoy</div>
+                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Generar / Ver Citas</div>
+            </div>
+        </div>
+
+        {{-- Tarjeta: Ingresos del día --}}
+        <div
+            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #2563EB;">
+            <div
+                style="background: #DBEAFE; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-dollar-sign" style="color: #2563EB; font-size: 1.4em;"></i>
+            </div>
+            <div>
+                <div id="lbl-ingresos-dia" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
+                    ${{ number_format($ingresosDia, 0) }}</div>
+                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del día</div>
             </div>
         </div>
 
@@ -42,12 +58,12 @@
             style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
             <div
                 style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="fa-solid fa-peso-sign" style="color: #FF9800; font-size: 1.4em;"></i>
+                <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
             </div>
             <div>
                 <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
                     ${{ number_format($ingresosMes, 0) }}</div>
-                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos este mes</div>
+                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
             </div>
         </div>
 
@@ -248,7 +264,7 @@
 
                     <button class="ghost-btn" id="btn-actualizar-cita"
                         style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
-                                                                                                                                                                                                                                margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
+                                                                                                                                                                                                                                    margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
                         GUARDAR CAMBIOS
                     </button>
 
@@ -388,9 +404,9 @@
                 <!-- WIDGET 2: HORARIO (Aparece sobre Resumen/Odontograma) -->
                 <div id="widget-horario" class="inner-widget"
                     style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                                                               background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
-                                                               border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-                                                               padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
+                                                                   background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+                                                                   border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+                                                                   padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
 
                     <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 5px;">
                         <i class="fa-regular fa-calendar-check"></i> Reprogramar Cita
@@ -404,7 +420,7 @@
                             <label style="font-weight: 700; color: #333;">Fecha seleccionada</label>
                             <input type="date" name="nueva_fecha" id="input-nueva-fecha"
                                 style="padding: 14px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1.1rem; 
-                                                                           background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
+                                                                               background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
                                 onchange="generarHorariosDisponibles(this.value)">
                         </div>
 
@@ -414,7 +430,7 @@
 
                             <div id="contenedor-horarios"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; 
-                                                                            max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
+                                                                                max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
                                 <div
                                     style="grid-column: 1 / -1; color: #888; text-align: center; padding: 20px; font-style: italic;">
                                     Selecciona una fecha primero...
@@ -946,12 +962,12 @@
                             }
 
                             tr.innerHTML = `
-                                                                                        <td style="${tdStyle}">${fila.dia}</td>
-                                                                                        <td style="${tdStyle}">${fila.hora}</td>
-                                                                                        <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                                                                        <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                                                                        <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                                                                    `;
+                                                                                            <td style="${tdStyle}">${fila.dia}</td>
+                                                                                            <td style="${tdStyle}">${fila.hora}</td>
+                                                                                            <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
+                                                                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
+                                                                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
+                                                                                        `;
                             return tr;
                         });
 
@@ -1040,14 +1056,14 @@
             const dientesPermInf = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const svgCaras = `
-                                                                                                                                                        <svg viewBox="0 0 100 100" class="odontograma-svg">
-                                                                                                                                                            <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
-                                                                                                                                                            <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
-                                                                                                                                                            <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
-                                                                                                                                                            <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
-                                                                                                                                                            <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
-                                                                                                                                                        </svg>
-                                                                                                                                                    `;
+                                                                                                                                                            <svg viewBox="0 0 100 100" class="odontograma-svg">
+                                                                                                                                                                <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
+                                                                                                                                                                <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
+                                                                                                                                                                <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
+                                                                                                                                                                <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
+                                                                                                                                                                <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
+                                                                                                                                                            </svg>
+                                                                                                                                                        `;
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -1079,9 +1095,9 @@
 
                     const svgId = obtenerIdAnatomia(numero);
                     const divAnatomia = `
-                                                                                                                                            <div class="anatomia">
-                                                                                                                                                <svg><use href="${svgId}"></use></svg>
-                                                                                                                                            </div>`;
+                                                                                                                                                <div class="anatomia">
+                                                                                                                                                    <svg><use href="${svgId}"></use></svg>
+                                                                                                                                                </div>`;
                     const divNumero = `<div class="numero-diente">${numero}</div>`;
                     const divCaras = `<div class="caras-interactivas">${svgCaras}</div>`;
 

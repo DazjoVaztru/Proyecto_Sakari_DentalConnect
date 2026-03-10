@@ -738,14 +738,14 @@
                                 </label>
                                 <input type="file" id="nueva-evolucion-foto"
                                     accept="image/jpeg, image/png, image/jpg, image/webp" style="display: none;" onchange="
-                                                                                                        const file = this.files[0];
-                                                                                                        if(file) {
-                                                                                                            document.getElementById('label-ev-foto').innerText = file.name;
-                                                                                                            document.getElementById('label-ev-foto').style.color = '#10b981';
-                                                                                                        } else {
-                                                                                                            document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
-                                                                                                            document.getElementById('label-ev-foto').style.color = '#00b4d8';
-                                                                                                        }">
+                                                                                                            const file = this.files[0];
+                                                                                                            if(file) {
+                                                                                                                document.getElementById('label-ev-foto').innerText = file.name;
+                                                                                                                document.getElementById('label-ev-foto').style.color = '#10b981';
+                                                                                                            } else {
+                                                                                                                document.getElementById('label-ev-foto').innerText = 'Adjuntar Evidencia (Foto)';
+                                                                                                                document.getElementById('label-ev-foto').style.color = '#00b4d8';
+                                                                                                            }">
                             </div>
 
                             <button onclick="guardarEvolucion()" id="btn-submit-evolucion" class="ghost-btn"
@@ -909,7 +909,7 @@
                 <div class="form-grid">
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: #f59e0b; text-transform: uppercase; border-bottom: 2px solid #fef3c7; padding-bottom: 6px; margin-bottom: 5px;">
-                        <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales (Bloqueados)
+                        <i class="fa-solid fa-id-card" style="margin-right: 5px;"></i> Datos Personales
                     </div>
 
                     <input type="text" id="edit-nombre" class="modern-input" placeholder="Nombre(s)" readonly
@@ -918,12 +918,21 @@
                         style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
                     <input type="text" id="edit-fecha-nac" class="modern-input" placeholder="Fecha Nacimiento" readonly
                         style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
-                    <input type="text" id="edit-tipo-sangre" class="modern-input" placeholder="Tipo Sangre" readonly
-                        style="background: #f3f4f6; color: #6b7280; cursor: not-allowed;">
+                    <select name="tipo_sangre" id="edit-tipo-sangre" class="modern-input" required>
+                        <option value="">Tipo de Sangre*</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
 
                     <div class="full-width"
                         style="font-size: 0.78em; font-weight: 700; color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid #e0fbfc; padding-bottom: 6px; margin-top: 15px; margin-bottom: 5px;">
-                        <i class="fa-solid fa-pen" style="margin-right: 5px;"></i> Datos Editables
+                        <i class="fa-solid fa-pen" style="margin-right: 5px;"></i> Datos de Contacto y Físicos
                     </div>
 
                     <input type="email" name="email" id="edit-email" class="modern-input" placeholder="Email (Usuario App)*"
@@ -1029,9 +1038,9 @@
                     icon: 'error',
                     title: 'Campos obligatorios faltantes',
                     html: `<p style="text-align:left;font-size:0.95rem;">Para crear el expediente clínico, debes completar:</p>
-                                                   <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
-                                                       ${faltantes.map(f => `<li>${f}</li>`).join('')}
-                                                   </ul>`,
+                                                       <ul style="text-align:left;color:#991b1b;font-weight:600;margin-top:8px;">
+                                                           ${faltantes.map(f => `<li>${f}</li>`).join('')}
+                                                       </ul>`,
                     confirmButtonColor: '#ef4444',
                     confirmButtonText: 'Entendido'
                 });
@@ -1124,7 +1133,7 @@
             const badges = document.getElementById('view-alergias-badges');
             if (paciente.alergias) {
                 badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                                                                                <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
+                                                                                                                                    <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
             } else {
                 badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
             }
@@ -1204,15 +1213,15 @@
                 list.innerHTML = json.data.map(cita => {
                     const statusClass = cita.estado_cita === 'completada' ? 'color:#10b981;' : (cita.estado_cita === 'cancelada' ? 'color:#ef4444;' : 'color:#f59e0b;');
                     return `<div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; display: flex; justify-content: space-between; align-items: center;">
-                                                                                                    <div>
-                                                                                                        <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
-                                                                                                        <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
-                                                                                                        ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
-                                                                                                    </div>
-                                                                                                    <div style="text-align: right;">
-                                                                                                        <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
-                                                                                                    </div>
-                                                                                                </div>`;
+                                                                                                        <div>
+                                                                                                            <h5 style="margin:0 0 5px 0; font-size: 1rem; color: #2b2d42;">${cita.servicio ? cita.servicio.nombre_servicio : 'Consulta General'}</h5>
+                                                                                                            <span style="font-size: 0.85rem; color: #6c757d;"><i class="fa-solid fa-calendar-day"></i> ${new Date(cita.fecha_hora_inicio).toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</span>
+                                                                                                            ${cita.notas ? `<p style="margin:5px 0 0 0; font-size:0.85rem; color:#555;"><i>"${cita.notas}"</i></p>` : ''}
+                                                                                                        </div>
+                                                                                                        <div style="text-align: right;">
+                                                                                                            <span style="font-weight: 800; font-size: 0.85em; text-transform: uppercase; ${statusClass}">${cita.estado_cita}</span>
+                                                                                                        </div>
+                                                                                                    </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar historial.</p>';
@@ -1240,20 +1249,20 @@
                     if (ev.imagenes && ev.imagenes.length > 0) {
                         const imgUrl = '/storage/' + ev.imagenes[0].ruta_imagen;
                         imageHtml = `<div style="margin-top: 15px; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; display: inline-block;">
-                                                                                                            <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
-                                                                                                                <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
-                                                                                                            </a>
-                                                                                                         </div>`;
+                                                                                                                <a href="${imgUrl}" target="_blank" title="Ver imagen completa">
+                                                                                                                    <img src="${imgUrl}" alt="Evidencia" style="max-width: 200px; max-height: 150px; display: block; object-fit: cover;">
+                                                                                                                </a>
+                                                                                                             </div>`;
                     }
 
                     return `<div style="background:white;border:1px solid #e2e8f0;border-radius:14px;padding:18px;border-left:4px solid var(--primary-color);">
-                                                                                                                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-                                                                                                                        <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
-                                                                                                                    </div>
-                                                                                                                    <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
-                                                                                                                    ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
-                                                                                                                    ${imageHtml}
-                                                                                                                </div>`;
+                                                                                                                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                                                                                                            <span style="font-size:0.8em;font-weight:700;color:var(--primary-color);text-transform:uppercase;"><i class="fa-solid fa-calendar-days"></i> ${fecha}</span>
+                                                                                                                        </div>
+                                                                                                                        <p style="margin:0;color:#333;line-height:1.6;">${ev.descripcion_avance || 'Sin descripción.'}</p>
+                                                                                                                        ${ev.plan_tratamiento ? `<p style="margin:8px 0 0;font-size:0.88em;color:#666;"><strong>Plan:</strong> ${ev.plan_tratamiento}</p>` : ''}
+                                                                                                                        ${imageHtml}
+                                                                                                                    </div>`;
                 }).join('');
             } catch (e) {
                 list.innerHTML = '<p style="text-align:center;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar evoluciones.</p>';
@@ -1345,7 +1354,7 @@
             document.getElementById('edit-nombre').value = currentPaciente.nombre;
             document.getElementById('edit-apellidos').value = `${currentPaciente.apellido_paterno} ${currentPaciente.apellido_materno || ''}`;
             document.getElementById('edit-fecha-nac').value = currentPaciente.fecha_nacimiento || '';
-            document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || 'N/A';
+            document.getElementById('edit-tipo-sangre').value = currentPaciente.tipo_sangre || '';
 
             // Campos Editables
             document.getElementById('edit-email').value = currentPaciente.correo_electronico || '';

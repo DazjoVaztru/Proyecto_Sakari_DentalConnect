@@ -69,6 +69,11 @@ class DashboardController extends Controller
             ->whereYear('fecha_ingreso', $hoy->year)
             ->sum('monto');
 
+        // --- Ingresos del día actual ---
+        $ingresosDia = IngresoCaja::where('id_clinica', $idClinica)
+            ->whereDate('fecha_ingreso', $hoy)
+            ->sum('monto');
+
         // --- Ítems de inventario con stock bajo (< 5 unidades) ---
         $itemsBajoStock = Inventario::where('id_clinica', $idClinica)
             ->where('stock', '<', 5)
@@ -89,6 +94,7 @@ class DashboardController extends Controller
             'citasHoyCount',
             'totalPacientes',
             'ingresosMes',
+            'ingresosDia',
             'itemsBajoStock',
             'notificacionesPendientes',
             'servicios'
