@@ -39,19 +39,7 @@
             </div>
         </div>
 
-        {{-- Tarjeta: Ingresos del día --}}
-        <div
-            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #2563EB;">
-            <div
-                style="background: #DBEAFE; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="fa-solid fa-dollar-sign" style="color: #2563EB; font-size: 1.4em;"></i>
-            </div>
-            <div>
-                <div id="lbl-ingresos-dia" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
-                    ${{ number_format($ingresosDia, 0) }}</div>
-                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del día</div>
-            </div>
-        </div>
+
 
         {{-- Tarjeta: Ingresos del mes --}}
         <div
