@@ -42,19 +42,21 @@
 
 
         {{-- Tarjeta: Ingresos del mes --}}
-        <div
-            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
-            <div
-                style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
-            </div>
-            <div>
-                <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
-                    ${{ number_format($ingresosMes, 0) }}</div>
-                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
-            </div>
+       <div
+    style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
+    <div
+        style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
+    </div>
+    <div>
+        <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
+            ${{ number_format($ingresosMes, 0) }}
         </div>
+        <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
+    </div>
+</div>
 
+</div>
        {{-- Tarjeta Principal: Citas --}}
 <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
     <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
