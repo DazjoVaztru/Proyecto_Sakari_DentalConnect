@@ -173,7 +173,9 @@
                         <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">V</span>
                         <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">S</span>
 
-                        <div id="functional-calendar-days" style="display: contents;"></div>
+                       <div id="functional-calendar-days"
+     style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px;">
+</div>
                     </div>
 
                     <div
