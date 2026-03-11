@@ -324,12 +324,15 @@ class DashboardController extends Controller
             $horaFinModal = '20:00';
             
             if ($clinicaAbierta) {
-                $horaInicioModal = Carbon::parse($horarioDia->hora_inicio)->format('H:i');
-                $horaFinModal = Carbon::parse($horarioDia->hora_fin)->format('H:i');
+                $hInicioOriginal = $horarioDia->hora_inicio ?: '08:00:00';
+                $hFinOriginal = $horarioDia->hora_fin ?: '20:00:00';
+                $horaInicioModal = Carbon::parse($hInicioOriginal)->format('H:i');
+                $horaFinModal = Carbon::parse($hFinOriginal)->format('H:i');
                 
-                // Calcular slots disponibles apróximados (cada 30 min)
-                $minutosTotales = Carbon::parse($horarioDia->hora_fin)->diffInMinutes(Carbon::parse($horarioDia->hora_inicio));
-                $slotsDisponiblesPorDia = max(1, floor($minutosTotales / 30));
+                // Calcular slots disponibles apróximados (cada 30 min), fallback a 16 por seguridad
+                $minutosTotales = Carbon::parse($hFinOriginal)->diffInMinutes(Carbon::parse($hInicioOriginal));
+                $slotsCalculados = floor($minutosTotales / 30);
+                $slotsDisponiblesPorDia = $slotsCalculados > 0 ? $slotsCalculados : 16;
             } else {
                 $slotsDisponiblesPorDia = 0;
             }
