@@ -90,8 +90,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/calendario/disponibilidad', [DashboardController::class, 'obtenerDisponibilidadMes'])->name('api.calendario');
 
     // 🔴 NUEVA API → HORAS OCUPADAS (IMPORTANTE PARA BLOQUEAR HORARIOS)
-    Route::get('/api/citas/horas-ocupadas', [CitaController::class, 'horasOcupadas'])
-        ->name('api.citas.horas_ocupadas');
+
+// Por esto:
+Route::get('/api/citas/horas-ocupadas', [DashboardController::class, 'horasOcupadas'])
+    ->name('api.citas.horas_ocupadas');
 
 
     /**

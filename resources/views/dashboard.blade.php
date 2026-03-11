@@ -611,18 +611,14 @@
     </div>
 
 @endsection
-
 @section('scripts')
-
     <script>
-
         // ==========================================
         // aqui va ek calendario
         // ==========================================
         let horasOcupadas = [];
         let calMesActual = new Date().getMonth() + 1;
         let calAnioActual = new Date().getFullYear();
-        // Fecha original de la cita actualmente abierta (se llena al cargar la cita)
         let fechaCitaActual = null;
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -632,12 +628,9 @@
             grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i></div>';
 
             fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
-                .then(res => res.json())
+                .then(res => res.ok ? res.json() : Promise.reject('Error en disponibilidad')) // Validación de respuesta
                 .then(disponibilidad => {
                     grid.innerHTML = '';
-
-                    // Calcular la fecha mínima permitida para reagendar:
-                    // = max(hoy, fechaCita - 1 día)
                     const hoy = new Date();
                     hoy.setHours(0, 0, 0, 0);
 
@@ -646,7 +639,6 @@
                         const unDiaAntes = new Date(fechaCitaActual);
                         unDiaAntes.setDate(unDiaAntes.getDate() - 1);
                         unDiaAntes.setHours(0, 0, 0, 0);
-                        // El mínimo es el mayor entre hoy y (cita - 1 día)
                         minFechaPermitida = unDiaAntes > hoy ? unDiaAntes : hoy;
                     }
 
@@ -662,7 +654,6 @@
                         div.style.fontSize = '0.9em';
                         div.style.transition = '0.2s';
 
-                        // Crear tooltip con información de horas
                         let tooltipText = `Día ${dia}`;
                         if (data.horas_disponibles !== undefined) {
                             tooltipText += `\n📅 Horas disponibles: ${data.horas_disponibles}/8`;
@@ -670,13 +661,11 @@
                         }
                         div.title = tooltipText;
 
-                        // Verificar si este día está por debajo de la fecha mínima permitida
                         const estaFecha = new Date(anio, mes - 1, parseInt(dia));
                         estaFecha.setHours(0, 0, 0, 0);
                         const esBloqueado = estaFecha < minFechaPermitida;
 
                         if (esBloqueado) {
-                            // Día bloqueado por restricción de reagendado
                             div.style.background = '#d1d5db';
                             div.style.color = '#9ca3af';
                             div.style.cursor = 'not-allowed';
@@ -706,14 +695,14 @@
                             div.onmouseout = () => div.style.transform = 'scale(1)';
                         } else if (!esBloqueado && data.estado === 'rojo') {
                             div.style.cursor = 'not-allowed';
-                            div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.\n\nIntenta otro día con horas libres.`);
+                            div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.`);
                         } else if (esBloqueado) {
                             div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
                         }
-
                         grid.appendChild(div);
                     }
-                });
+                })
+                .catch(err => console.error("Error en disponibilidad:", err));
         }
 
         function cambiarMes(delta) {
@@ -723,154 +712,108 @@
             cargarCalendarioFuncional(calMesActual, calAnioActual);
         }
 
-        // Agrega esta función para generar las píldoras de tiempo
-       function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00', horasOcupadas = []) {
+        function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00', horasOcupadas = []) {
+            const contenedor = document.getElementById('contenedor-horarios');
+            const inputHora = document.getElementById('input-nueva-hora');
+            inputHora.value = '';
+            if (!fechaSeleccionada) return;
 
-    const contenedor = document.getElementById('contenedor-horarios');
-    const inputHora = document.getElementById('input-nueva-hora');
+            let horariosClinica = [];
+            // Validación por si el backend manda nulo en las horas
+            let [hInicio, mInicio] = (horaInicioStr || '09:00').split(':').map(Number);
+            let [hFin, mFin] = (horaFinStr || '18:00').split(':').map(Number);
 
-    inputHora.value = '';
+            let currentDate = new Date();
+            currentDate.setHours(hInicio, mInicio, 0, 0);
+            let endDate = new Date();
+            endDate.setHours(hFin, mFin, 0, 0);
 
-    if (!fechaSeleccionada) return;
+            while (currentDate < endDate && horariosClinica.length < 48) {
+                let h = String(currentDate.getHours()).padStart(2, '0');
+                let m = String(currentDate.getMinutes()).padStart(2, '0');
+                horariosClinica.push(`${h}:${m}`);
+                currentDate.setMinutes(currentDate.getMinutes() + 30);
+            }
 
-    let horariosClinica = [];
+            contenedor.innerHTML = '';
+            horariosClinica.forEach(hora => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'slot-horario';
+                const [h, m] = hora.split(':');
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+                btn.innerText = hora12;
+                btn.dataset.hora = hora;
+                btn.style.padding = "12px 5px";
+                btn.style.borderRadius = "10px";
+                btn.style.fontWeight = "700";
+                btn.style.transition = "0.2s";
 
-    let [hInicio, mInicio] = horaInicioStr.split(':').map(Number);
-    let [hFin, mFin] = horaFinStr.split(':').map(Number);
-
-    let currentDate = new Date();
-    currentDate.setHours(hInicio, mInicio, 0, 0);
-
-    let endDate = new Date();
-    endDate.setHours(hFin, mFin, 0, 0);
-
-    while (currentDate < endDate && horariosClinica.length < 48) {
-
-        let h = String(currentDate.getHours()).padStart(2, '0');
-        let m = String(currentDate.getMinutes()).padStart(2, '0');
-
-        horariosClinica.push(`${h}:${m}`);
-
-        currentDate.setMinutes(currentDate.getMinutes() + 30);
-    }
-
-    contenedor.innerHTML = '';
-
-    horariosClinica.forEach(hora => {
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'slot-horario';
-
-        const [h, m] = hora.split(':');
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
-
-        btn.innerText = hora12;
-        btn.dataset.hora = hora;
-
-        btn.style.padding = "12px 5px";
-        btn.style.borderRadius = "10px";
-        btn.style.fontWeight = "700";
-        btn.style.transition = "0.2s";
-
-        // 🔴 SI LA HORA YA ESTÁ OCUPADA
-        if (horasOcupadas.includes(hora)) {
-
-            btn.disabled = true;
-
-            btn.style.background = "#ef4444";
-            btn.style.color = "white";
-            btn.style.cursor = "not-allowed";
-            btn.style.opacity = "0.6";
-
-        } else {
-
-            btn.style.background = "rgba(255,255,255,0.6)";
-            btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
-            btn.style.cursor = "pointer";
-
-            btn.onclick = () => {
-
-                document.querySelectorAll('.slot-horario').forEach(b => {
-
-                    if (!b.disabled) {
-                        b.style.background = "rgba(255,255,255,0.6)";
-                        b.style.color = "#333";
-                        b.style.boxShadow = "none";
-                    }
-
-                });
-
-                btn.style.background = "var(--primary-color)";
-                btn.style.color = "white";
-                btn.style.boxShadow = "0 4px 10px rgba(0,209,255,0.3)";
-
-                inputHora.value = hora;
-            };
+                if (horasOcupadas.includes(hora)) {
+                    btn.disabled = true;
+                    btn.style.background = "#ef4444";
+                    btn.style.color = "white";
+                    btn.style.cursor = "not-allowed";
+                    btn.style.opacity = "0.6";
+                } else {
+                    btn.style.background = "rgba(255,255,255,0.6)";
+                    btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
+                    btn.style.cursor = "pointer";
+                    btn.onclick = () => {
+                        document.querySelectorAll('.slot-horario').forEach(b => {
+                            if (!b.disabled) {
+                                b.style.background = "rgba(255,255,255,0.6)";
+                                b.style.color = "#333";
+                            }
+                        });
+                        btn.style.background = "var(--primary-color)";
+                        btn.style.color = "white";
+                        inputHora.value = hora;
+                    };
+                }
+                contenedor.appendChild(btn);
+            });
         }
-
-        contenedor.appendChild(btn);
-    });
-
-}
 
         function abrirModalAgendar(dia, mes, anio, horaInicio, horaFin) {
+            const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+            document.getElementById('input-nueva-fecha').value = fechaString;
 
-    const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-    document.getElementById('input-nueva-fecha').value = fechaString;
-
-    // Obtener horas ocupadas de la base de datos
-    fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
-        .then(res => res.json())
-        .then(data => {
-
-            horasOcupadas = data.horas_ocupadas || [];
-
-            generarHorariosDisponibles(
-                fechaString,
-                horaInicio,
-                horaFin,
-                horasOcupadas
-            );
-
-            openWidget('widget-horario');
-        });
-}
-
-        // Función para validar antes de cerrar
-        function confirmarHorario() {
-            const horaSeleccionada = document.getElementById('input-nueva-hora').value;
-            if (!horaSeleccionada) {
-                alert("Por favor, selecciona una hora de la cuadrícula para la cita.");
-                return;
-            }
-            // Si ya seleccionó, cerramos el widget y el usuario ya puede darle a "Guardar Cambios"
-            closeWidgets();
-        }
-
-        // ==========================================
-        // LÓGICA DE CARGA DE DATOS DE LA CITA
-        // ==========================================
-        function cargarModalCita(idCita) {
-            console.log('Abriendo modal para cita:', idCita);
-            openModal('modal-detalle-cita');
-            document.getElementById('form-actualizar-cita').action = `/citas/${idCita}/actualizar`;
-
-            // Loader visual
-            document.getElementById('lbl-nombre').innerText = 'Cargando...';
-
-            fetch(`/api/citas/${idCita}/modal-detalles`)
+            // MODIFICACIÓN: Manejo de error 500 para evitar el SyntaxError
+            fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
                 .then(res => {
-                    console.log('Response status:', res.status);
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
+                    if (!res.ok) throw new Error('Error 500 del servidor');
                     return res.json();
                 })
                 .then(data => {
-                    console.log('Datos recibidos:', data);
-                    // 1. Datos Paciente
+                    horasOcupadas = data.horas_ocupadas || [];
+                    generarHorariosDisponibles(fechaString, horaInicio, horaFin, horasOcupadas);
+                    openWidget('widget-horario');
+                })
+                .catch(err => {
+                    console.error("Error al cargar horas ocupadas:", err);
+                    alert("Error al obtener disponibilidad del servidor. Revisa los logs.");
+                });
+        }
+
+        function confirmarHorario() {
+            const horaSeleccionada = document.getElementById('input-nueva-hora').value;
+            if (!horaSeleccionada) {
+                alert("Por favor, selecciona una hora de la cuadrícula.");
+                return;
+            }
+            closeWidgets();
+        }
+
+        function cargarModalCita(idCita) {
+            openModal('modal-detalle-cita');
+            document.getElementById('form-actualizar-cita').action = `/citas/${idCita}/actualizar`;
+            document.getElementById('lbl-nombre').innerText = 'Cargando...';
+
+            fetch(`/api/citas/${idCita}/modal-detalles`)
+                .then(res => res.ok ? res.json() : Promise.reject('Error modal'))
+                .then(data => {
                     document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
                     document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
                     document.getElementById('lbl-materno').innerText = data.paciente.materno;
@@ -883,38 +826,28 @@
                     if (document.getElementById('lbl-alergias')) document.getElementById('lbl-alergias').innerText = data.paciente.alergias;
                     if (document.getElementById('lbl-enfermedades')) document.getElementById('lbl-enfermedades').innerText = data.paciente.enfermedades;
 
-                    // 2. Historial completo de citas del paciente → generar todas las filas
                     const tbody = document.getElementById('cita-tabla-body');
-                    tbody.innerHTML = ''; // limpiar filas anteriores
-
-                    // Variables globales para paginación
+                    tbody.innerHTML = '';
                     window.todasLasFilas = [];
                     window.paginaActual = 1;
                     window.filasPorPagina = 4;
 
                     if (data.historial_citas && data.historial_citas.length > 0) {
-                        // Guardar todas las filas en el array global
                         window.todasLasFilas = data.historial_citas.map(function (fila) {
                             const esActual = fila.es_actual;
                             const bgFila = esActual ? '#E8FFF4' : 'white';
                             const borde = '2px solid #00D1FF';
                             const tdStyle = `padding:14px 15px; border-right:${borde}; font-size:1em; color:#333; background:${bgFila};`;
-                            const tdLast = `padding:14px 15px; font-size:1em; font-weight:700; color:var(--primary-color); background:${bgFila};`;
                             const tr = document.createElement('tr');
                             tr.style.borderBottom = borde;
-                            tr.dataset.citaId = fila.id;
-                            tr._citaId = fila.id;
                             if (esActual) {
                                 tr.style.fontWeight = '700';
                                 tr.setAttribute('data-cita-actual', 'true');
                             }
 
-                            // Determinar color y icono del estado
                             let colorEstado = '#999';
                             let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
                             let textoEstado = 'Pendiente';
-
-                            // Comparar estado sin diferenciar mayúsculas/minúsculas
                             const estadoLower = (fila.estado || '').toLowerCase().trim();
                             if (estadoLower === 'completada') {
                                 colorEstado = '#22C55E';
@@ -927,77 +860,53 @@
                             }
 
                             tr.innerHTML = `
-                                                                                            <td style="${tdStyle}">${fila.dia}</td>
-                                                                                            <td style="${tdStyle}">${fila.hora}</td>
-                                                                                            <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                                                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                                                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                                                                        `;
+                                <td style="${tdStyle}">${fila.dia}</td>
+                                <td style="${tdStyle}">${fila.hora}</td>
+                                <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
+                                <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
+                                <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
+                            `;
                             return tr;
                         });
-
-                        // Guardar datos de citas para actualización rápida
                         window.citasData = data.historial_citas;
-
-                        // Renderizar la primera página
                         renderizarPagina();
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="5" style="padding:18px; color:#888; text-align:center;">Sin historial de citas</td></tr>';
-                        document.getElementById('paginacion-controles').style.display = 'none';
+                        tbody.innerHTML = '<tr><td colspan="5" style="padding:18px; color:#888; text-align:center;">Sin historial</td></tr>';
                     }
 
-                    // 3. Totales Crudos y Display
-                    // Replace "$..." with exact integers for raw variables based on what backend returns
                     const rawCosto = parseFloat(data.finanzas.total.replace(/,/g, ''));
                     const rawRestante = parseFloat(data.finanzas.restante.replace(/,/g, ''));
-                    const rawPagado = rawCosto - rawRestante; // We calculate pagado so far
-
+                    const rawPagado = rawCosto - rawRestante;
                     document.getElementById('raw-costo-total').value = rawCosto;
                     document.getElementById('raw-total-abonado').value = rawPagado;
-
                     document.getElementById('lbl-total').innerText = '$' + data.finanzas.total;
                     document.getElementById('lbl-restante').innerText = data.finanzas.restante;
 
-                    // 4. Guardar fecha de la cita actual para el calendario de reagendado
                     if (data.fila_tabla && data.fila_tabla.dia) {
-                        // Convertir dd/mm/yyyy a Date
                         const partesFecha = data.fila_tabla.dia.split('/');
                         if (partesFecha.length === 3) {
                             fechaCitaActual = new Date(parseInt(partesFecha[2]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[0]));
                         }
                     }
 
-                    // 5. Calendario
                     if (data.fecha_cita) {
                         calMesActual = data.fecha_cita.mes + 1;
                         calAnioActual = data.fecha_cita.anio;
-                        // Si pasa de diciembre → enero del siguiente año
-                        if (calMesActual > 12) {
-                            calMesActual = 1; calAnioActual++;
-
-                        }
+                        if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
                         cargarCalendarioFuncional(calMesActual, calAnioActual);
                     }
 
-                    // 5. Histórico Odontograma
                     document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
-
                     if (document.getElementById('odontograma-paciente-edad')) {
                         document.getElementById('odontograma-paciente-edad').value = data.paciente.edad_numero;
                         document.dispatchEvent(new CustomEvent('odontograma:edadCargada', { detail: { edad: data.paciente.edad_numero } }));
                     }
 
                     if (data.odontograma) {
-                        console.log("Historial dental del paciente:", data.odontograma);
-
-                        // Limpiar todos los dientes primero
                         document.querySelectorAll('.cara-diente').forEach(c => c.style.fill = 'white');
-
-                        // Pintar los registrados — columnas reales: numero_diente, cara_diente, estado_diente
                         data.odontograma.forEach(registro => {
                             const caraElement = document.querySelector(`.diente[data-diente="${registro.numero_diente}"] .cara-diente[data-cara="${registro.cara_diente}"]`);
                             if (caraElement) {
-                                // estado_diente 'hallazgo' = azul; tratamiento/otros = rojo
                                 const color = (registro.estado_diente === 'hallazgo') ? 'blue' : 'red';
                                 caraElement.style.fill = color;
                             }
@@ -1009,6 +918,7 @@
                     document.getElementById('lbl-nombre').innerText = 'Error al cargar';
                 });
         }
+@endsection
 
         // ==========================================
         // LÓGICA INTERACTIVA ODONTOGRAMA (Dinámica)
