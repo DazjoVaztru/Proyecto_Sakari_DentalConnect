@@ -161,47 +161,11 @@
                         <span id="cal-mes-anio"
                             style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
 
-                        <button class="ghost-btn"
+                      <button class="ghost-btn"
                             style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
                             onclick="cambiarMes(1)">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
-                    </div>
-
-                   <div class="calendar-grid-functional" 
-     style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center;">
-    
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">D</span>
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">L</span>
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">M</span>
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">M</span>
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">J</span>
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">V</span>
-    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">S</span>
-
-    <div id="functional-calendar-days" style="display: contents;">
-        </div>
-</div>
-                        style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; font-size: 0.7em; color: #666;">
-                        <div style="display:flex; align-items:center;"><span
-                                style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre
-                        </div>
-                        <div style="display:flex; align-items:center;"><span
-                                style="width:8px;height:8px;background:#FFC107;border-radius:50%;margin-right:4px;"></span>Ocupado
-                        </div>
-                        <div style="display:flex; align-items:center;"><span
-                                style="width:8px;height:8px;background:#EF4444;border-radius:50%;margin-right:4px;"></span>Lleno
-                        </div>
-                    </div>
-                </div>
-
-                <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
-                    <button class="ghost-btn" onclick="openWidget('widget-seguimiento')"
-                        style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Seguimiento</button>
-                    <button type="button" class="ghost-btn" onclick="openWidget('widget-pago')"
-                        style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Pago
-                        de hoy</button>
-
                     <button type="button" class="ghost-btn" onclick="switchTab('tab-odontograma')"
                         style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">
                         Odontograma
