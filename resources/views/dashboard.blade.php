@@ -931,12 +931,32 @@ function generarHorariosDisponibles(
 
         document.getElementById('input-nueva-fecha').value=fechaString;
 
-        fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
+        fetch(`/api/calendario/horas-ocupadas?fecha=${fechaString}`)
         .then(res=>res.ok?res.json():{horas_ocupadas:[]})
         .then(data=>{
 
             // 1. Forzamos el formato 'HH:mm' recortando los segundos de lo que mande el servidor
             horasOcupadas = (data.horas_ocupadas || []).map(hora => hora.substring(0, 5));
+            
+            // Validar si es el día de hoy para deshabilitar también las horas que ya pasaron
+            const esHoy = fechaString === new Date().toISOString().split('T')[0];
+            if (esHoy) {
+                const now = new Date();
+                // Si llamamos generarHorariosDisponibles, podemos mandarle las "horas ocupadas"
+                // Pero es más fácil inyectar las horas vencidas aquí
+                let hInicio = parseInt(horaInicio ? horaInicio.split(':')[0] : '8');
+                let nowH = now.getHours();
+                let nowM = now.getMinutes();
+                for (let h = hInicio; h <= nowH; h++) {
+                    let hStr = String(h).padStart(2, '0');
+                    if (h < nowH || (h === nowH && nowM > 0)) {
+                        if (!horasOcupadas.includes(`${hStr}:00`)) horasOcupadas.push(`${hStr}:00`);
+                        if (!horasOcupadas.includes(`${hStr}:30`) && (h < nowH || (h === nowH && nowM > 30))) {
+                            horasOcupadas.push(`${hStr}:30`);
+                        }
+                    }
+                }
+            }
 
             generarHorariosDisponibles(
                 fechaString,
@@ -947,6 +967,11 @@ function generarHorariosDisponibles(
 
             openWidget('widget-horario');
 
+        })
+        .catch(err => {
+            console.error('Error cargando horas:', err);
+            generarHorariosDisponibles(fechaString, horaInicio || '09:00', horaFin || '18:00', []);
+            openWidget('widget-horario');
         });
 
     }
