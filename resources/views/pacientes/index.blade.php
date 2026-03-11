@@ -1090,6 +1090,27 @@
                 card.style.display = text.includes(query) ? 'flex' : 'none';
             });
         });
+        // --- UBICACIÓN: Después del Buscador y antes de verPerfil ---
+document.getElementById('form-add-cita').addEventListener('submit', function(e) {
+    const fecha = document.getElementById('input-reserva-fecha').value;
+    const hora = document.getElementById('input-reserva-hora').value;
+
+    if (!fecha || !hora) {
+        e.preventDefault(); 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Por favor, selecciona un día y una hora en el calendario.',
+            confirmButtonColor: '#00b4d8'
+        });
+        return;
+    }
+
+    const btn = document.getElementById('btn-confirmar-cita');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.7';
+});
 
         // ─── Perfil del Paciente ────────────────────────────────────────────────
         function verPerfil(paciente) {
@@ -1120,35 +1141,38 @@
             }
 
             // Contacto de Emergencia
-            const ce = paciente.contacto_emergencia;
+           const ce = paciente.contacto_emergencia;
             if (ce) {
-                document.getElementById('view-emergencia-nombre').innerText = `${ce.nombre} ${ce.paterno || ''}`;
+                document.getElementById('view-emergencia-nombre').innerText = `${ce.nombre} ${ce.apellido_paterno}`;
                 document.getElementById('view-emergencia-tel').innerText = ce.numero_telefono || 'S/D';
             } else {
                 document.getElementById('view-emergencia-nombre').innerText = 'No registrado';
-                document.getElementById('view-emergencia-tel').innerText = '---';
+                document.getElementById('view-emergencia-tel').innerText = 'S/D';
             }
 
-            // Alergias
-            const badges = document.getElementById('view-alergias-badges');
-            if (paciente.alergias) {
-                badges.innerHTML = `<span style="background:#ef4444; color:white; border-radius:20px; padding:5px 15px; font-size:0.9em; font-weight:700;">
-                                                                                                                                    <i class="fa-solid fa-pills"></i> ${paciente.alergias}</span>`;
-            } else {
-                badges.innerHTML = '<span style="color: #6c757d; font-style: italic;">Sin alergias registradas</span>';
-            }
+            // --- ESTO ES LO MÁS IMPORTANTE PARA LA CITA ---
+            // Inyectamos el ID y nombre en el formulario de citas
+            const inputIdCita = document.getElementById('form-cita-paciente-id');
+            const inputNomCita = document.getElementById('form-cita-paciente-nombre');
+            
+            if(inputIdCita) inputIdCita.value = paciente.id_paciente;
+            if(inputNomCita) inputNomCita.value = `${paciente.nombre} ${paciente.apellido_paterno}`;
 
+            // Abrir el modal de perfil
             openModal('modal-patient-profile');
         }
 
+        // Función auxiliar para la edad (si no la tienes)
         function calcularEdad(fecha) {
             if (!fecha) return 'S/D';
-            const birth = new Date(fecha);
-            const now = new Date();
-            let age = now.getFullYear() - birth.getFullYear();
-            const month = now.getMonth() - birth.getMonth();
-            if (month < 0 || (month === 0 && now.getDate() < birth.getDate())) age--;
-            return age + ' años';
+            const hoy = new Date();
+            const cumple = new Date(fecha);
+            let edad = hoy.getFullYear() - cumple.getFullYear();
+            const m = hoy.getMonth() - cumple.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < cumple.getDate())) {
+                edad--;
+            }
+            return edad + ' años';
         }
 
         // ─── Tabs ─────────────────────────────────────────────────────────────
@@ -1564,7 +1588,7 @@
             let fechaBonita = fechaObj.toLocaleDateString('es-MX', opciones);
             document.getElementById('lbl-fecha-seleccionada').innerHTML = `<span style="color:var(--primary-color);">Fecha:</span> ${fechaBonita}`;
 
-            generarHorasReserva(fechaString, horaInicio, horaFin);
+            generarHorasReserva(fechaString, "08:00", "20:00");
         }
 
         function generarHorasReserva(fecha, horaInicioStr, horaFinStr) {
