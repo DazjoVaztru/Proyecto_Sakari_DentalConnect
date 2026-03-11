@@ -676,13 +676,26 @@
         }
 
         // Calendario
-        if(data.fecha_cita && data.filas_tabla && data.filas_tablas.length > 0) {
-            const parts = data.filas_tablas[0].dia.split('/');
-            if(parts.length === 3) {
-                fechaCitaActual = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        if (data.fecha_cita){
+            fechaCitaActual = null;
+            try {
+                if (data.filas_tabla && data.filas_tabla.length > 0 && data.filas_tabla[0].dia){
+                    const parts = data.filas_tabla[0].dia.split('/');
+                    if(parts.length === 3) {
+                        fechaCitaActual = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                }
+                else if (data.fila_tabla && data.fila_tabla.fecha_cita){
+                    const parts = data.fila_tabla.dia.split('/');
+                    if (parts.length === 3){
+                        fechaCitaActual = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                }
+            } catch (e) {
+                console.warn("Aviso: No se pudo establecer la fecha de la cita anterior.");
             }
-            calMesActual = data.fecha_cita.mes;
-            calAnioActual = data.fecha_cita.anio;
+            calMesActual = data.fecha_cita.mes || new Date().getMonth() + 1;
+            calAnioActual = data.fecha_cita.anio || new Date().getFullYear();
             cargarCalendarioFuncional(calMesActual, calAnioActual);
         }
 
