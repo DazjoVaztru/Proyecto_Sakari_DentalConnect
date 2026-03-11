@@ -676,7 +676,7 @@
         }
 
         // Calendario
-        if(data.fecha_cita && data.fila_tabla) {
+        if(data.fecha_cita && data.filas_tabla && data.filas_tablas.length > 0) {
             const parts = data.fila_tabla.dia.split('/');
             if(parts.length === 3) {
                 fechaCitaActual = `${parts[2]}-${parts[1]}-${parts[0]}`;
