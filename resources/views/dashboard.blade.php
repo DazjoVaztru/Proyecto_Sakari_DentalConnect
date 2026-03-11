@@ -87,142 +87,189 @@
     </div>
 
 
-    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
-        <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
-        <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
-            @forelse($proximasCitas as $cita)
-                @php
-                    // Banderas de estado
-                    $esDeuda = $cita->estado_cita === 'completada';
-                    $esVencida = !$esDeuda && \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
+    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);"> 
+    <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
 
-                    // Colores dinámicos
-                    $borderColor = $esDeuda ? '#FCA5A5' : ($esVencida ? '#FCD34D' : '#eee');
-                    $bgColor = $esDeuda ? '#FEF2F2' : ($esVencida ? '#FFFBF0' : '#fff');
-                    $hoverColor = $esDeuda ? '#EF4444' : ($esVencida ? '#FCD34D' : '#00D1FF');
-                @endphp
+    <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
 
-                <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}" data-id="{{ $cita->id_cita }}"
-                    onclick="cargarModalCita({{ $cita->id_cita }})"
-                    style="position: relative; border: 1px solid {{ $borderColor }}; background: {{ $bgColor }}; padding: 20px 25px; border-radius: 12px; width: 90%; cursor: pointer; transition: all 0.2s ease;"
-                    onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $hoverColor }}'"
-                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
+        @forelse($proximasCitas as $cita)
 
-                    {{-- Overlay de checkmark (oculto por default) --}}
-                    <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
-                        style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(240,255,246,0.97); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
-                        <svg width="60" height="60" viewBox="0 0 60 60">
-                            <circle cx="30" cy="30" r="28" fill="#22C55E" />
-                            <path id="check-path-{{ $cita->id_cita }}" d="M16 30 L26 42 L44 20" stroke="white" stroke-width="5"
-                                fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55"
-                                stroke-dashoffset="55" style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
-                        </svg>
-                        <span style="font-weight: 800; color: #15803D; font-size: 1.05em;">¡Cita completada!</span>
-                    </div>
+            @php
+                $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
 
-                    <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
-                        {{-- Bloque fecha --}}
-                        <div
-                            style="background: {{ $esDeuda ? '#FEE2E2' : ($esVencida ? '#FEF3C7' : '#e0fbfc') }}; padding: 12px 18px; border-radius: 12px; text-align: center; min-width: 70px; flex-shrink: 0;">
-                            <span
-                                style="display: block; font-weight: 800; color: {{ $esDeuda ? '#DC2626' : ($esVencida ? '#B45309' : 'var(--primary-color)') }}; font-size: 1.4em;">
-                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
-                            </span>
-                            <small style="color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em;">
-                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
-                            </small>
-                        </div>
+                $borderColor = $esVencida ? '#FCD34D' : '#eee';
+                $bgColor = $esVencida ? '#FFFBF0' : '#fff';
+                $hoverColor = $esVencida ? '#FCD34D' : '#00D1FF';
+            @endphp
 
-                        {{-- Info --}}
-                        <div style="flex: 1; overflow: hidden;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                <h4
-                                    style="margin: 0; font-size: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;">
-                                    {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
-                                </h4>
+            <div class="appointment-card"
+                id="cita-card-{{ $cita->id_cita }}"
+                data-id="{{ $cita->id_cita }}"
+                onclick="cargarModalCita({{ $cita->id_cita }})"
 
-                                {{-- Badges Dinámicos --}}
-                                @if($esDeuda)
-                                    <span
-                                        style="background: #FEE2E2; color: #DC2626; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCA5A5; white-space: nowrap; flex-shrink: 0;">
-                                        ⚠ SALDO PENDIENTE
-                                    </span>
-                                @elseif($esVencida)
-                                    <span
-                                        style="background: #FEF3C7; color: #B45309; font-size: 0.7em; font-weight: 800; padding: 2px 9px; border-radius: 20px; border: 1px solid #FCD34D; white-space: nowrap; flex-shrink: 0;">
-                                        ⚠ VENCIDA
-                                    </span>
-                                @endif
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px; color: #555; font-size: 1em;">
-                                <i class="fa-regular fa-clock"
-                                    style="color: {{ $esDeuda ? '#EF4444' : ($esVencida ? '#D97706' : 'var(--primary-color)') }};"></i>
-                                {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
-                                <span style="margin: 0 5px; color: #ddd;">|</span>
-                                <span style="color: var(--secondary-color); font-weight: 600;">
-                                    {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
-                                </span>
-                            </div>
-                        </div>
+                style="position: relative;
+                border: 1px solid {{ $borderColor }};
+                background: {{ $bgColor }};
+                padding: 20px 25px;
+                border-radius: 12px;
+                width: 90%;
+                cursor: pointer;
+                transition: all 0.2s ease;"
 
-                        {{-- Botón Marcar Completada o COBRAR --}}
-                        @if($esDeuda)
-                            <button type="button"
-                                onclick="event.stopPropagation(); cargarModalCita({{ $cita->id_cita }}); setTimeout(()=>openWidget('widget-pago'), 600);"
-                                style="background: #DC2626; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(220,38,38,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
-                                onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
-                                onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
-                                <i class="fa-solid fa-hand-holding-dollar" style="font-size:1em;"></i>
-                                Cobrar
-                            </button>
-                        @else
-                            <button type="button" id="btn-completar-{{ $cita->id_cita }}"
-                                onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
-                                style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 0.9em; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(34,197,94,0.25); transition: opacity 0.2s, transform 0.1s; flex-shrink: 0; white-space: nowrap; align-self: center; margin-left: auto;"
-                                onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
-                                onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
-                                <i class="fa-regular fa-circle-check" style="font-size:1em;"></i>
-                                Marcar completada
-                            </button>
-                        @endif
-                    </div>
+                onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $hoverColor }}'"
+                onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
+
+                {{-- Overlay check completada --}}
+                <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
+                    style="display:none; position:absolute; top:0; left:0; right:0; bottom:0;
+                    background: rgba(240,255,246,0.97); border-radius:12px; z-index:10;
+                    flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="28" fill="#22C55E"/>
+                        <path id="check-path-{{ $cita->id_cita }}"
+                            d="M16 30 L26 42 L44 20"
+                            stroke="white"
+                            stroke-width="5"
+                            fill="none"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-dasharray="55"
+                            stroke-dashoffset="55"
+                            style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
+                    </svg>
+
+                    <span style="font-weight:800; color:#15803D; font-size:1.05em;">
+                        ¡Cita completada!
+                    </span>
+
                 </div>
-            @empty
-                <p style="text-align: center; color: #888; padding: 30px;">No hay citas próximas agendadas.</p>
-            @endforelse
-        </div>
+
+                <div style="display:flex; align-items:center; gap:20px; width:100%;">
+
+                    {{-- FECHA --}}
+                    <div style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }};
+                        padding:12px 18px;
+                        border-radius:12px;
+                        text-align:center;
+                        min-width:70px;
+                        flex-shrink:0;">
+
+                        <span style="display:block;
+                            font-weight:800;
+                            color: {{ $esVencida ? '#B45309' : 'var(--primary-color)' }};
+                            font-size:1.4em;">
+
+                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
+
+                        </span>
+
+                        <small style="color:#555; font-weight:700; text-transform:uppercase; font-size:0.85em;">
+                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
+                        </small>
+
+                    </div>
+
+                    {{-- INFO --}}
+                    <div style="flex:1; overflow:hidden;">
+
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+
+                            <h4 style="margin:0;
+                                font-size:1.3em;
+                                white-space:nowrap;
+                                overflow:hidden;
+                                text-overflow:ellipsis;
+                                color:#333;">
+
+                                {{ $cita->paciente->nombre }}
+                                {{ $cita->paciente->apellido_paterno }}
+
+                            </h4>
+
+                            @if($esVencida)
+
+                                <span style="background:#FEF3C7;
+                                    color:#B45309;
+                                    font-size:0.7em;
+                                    font-weight:800;
+                                    padding:2px 9px;
+                                    border-radius:20px;
+                                    border:1px solid #FCD34D;
+                                    white-space:nowrap;
+                                    flex-shrink:0;">
+
+                                    ⚠ VENCIDA
+
+                                </span>
+
+                            @endif
+
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:10px; color:#555; font-size:1em;">
+
+                            <i class="fa-regular fa-clock"
+                                style="color: {{ $esVencida ? '#D97706' : 'var(--primary-color)' }};"></i>
+
+                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
+
+                            <span style="margin:0 5px; color:#ddd;">|</span>
+
+                            <span style="color:var(--secondary-color); font-weight:600;">
+                                {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    {{-- BOTÓN COMPLETAR --}}
+                    <button type="button"
+                        id="btn-completar-{{ $cita->id_cita }}"
+                        onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
+
+                        style="background:#22C55E;
+                        color:white;
+                        border:none;
+                        border-radius:8px;
+                        padding:12px 20px;
+                        font-size:0.9em;
+                        font-weight:700;
+                        cursor:pointer;
+                        display:flex;
+                        align-items:center;
+                        gap:6px;
+                        box-shadow:0 2px 8px rgba(34,197,94,0.25);
+                        transition:opacity 0.2s, transform 0.1s;
+                        flex-shrink:0;
+                        white-space:nowrap;
+                        align-self:center;
+                        margin-left:auto;"
+
+                        onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
+                        onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
+
+                        <i class="fa-regular fa-circle-check"></i>
+                        Marcar completada
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        @empty
+
+            <p style="text-align:center; color:#888; padding:30px;">
+                No hay citas próximas agendadas.
+            </p>
+
+        @endforelse
+
     </div>
 
-    <div class="modal-overlay" id="modal-detalle-cita">
-        <div class="modal-glass modal-xl"
-            style="background: #F8FDFF; padding: 0; max-width: 1750px; width: 98vw; height: 95vh; display: flex; overflow: hidden; border-radius: 20px; border: 1px solid #dceeef;">
-
-            <div
-                style="width: 30%; background: #E0FBFC; padding: 30px; display: flex; flex-direction: column; border-right: 2px solid #bcebf5; overflow-y: auto;">
-
-                <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
-
-                <div
-                    style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
-
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
-                        <button class="ghost-btn"
-                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
-                            onclick="cambiarMes(-1)">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-
-                        <span id="cal-mes-anio"
-                            style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
-
-                        <button class="ghost-btn"
-                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
-                            onclick="cambiarMes(1)">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                    </div>
-
+</div>
                     <div class="calendar-grid-functional"
                         style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em;">
                         <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">D</span>
