@@ -147,31 +147,36 @@
 
                 <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
 
-               {{-- Calendario dentro del Modal --}}
-<div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box;">
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 10px; border-radius: 10px;">
-        <button type="button" onclick="cambiarMes(-1)" style="background:transparent; border:none; cursor:pointer; color: #00D1FF;">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <span id="cal-mes-anio" style="font-weight: 700; color: #00D1FF; font-size: 1em;">Marzo 2026</span>
-        <button type="button" onclick="cambiarMes(1)" style="background:transparent; border:none; cursor:pointer; color: #00D1FF;">
-            <i class="fa-solid fa-chevron-right"></i>
-        </button>
-    </div>
+                <div
+                    style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
 
-    <div class="calendar-grid-functional">
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">DOM</span>
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">LUN</span>
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">MAR</span>
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">MIÉ</span>
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">JUE</span>
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">VIE</span>
-        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">SÁB</span>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
+                        <button class="ghost-btn"
+                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
+                            onclick="cambiarMes(-1)">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <span id="cal-mes-anio"
+                            style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
+
+                        <button class="ghost-btn"
+                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
+                            onclick="cambiarMes(1)">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                  <div class="calendar-grid-functional" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; width: 100%;">
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">D</span>
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">L</span>
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">M</span>
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">M</span>
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">J</span>
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">V</span>
+        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">S</span>
 
         <div id="functional-calendar-days" style="display: contents;"></div>
     </div>
-</div>
 
     <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; font-size: 0.7em; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
         <div style="display:flex; align-items:center;"><span style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre</div>
