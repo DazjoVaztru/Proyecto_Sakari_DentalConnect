@@ -348,7 +348,9 @@ class DashboardController extends Controller
                 'horas_ocupadas' => $horasOcupadas,
                 'horas_disponibles' => $horasDisponibles,
                 'slots_ocupados' => $totalCitas,
-                'slots_totales' => $slotsDisponiblesPorDia
+                'slots_totales' => $slotsDisponiblesPorDia,
+                'hora_inicio' => '08:00',
+                'hora_fin' => '17:00'
             ];
         }
 

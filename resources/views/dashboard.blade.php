@@ -270,6 +270,37 @@
     </div>
 
 </div>
+
+    <div class="modal-overlay" id="modal-detalle-cita">
+        <div class="modal-glass modal-xl"
+            style="background: #F8FDFF; padding: 0; max-width: 1750px; width: 98vw; height: 95vh; display: flex; overflow: hidden; border-radius: 20px; border: 1px solid #dceeef;">
+
+            <div
+                style="width: 30%; background: #E0FBFC; padding: 30px; display: flex; flex-direction: column; border-right: 2px solid #bcebf5; overflow-y: auto;">
+
+                <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
+
+                <div
+                    style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
+
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
+                        <button class="ghost-btn"
+                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
+                            onclick="cambiarMes(-1)">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <span id="cal-mes-anio"
+                            style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
+
+                        <button class="ghost-btn"
+                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
+                            onclick="cambiarMes(1)">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
                     <div class="calendar-grid-functional"
                         style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em;">
                         <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">D</span>
