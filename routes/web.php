@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\PacienteHistorialController;
  * Manejan el inicio de sesión, registro y cierre de sesión.
  * No requieren autenticación previa.
  */
+
 // Rutas Públicas (Login/Registro)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -30,7 +31,7 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Rutas de Recuperación de Contraseña
+// Recuperación de contraseña
 Route::get('/olvide-password', function () {
     return view('auth.forgot-password');
 })->name('password.request');
@@ -39,33 +40,36 @@ Route::get('/recuperar-password', function () {
     return view('auth.reset-password');
 })->name('password.reset');
 
-// Redirigir la raíz al dashboard o login según corresponda
+// Redirigir raíz
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+
 /**
  * Rutas Privadas / Protegidas.
- *
- * Requieren que el usuario esté autenticado (middleware 'auth').
- * Incluyen el dashboard, gestión de pacientes, tratamientos, configuración y APIs internas.
  */
-// Rutas Privadas (Requieren Login)
 Route::middleware(['auth'])->group(function () {
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Pacientes
-    Route::resource('pacientes', PacienteController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('pacientes', PacienteController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 
     // Tratamientos
     Route::resource('tratamientos', TratamientoController::class)
         ->parameters(['tratamientos' => 'id'])
         ->except(['create', 'edit', 'show']);
-    Route::post('/citas/{id}/actualizar', [DashboardController::class, 'actualizarCita'])->name('citas.actualizar');
+
+    // Actualizar cita
+    Route::post('/citas/{id}/actualizar', [DashboardController::class, 'actualizarCita'])
+        ->name('citas.actualizar');
 
     // Publicidad
+    Route::resource('publicidad', PublicidadController::class)
+        ->only(['index', 'store', 'destroy']);
 
-    Route::resource('publicidad', App\Http\Controllers\PublicidadController::class)->only(['index', 'store', 'destroy']);
     // Configuración
     Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
     Route::post('/configuracion/clinica', [ConfiguracionController::class, 'updateClinica'])->name('configuracion.updateClinica');
@@ -75,37 +79,55 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/configuracion/recepcionista/{id}', [ConfiguracionController::class, 'destroyRecepcionista'])->name('configuracion.destroyRecepcionista');
 
     /**
-     * API Interna para consumo AJAX.
-     *
-     * Rutas que devuelven JSON para poblar modales y calendarios sin recargar la página.
+     * APIs internas (AJAX)
      */
-    // API Interna
+
+    // Citas
     Route::get('/api/citas/{id}/modal-detalles', [DashboardController::class, 'obtenerDatosModal'])->name('api.cita.detalles');
     Route::post('/api/citas/{id}/completar', [DashboardController::class, 'completarCita'])->name('api.cita.completar');
+
+    // Calendario disponibilidad
     Route::get('/api/calendario/disponibilidad', [DashboardController::class, 'obtenerDisponibilidadMes'])->name('api.calendario');
 
-    // API de Odontograma (CRUD completo)
+    // 🔴 NUEVA API → HORAS OCUPADAS (IMPORTANTE PARA BLOQUEAR HORARIOS)
+    Route::get('/api/citas/horas-ocupadas', [CitaController::class, 'horasOcupadas'])
+        ->name('api.citas.horas_ocupadas');
+
+
+    /**
+     * API Odontograma
+     */
     Route::get('/api/odontograma/paciente/{id_paciente}', [OdontogramaController::class, 'index']);
     Route::post('/api/odontograma', [OdontogramaController::class, 'store']);
     Route::patch('/api/odontograma/{id_odontograma}', [OdontogramaController::class, 'update']);
     Route::delete('/api/odontograma/{id_odontograma}', [OdontogramaController::class, 'destroy']);
 
-    // APIs de Historial Clínico del Paciente
+    /**
+     * Historial clínico
+     */
     Route::get('/api/pacientes/{idPaciente}/signos-vitales', [PacienteHistorialController::class, 'signosVitales']);
     Route::get('/api/pacientes/{idPaciente}/evoluciones', [PacienteHistorialController::class, 'evoluciones']);
     Route::post('/api/pacientes/{idPaciente}/evoluciones', [PacienteHistorialController::class, 'storeEvolucion']);
     Route::post('/api/pacientes/{idPaciente}/foto', [PacienteHistorialController::class, 'subirFotoProgreso']);
     Route::get('/api/pacientes/{idPaciente}/citas', [PacienteHistorialController::class, 'historialCitas']);
 
-    // Citas
+    /**
+     * Crear cita
+     */
     Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
 
 });
 
-// Fallback route para servir imágenes del storage público cuando el enlace simbólico no está disponible (ej. en Railway)
+
+/**
+ * Fallback para imágenes del storage (Railway fix)
+ */
 Route::get('/storage/{path}', function (string $path) {
+
     if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
         abort(404);
     }
+
     return \Illuminate\Support\Facades\Storage::disk('public')->response($path);
+
 })->where('path', '.*');

@@ -4,26 +4,51 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PacienteAppController;
+use App\Http\Controllers\CitaController;
 
 // ==========================================
 // API PÚBLICA / APLICACIÓN MÓVIL DEL PACIENTE
 // ==========================================
 
+// Login
 Route::post('/login', [AuthController::class, 'login']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth
+    // Usuario autenticado
     Route::get('/user', function (Request $request) {
-        return $request->user(); });
+        return $request->user();
+    });
+
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Endpoints Ligeros para el Paciente
+    // ==========================================
+    // DATOS DEL PACIENTE
+    // ==========================================
+
     Route::get('/perfil', [PacienteAppController::class, 'perfil']);
+
     Route::get('/citas-proximas', [PacienteAppController::class, 'citasProximas']);
+
     Route::get('/citas-pasadas', [PacienteAppController::class, 'citasPasadas']);
-    Route::get('/horarios-disponibles', [PacienteAppController::class, 'horariosDisponibles']);
+
     Route::get('/estado-cuenta', [PacienteAppController::class, 'estadoCuenta']);
+
     Route::get('/clinicas-doctores', [PacienteAppController::class, 'clinicasYDoctores']);
+
     Route::get('/publicidad', [PacienteAppController::class, 'publicidad']);
+
+
+    // ==========================================
+    // HORARIOS
+    // ==========================================
+
+    // Horarios disponibles
+    Route::get('/horarios-disponibles', [PacienteAppController::class, 'horariosDisponibles']);
+
+    // 🔴 NUEVA API → HORAS OCUPADAS (para bloquear horarios)
+    Route::get('/horas-ocupadas', [CitaController::class, 'horasOcupadas']);
+
 });

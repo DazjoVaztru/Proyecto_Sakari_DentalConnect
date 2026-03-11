@@ -357,4 +357,34 @@ class DashboardController extends Controller
         // El frontend espera directamente el mapa de días
         return response()->json($eventos);
     }
+    // --- FUNCIÓN 5: Obtener horas ocupadas de un día ---
+/**
+ * Devuelve los horarios ocupados de una fecha específica
+ * para bloquearlos en el calendario del frontend.
+ */
+public function horasOcupadas(Request $request)
+{
+    $fecha = $request->input('fecha');
+
+    if (!$fecha) {
+        return response()->json([
+            'horas_ocupadas' => []
+        ]);
+    }
+
+    $horas = Cita::where('id_clinica', Auth::user()->id_clinica)
+        ->whereDate('fecha_hora_inicio', $fecha)
+        ->where('estado_cita', '!=', 'cancelada')
+        ->get()
+        ->map(function ($cita) {
+
+            return Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
+
+        })
+        ->toArray();
+
+    return response()->json([
+        'horas_ocupadas' => $horas
+    ]);
+}
 }

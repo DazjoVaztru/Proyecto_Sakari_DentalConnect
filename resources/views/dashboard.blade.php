@@ -55,208 +55,80 @@
             </div>
         </div>
 
-        {{-- Tarjeta: Notificaciones --}}
-        @if($notificacionesPendientes > 0)
-            <div
-                style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #9c27b0;">
-                <div
-                    style="background: #f3e5f5; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i class="fa-solid fa-bell" style="color: #9c27b0; font-size: 1.4em;"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
-                        {{ $notificacionesPendientes }}
-                    </div>
-                    <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Notificaciones pendientes</div>
-                </div>
-            </div>
-        @endif
-
-    </div>
-
-
-    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);"> 
-    <h3 style="margin-bottom: 20px;">Próximas Citas Pendientes</h3>
-
+       {{-- Tarjeta Principal: Citas --}}
+<div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
+    <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
+    
     <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
-
         @forelse($proximasCitas as $cita)
-
             @php
-                $esVencida = \Carbon\Carbon::parse($cita->fecha_hora_inicio)->isPast();
+                $fechaCita = \Carbon\Carbon::parse($cita->fecha_hora_inicio);
+                $esVencida = $fechaCita->isPast();
 
-                $borderColor = $esVencida ? '#FCD34D' : '#eee';
-                $bgColor = $esVencida ? '#FFFBF0' : '#fff';
-                $hoverColor = $esVencida ? '#FCD34D' : '#00D1FF';
+                // Colores neutros y profesionales
+                $borderColor = $esVencida ? '#FCD34D' : '#E5E7EB';
+                $bgColor = $esVencida ? '#FFFBEB' : '#FFFFFF';
+                $hoverColor = $esVencida ? '#F59E0B' : 'var(--primary-color)';
             @endphp
 
-            <div class="appointment-card"
-                id="cita-card-{{ $cita->id_cita }}"
-                data-id="{{ $cita->id_cita }}"
-                onclick="cargarModalCita({{ $cita->id_cita }})"
+            <div class="appointment-card" 
+                 id="cita-card-{{ $cita->id_cita }}" 
+                 onclick="cargarModalCita({{ $cita->id_cita }})"
+                 style="position: relative; border: 1px solid {{ $borderColor }}; background: {{ $bgColor }}; padding: 18px 22px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between; gap: 15px;"
+                 onmouseover="this.style.boxShadow='0 6px 15px rgba(0,0,0,0.05)'; this.style.borderColor='{{ $hoverColor }}'"
+                 onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
 
-                style="position: relative;
-                border: 1px solid {{ $borderColor }};
-                background: {{ $bgColor }};
-                padding: 20px 25px;
-                border-radius: 12px;
-                width: 90%;
-                cursor: pointer;
-                transition: all 0.2s ease;"
-
-                onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.borderColor='{{ $hoverColor }}'"
-                onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
-
-                {{-- Overlay check completada --}}
+                {{-- Overlay de éxito --}}
                 <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
-                    style="display:none; position:absolute; top:0; left:0; right:0; bottom:0;
-                    background: rgba(240,255,246,0.97); border-radius:12px; z-index:10;
-                    flex-direction:column; align-items:center; justify-content:center; gap:8px;">
-
-                    <svg width="60" height="60" viewBox="0 0 60 60">
-                        <circle cx="30" cy="30" r="28" fill="#22C55E"/>
-                        <path id="check-path-{{ $cita->id_cita }}"
-                            d="M16 30 L26 42 L44 20"
-                            stroke="white"
-                            stroke-width="5"
-                            fill="none"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-dasharray="55"
-                            stroke-dashoffset="55"
-                            style="transition: stroke-dashoffset 0.6s ease 0.15s;" />
-                    </svg>
-
-                    <span style="font-weight:800; color:#15803D; font-size:1.05em;">
-                        ¡Cita completada!
-                    </span>
-
+                    style="display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-circle-check" style="color: #22C55E; font-size: 2.5em;"></i>
+                    <span style="font-weight: 800; color: #15803D; margin-top: 5px;">¡Cita completada!</span>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:20px; width:100%;">
-
-                    {{-- FECHA --}}
-                    <div style="background: {{ $esVencida ? '#FEF3C7' : '#e0fbfc' }};
-                        padding:12px 18px;
-                        border-radius:12px;
-                        text-align:center;
-                        min-width:70px;
-                        flex-shrink:0;">
-
-                        <span style="display:block;
-                            font-weight:800;
-                            color: {{ $esVencida ? '#B45309' : 'var(--primary-color)' }};
-                            font-size:1.4em;">
-
-                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('d') }}
-
+                <div style="display: flex; align-items: center; gap: 18px; flex: 1;">
+                    {{-- Bloque fecha --}}
+                    <div style="background: {{ $esVencida ? '#FEF3C7' : '#E0F2FE' }}; padding: 10px; border-radius: 10px; text-align: center; min-width: 65px;">
+                        <span style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : '#0369A1' }}; font-size: 1.3em;">
+                            {{ $fechaCita->format('d') }}
                         </span>
-
-                        <small style="color:#555; font-weight:700; text-transform:uppercase; font-size:0.85em;">
-                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('M') }}
+                        <small style="color: #666; font-weight: 700; text-transform: uppercase; font-size: 0.75em;">
+                            {{ $fechaCita->translatedFormat('M') }}
                         </small>
-
                     </div>
 
-                    {{-- INFO --}}
-                    <div style="flex:1; overflow:hidden;">
-
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-
-                            <h4 style="margin:0;
-                                font-size:1.3em;
-                                white-space:nowrap;
-                                overflow:hidden;
-                                text-overflow:ellipsis;
-                                color:#333;">
-
-                                {{ $cita->paciente->nombre }}
-                                {{ $cita->paciente->apellido_paterno }}
-
+                    {{-- Información del Paciente --}}
+                    <div style="overflow: hidden;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <h4 style="margin: 0; font-size: 1.15em; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
                             </h4>
-
                             @if($esVencida)
-
-                                <span style="background:#FEF3C7;
-                                    color:#B45309;
-                                    font-size:0.7em;
-                                    font-weight:800;
-                                    padding:2px 9px;
-                                    border-radius:20px;
-                                    border:1px solid #FCD34D;
-                                    white-space:nowrap;
-                                    flex-shrink:0;">
-
-                                    ⚠ VENCIDA
-
-                                </span>
-
+                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.65em; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 1px solid #FCD34D;">VENCIDA</span>
                             @endif
-
                         </div>
-
-                        <div style="display:flex; align-items:center; gap:10px; color:#555; font-size:1em;">
-
-                            <i class="fa-regular fa-clock"
-                                style="color: {{ $esVencida ? '#D97706' : 'var(--primary-color)' }};"></i>
-
-                            {{ \Carbon\Carbon::parse($cita->fecha_hora_inicio)->format('h:i A') }}
-
-                            <span style="margin:0 5px; color:#ddd;">|</span>
-
-                            <span style="color:var(--secondary-color); font-weight:600;">
-                                {{ $cita->servicio ? $cita->servicio->nombre_servicio : 'Consulta General' }}
-                            </span>
-
+                        <div style="display: flex; align-items: center; gap: 12px; color: #6b7280; font-size: 0.9em;">
+                            <span><i class="fa-regular fa-clock"></i> {{ $fechaCita->format('h:i A') }}</span>
+                            <span style="color: #d1d5db;">|</span>
+                            <span style="font-weight: 600; color: #4b5563;">{{ $cita->servicio->nombre_servicio ?? 'Consulta General' }}</span>
                         </div>
-
                     </div>
-
-                    {{-- BOTÓN COMPLETAR --}}
-                    <button type="button"
-                        id="btn-completar-{{ $cita->id_cita }}"
-                        onclick="event.stopPropagation(); completarCita({{ $cita->id_cita }})"
-
-                        style="background:#22C55E;
-                        color:white;
-                        border:none;
-                        border-radius:8px;
-                        padding:12px 20px;
-                        font-size:0.9em;
-                        font-weight:700;
-                        cursor:pointer;
-                        display:flex;
-                        align-items:center;
-                        gap:6px;
-                        box-shadow:0 2px 8px rgba(34,197,94,0.25);
-                        transition:opacity 0.2s, transform 0.1s;
-                        flex-shrink:0;
-                        white-space:nowrap;
-                        align-self:center;
-                        margin-left:auto;"
-
-                        onmouseover="this.style.opacity='0.85';this.style.transform='scale(1.03)'"
-                        onmouseout="this.style.opacity='1';this.style.transform='scale(1)'">
-
-                        <i class="fa-regular fa-circle-check"></i>
-                        Marcar completada
-
-                    </button>
-
                 </div>
 
+                {{-- Acciones: Solo botón de completar --}}
+                <div onclick="event.stopPropagation();">
+                    <button id="btn-completar-{{ $cita->id_cita }}" onclick="completarCita({{ $cita->id_cita }})" 
+                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.2s;">
+                        <i class="fa-regular fa-circle-check"></i> Completar
+                    </button>
+                </div>
             </div>
-
         @empty
-
-            <p style="text-align:center; color:#888; padding:30px;">
-                No hay citas próximas agendadas.
-            </p>
-
+            <div style="text-align: center; color: #9ca3af; padding: 40px;">
+                <i class="fa-regular fa-calendar-xmark" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No hay citas próximas agendadas.</p>
+            </div>
         @endforelse
-
     </div>
-
 </div>
 
     <div class="modal-overlay" id="modal-detalle-cita">
@@ -737,10 +609,13 @@
 @endsection
 
 @section('scripts')
+
     <script>
+
         // ==========================================
         // aqui va ek calendario
         // ==========================================
+        let horasOcupadas = [];
         let calMesActual = new Date().getMonth() + 1;
         let calAnioActual = new Date().getFullYear();
         // Fecha original de la cita actualmente abierta (se llena al cargar la cita)
@@ -845,99 +720,119 @@
         }
 
         // Agrega esta función para generar las píldoras de tiempo
-        function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00') {
-            const contenedor = document.getElementById('contenedor-horarios');
-            const inputHora = document.getElementById('input-nueva-hora');
-            inputHora.value = ''; // Limpiar selección previa si cambia la fecha
+       function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00', horasOcupadas = []) {
 
-            if (!fechaSeleccionada) return;
+    const contenedor = document.getElementById('contenedor-horarios');
+    const inputHora = document.getElementById('input-nueva-hora');
 
-            let horariosClinica = [];
+    inputHora.value = '';
 
-            // Generar slots de 30 min desde horaInicioStr hasta horaFinStr
-            if (horaInicioStr && horaFinStr) {
-                let [hInicio, mInicio] = horaInicioStr.split(':').map(Number);
-                let [hFin, mFin] = horaFinStr.split(':').map(Number);
+    if (!fechaSeleccionada) return;
 
-                let currentDate = new Date();
-                currentDate.setHours(hInicio, mInicio, 0, 0);
+    let horariosClinica = [];
 
-                let endDate = new Date();
-                endDate.setHours(hFin, mFin, 0, 0);
+    let [hInicio, mInicio] = horaInicioStr.split(':').map(Number);
+    let [hFin, mFin] = horaFinStr.split(':').map(Number);
 
-                // Prevenir loop infinito
-                while (currentDate < endDate && horariosClinica.length < 48) {
-                    let h = String(currentDate.getHours()).padStart(2, '0');
-                    let m = String(currentDate.getMinutes()).padStart(2, '0');
-                    horariosClinica.push(`${h}:${m}`);
+    let currentDate = new Date();
+    currentDate.setHours(hInicio, mInicio, 0, 0);
 
-                    // Añadir 30 mins
-                    currentDate.setMinutes(currentDate.getMinutes() + 30);
-                }
-            }
+    let endDate = new Date();
+    endDate.setHours(hFin, mFin, 0, 0);
 
-            contenedor.innerHTML = '';
+    while (currentDate < endDate && horariosClinica.length < 48) {
 
-            if (horariosClinica.length === 0) {
-                contenedor.innerHTML = '<div style="grid-column: 1 / -1; color: #888; text-align: center; padding: 20px; font-style: italic;">No hay horas disponibles.</div>';
-                return;
-            }
+        let h = String(currentDate.getHours()).padStart(2, '0');
+        let m = String(currentDate.getMinutes()).padStart(2, '0');
 
-            horariosClinica.forEach(hora => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'slot-horario';
+        horariosClinica.push(`${h}:${m}`);
 
-                // Convertir formato 24h a 12h (AM/PM) para mostrarlo bonito al usuario
-                const [h, m] = hora.split(':');
-                const ampm = h >= 12 ? 'PM' : 'AM';
-                const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+        currentDate.setMinutes(currentDate.getMinutes() + 30);
+    }
 
-                btn.innerText = hora12;
-                btn.dataset.hora = hora; // Guardar valor 24h para la Base de Datos
+    contenedor.innerHTML = '';
 
-                // Estilos Glass para las píldoras
-                btn.style.padding = "12px 5px";
-                btn.style.background = "rgba(255, 255, 255, 0.6)";
-                btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
-                btn.style.borderRadius = "10px";
-                btn.style.color = "#333";
-                btn.style.fontWeight = "700";
-                btn.style.cursor = "pointer";
-                btn.style.transition = "all 0.2s ease";
+    horariosClinica.forEach(hora => {
 
-                // Evento Click para seleccionar el horario
-                btn.onclick = () => {
-                    // Reiniciar todos al color original
-                    document.querySelectorAll('.slot-horario').forEach(b => {
-                        b.style.background = "rgba(255, 255, 255, 0.6)";
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slot-horario';
+
+        const [h, m] = hora.split(':');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+
+        btn.innerText = hora12;
+        btn.dataset.hora = hora;
+
+        btn.style.padding = "12px 5px";
+        btn.style.borderRadius = "10px";
+        btn.style.fontWeight = "700";
+        btn.style.transition = "0.2s";
+
+        // 🔴 SI LA HORA YA ESTÁ OCUPADA
+        if (horasOcupadas.includes(hora)) {
+
+            btn.disabled = true;
+
+            btn.style.background = "#ef4444";
+            btn.style.color = "white";
+            btn.style.cursor = "not-allowed";
+            btn.style.opacity = "0.6";
+
+        } else {
+
+            btn.style.background = "rgba(255,255,255,0.6)";
+            btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
+            btn.style.cursor = "pointer";
+
+            btn.onclick = () => {
+
+                document.querySelectorAll('.slot-horario').forEach(b => {
+
+                    if (!b.disabled) {
+                        b.style.background = "rgba(255,255,255,0.6)";
                         b.style.color = "#333";
                         b.style.boxShadow = "none";
-                    });
+                    }
 
-                    // Pintar el seleccionado
-                    btn.style.background = "var(--primary-color)";
-                    btn.style.color = "white";
-                    btn.style.boxShadow = "0 4px 10px rgba(0, 209, 255, 0.3)";
+                });
 
-                    // Asignar el valor (ej. "16:30") al input oculto para que Laravel lo procese
-                    inputHora.value = hora;
-                };
+                btn.style.background = "var(--primary-color)";
+                btn.style.color = "white";
+                btn.style.boxShadow = "0 4px 10px rgba(0,209,255,0.3)";
 
-                contenedor.appendChild(btn);
-            });
+                inputHora.value = hora;
+            };
         }
+
+        contenedor.appendChild(btn);
+    });
+
+}
 
         function abrirModalAgendar(dia, mes, anio, horaInicio, horaFin) {
-            // Abre el Widget de Horario, y pre-rellena la fecha seleccionada
-            const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-            document.getElementById('input-nueva-fecha').value = fechaString;
 
-            // Disparamos la generación de horarios al abrir el modal
-            generarHorariosDisponibles(fechaString, horaInicio, horaFin);
+    const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    document.getElementById('input-nueva-fecha').value = fechaString;
+
+    // Obtener horas ocupadas de la base de datos
+    fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
+        .then(res => res.json())
+        .then(data => {
+
+            horasOcupadas = data.horas_ocupadas || [];
+
+            generarHorariosDisponibles(
+                fechaString,
+                horaInicio,
+                horaFin,
+                horasOcupadas
+            );
 
             openWidget('widget-horario');
-        }
+        });
+}
 
         // Función para validar antes de cerrar
         function confirmarHorario() {
