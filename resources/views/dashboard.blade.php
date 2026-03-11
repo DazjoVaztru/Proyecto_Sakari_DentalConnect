@@ -595,9 +595,13 @@
 //
 @section('scripts')
 <script>
-    function cargarModalCita(idCita){
+    // --- VARIABLES GLOBALES DE PAGINACIÓN ---
+    window.todasLasFilas = [];
+    window.paginaActual = 1;
+    window.filasPorPagina = 4; // Ajustamos a 4 para que se vea bien en el modal
 
-    console.log("Abrir cita:", idCita);
+    function cargarModalCita(idCita){
+        console.log("Abrir cita:", idCita);
 
     openModal('modal-detalle-cita');
 
@@ -626,18 +630,32 @@
         document.getElementById('lbl-alergias').innerText = data.paciente.alergias || 'Ninguna';
         document.getElementById('lbl-enfermedades').innerText = data.paciente.enfermedades || 'Ninguna';
 
-        // Tabla de la Cita Actual
+        // Tabla de Historial (Paginada)
         const tbody = document.getElementById('cita-tabla-body');
-        if(tbody && data.fila_tabla) {
-            tbody.innerHTML = `
-                <tr>
-                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${data.fila_tabla.dia}</td>
-                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${data.fila_tabla.hora}</td>
-                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${data.fila_tabla.seguimiento}</td>
-                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600; color: #10b981;">+$${data.fila_tabla.abono}</td>
-                    <td style="padding: 15px; font-weight: 600; color: #f59e0b;">En Proceso</td>
-                </tr>
-            `;
+        if(tbody && data.filas_tabla) {
+            window.todasLasFilas = [];
+            
+            data.filas_tabla.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.dataset.citaId = f.id_cita;
+                
+                // Color según estado
+                let colorEstado = '#f59e0b'; // Pendiente/En Proceso
+                if(f.estado.toLowerCase() === 'completada') colorEstado = '#10b981';
+                if(f.estado.toLowerCase() === 'cancelada') colorEstado = '#ef4444';
+
+                tr.innerHTML = `
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${f.dia}</td>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${f.hora}</td>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${f.seguimiento}</td>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600; color: #10b981;">+$${f.abono}</td>
+                    <td style="padding: 15px; font-weight: 600; color: ${colorEstado};">${f.estado}</td>
+                `;
+                window.todasLasFilas.push(tr);
+            });
+
+            window.paginaActual = 1;
+            renderizarPagina();
         }
 
         // Finanzas
@@ -876,7 +894,7 @@ function generarHorariosDisponibles(
 
         horariosClinica.push(`${h}:${m}`);
 
-        currentDate.setMinutes(currentDate.getMinutes()+30);
+        currentDate.setMinutes(currentDate.getMinutes()+60);
 
     }
 
@@ -951,9 +969,6 @@ function generarHorariosDisponibles(
                     let hStr = String(h).padStart(2, '0');
                     if (h < nowH || (h === nowH && nowM > 0)) {
                         if (!horasOcupadas.includes(`${hStr}:00`)) horasOcupadas.push(`${hStr}:00`);
-                        if (!horasOcupadas.includes(`${hStr}:30`) && (h < nowH || (h === nowH && nowM > 30))) {
-                            horasOcupadas.push(`${hStr}:30`);
-                        }
                     }
                 }
             }
@@ -1151,6 +1166,14 @@ function confirmarHorario(){
         // ==========================================
         // Trigger submit when clicking the external button
         document.getElementById('btn-actualizar-cita').addEventListener('click', function () {
+            // VERIFICACIÓN DE FECHA (Petición del usuario)
+            if (window.fechaCitaActual) {
+                const hoyStr = new Date().toISOString().split('T')[0];
+                if (window.fechaCitaActual !== hoyStr) {
+                    const confirmacion = confirm("Estás a punto de modificar datos de una cita días previos a la fecha programada o diferente al día de hoy. ¿Estás seguro de continuar?");
+                    if (!confirmacion) return;
+                }
+            }
             document.getElementById('form-actualizar-cita').requestSubmit();
         });
 

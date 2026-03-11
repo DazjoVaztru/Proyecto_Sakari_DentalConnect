@@ -1609,8 +1609,8 @@
                     let m = String(currentDate.getMinutes()).padStart(2, '0');
                     horariosClinica.push(`${h}:${m}`);
 
-                    // Añadir 30 mins
-                    currentDate.setMinutes(currentDate.getMinutes() + 30);
+                    // Añadir 60 mins (antes 30)
+                    currentDate.setMinutes(currentDate.getMinutes() + 60);
                 }
             }
 

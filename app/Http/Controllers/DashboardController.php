@@ -141,16 +141,23 @@ class DashboardController extends Controller
 
         }
 
-        $filaTabla = [
+        $citasPaciente = Cita::with(['servicio', 'ingresos'])
+            ->where('id_paciente', $p->id_paciente)
+            ->orderBy('fecha_hora_inicio', 'desc')
+            ->get();
 
-            'dia'=>Carbon::parse($cita->fecha_hora_inicio)->format('d/m/Y'),
-            'hora'=>Carbon::parse($cita->fecha_hora_inicio)->format('h:i A')
-                .' – '.
-                Carbon::parse($cita->fecha_hora_fin)->format('h:i A'),
-            'seguimiento'=>$cita->motivo ?? ($cita->servicio?->nombre_servicio ?? 'Consulta'),
-            'abono'=>number_format($totalPagado,2)
-
-        ];
+        $filasTabla = [];
+        foreach ($citasPaciente as $c) {
+            $pagadoCita = $c->ingresos ? $c->ingresos->sum('monto') : 0;
+            $filasTabla[] = [
+                'id_cita' => $c->id_cita,
+                'dia' => Carbon::parse($c->fecha_hora_inicio)->format('d/m/Y'),
+                'hora' => Carbon::parse($c->fecha_hora_inicio)->format('h:i A') . ' – ' . Carbon::parse($c->fecha_hora_fin)->format('h:i A'),
+                'seguimiento' => $c->motivo ?? ($c->servicio?->nombre_servicio ?? 'Consulta'),
+                'abono' => number_format($pagadoCita, 2),
+                'estado' => $c->estado_cita ?? 'Pendiente'
+            ];
+        }
 
         $finanzas = [
 
@@ -175,7 +182,7 @@ class DashboardController extends Controller
 
             'success'=>true,
             'paciente'=>$pacienteData,
-            'fila_tabla'=>$filaTabla,
+            'filas_tabla'=>$filasTabla,
             'finanzas'=>$finanzas,
             'fecha_cita'=>$fechaCita,
             'odontograma'=>$odontograma,
@@ -210,7 +217,7 @@ class DashboardController extends Controller
                 : Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
 
             $cita->fecha_hora_inicio=$request->nueva_fecha.' '.$hora;
-            $cita->fecha_hora_fin=Carbon::parse($cita->fecha_hora_inicio)->addMinutes(30);
+            $cita->fecha_hora_fin=Carbon::parse($cita->fecha_hora_inicio)->addHour();
 
         }
 
@@ -329,10 +336,10 @@ class DashboardController extends Controller
                 $horaInicioModal = Carbon::parse($hInicioOriginal)->format('H:i');
                 $horaFinModal = Carbon::parse($hFinOriginal)->format('H:i');
                 
-                // Calcular slots disponibles apróximados (cada 30 min), fallback a 16 por seguridad
+                // Calcular slots disponibles apróximados (cada 60 min), fallback a 8 por seguridad
                 $minutosTotales = Carbon::parse($hFinOriginal)->diffInMinutes(Carbon::parse($hInicioOriginal));
-                $slotsCalculados = floor($minutosTotales / 30);
-                $slotsDisponiblesPorDia = $slotsCalculados > 0 ? $slotsCalculados : 16;
+                $slotsCalculados = floor($minutosTotales / 60);
+                $slotsDisponiblesPorDia = $slotsCalculados > 0 ? $slotsCalculados : 8;
             } else {
                 $slotsDisponiblesPorDia = 0;
             }
