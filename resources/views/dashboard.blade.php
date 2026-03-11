@@ -2,928 +2,928 @@
 
 @section('titulo', 'Panel Principal')
 
-    @section('contenido')
-        <h2 class="page-title">Panel Principal</h2>
+@section('contenido')
+    <h2 class="page-title">Panel Principal</h2>
 
-        {{-- =====================================================================
-        SECCIÓN DE MÉTRICAS RÁPIDAS
-        ====================================================================== --}}
-        <div
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+    {{-- =====================================================================
+    SECCIÓN DE MÉTRICAS RÁPIDAS
+    ====================================================================== --}}
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
 
-            {{-- Tarjeta: Pacientes totales (Acceso Rápido a Pacientes) --}}
-            <div onclick="window.location.href='{{ route('pacientes.index') }}'"
-                style="cursor: pointer; background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid var(--primary-color); transition: transform 0.2s;"
-                onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
-                <div
-                    style="background: #e0fbfc; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i class="fa-solid fa-users" style="color: var(--primary-color); font-size: 1.4em;"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">{{ $totalPacientes }}</div>
-                    <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Pacientes activos</div>
-                </div>
-            </div>
-
-            {{-- Tarjeta: Citas de hoy (Generar Citas) --}}
-            <div onclick="window.location.href='{{ route('pacientes.index') }}'"
-                style="cursor: pointer; background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #4CAF50; transition: transform 0.2s;"
-                onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
-                <div
-                    style="background: #e8f5e9; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i class="fa-solid fa-calendar-plus" style="color: #4CAF50; font-size: 1.4em;"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">{{ $citasHoyCount }}</div>
-                    <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Generar / Ver Citas</div>
-                </div>
-            </div>
-
-
-
-            {{-- Tarjeta: Ingresos del mes --}}
+        {{-- Tarjeta: Pacientes totales (Acceso Rápido a Pacientes) --}}
+        <div onclick="window.location.href='{{ route('pacientes.index') }}'"
+            style="cursor: pointer; background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid var(--primary-color); transition: transform 0.2s;"
+            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
             <div
-                style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
-                <div
-                    style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
-                </div>
-                <div>
-                    <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
-                        ${{ number_format($ingresosMes, 0) }}
-                    </div>
-                    <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
-                </div>
+                style="background: #e0fbfc; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-users" style="color: var(--primary-color); font-size: 1.4em;"></i>
             </div>
-
+            <div>
+                <div style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">{{ $totalPacientes }}</div>
+                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Pacientes activos</div>
+            </div>
         </div>
-        {{-- Tarjeta Principal: Citas --}}
-        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
-            <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
 
-            <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
-                @forelse($proximasCitas as $cita)
-                    @php
-                        $fechaCita = \Carbon\Carbon::parse($cita->fecha_hora_inicio);
-                        $esVencida = $fechaCita->isPast();
+        {{-- Tarjeta: Citas de hoy (Generar Citas) --}}
+        <div onclick="window.location.href='{{ route('pacientes.index') }}'"
+            style="cursor: pointer; background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #4CAF50; transition: transform 0.2s;"
+            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div
+                style="background: #e8f5e9; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-calendar-plus" style="color: #4CAF50; font-size: 1.4em;"></i>
+            </div>
+            <div>
+                <div style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">{{ $citasHoyCount }}</div>
+                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Generar / Ver Citas</div>
+            </div>
+        </div>
 
-                        // Colores neutros y profesionales
-                        $borderColor = $esVencida ? '#FCD34D' : '#E5E7EB';
-                        $bgColor = $esVencida ? '#FFFBEB' : '#FFFFFF';
-                        $hoverColor = $esVencida ? '#F59E0B' : 'var(--primary-color)';
-                    @endphp
 
-                    <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}"
-                        onclick="cargarModalCita({{ $cita->id_cita }})"
-                        style="position: relative; border: 1px solid {{ $borderColor }}; background: {{ $bgColor }}; padding: 18px 22px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between; gap: 15px;"
-                        onmouseover="this.style.boxShadow='0 6px 15px rgba(0,0,0,0.05)'; this.style.borderColor='{{ $hoverColor }}'"
-                        onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
 
-                        {{-- Overlay de éxito --}}
-                        <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
-                            style="display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-circle-check" style="color: #22C55E; font-size: 2.5em;"></i>
-                            <span style="font-weight: 800; color: #15803D; margin-top: 5px;">¡Cita completada!</span>
+        {{-- Tarjeta: Ingresos del mes --}}
+        <div
+            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
+            <div
+                style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
+            </div>
+            <div>
+                <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
+                    ${{ number_format($ingresosMes, 0) }}
+                </div>
+                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
+            </div>
+        </div>
+
+    </div>
+    {{-- Tarjeta Principal: Citas --}}
+    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
+        <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
+
+        <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
+            @forelse($proximasCitas as $cita)
+                @php
+                    $fechaCita = \Carbon\Carbon::parse($cita->fecha_hora_inicio);
+                    $esVencida = $fechaCita->isPast();
+
+                    // Colores neutros y profesionales
+                    $borderColor = $esVencida ? '#FCD34D' : '#E5E7EB';
+                    $bgColor = $esVencida ? '#FFFBEB' : '#FFFFFF';
+                    $hoverColor = $esVencida ? '#F59E0B' : 'var(--primary-color)';
+                @endphp
+
+                <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}"
+                    onclick="cargarModalCita({{ $cita->id_cita }})"
+                    style="position: relative; border: 1px solid {{ $borderColor }}; background: {{ $bgColor }}; padding: 18px 22px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between; gap: 15px;"
+                    onmouseover="this.style.boxShadow='0 6px 15px rgba(0,0,0,0.05)'; this.style.borderColor='{{ $hoverColor }}'"
+                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
+
+                    {{-- Overlay de éxito --}}
+                    <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
+                        style="display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-circle-check" style="color: #22C55E; font-size: 2.5em;"></i>
+                        <span style="font-weight: 800; color: #15803D; margin-top: 5px;">¡Cita completada!</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 18px; flex: 1;">
+                        {{-- Bloque fecha --}}
+                        <div
+                            style="background: {{ $esVencida ? '#FEF3C7' : '#E0F2FE' }}; padding: 10px; border-radius: 10px; text-align: center; min-width: 65px;">
+                            <span
+                                style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : '#0369A1' }}; font-size: 1.3em;">
+                                {{ $fechaCita->format('d') }}
+                            </span>
+                            <small style="color: #666; font-weight: 700; text-transform: uppercase; font-size: 0.75em;">
+                                {{ $fechaCita->translatedFormat('M') }}
+                            </small>
                         </div>
 
-                        <div style="display: flex; align-items: center; gap: 18px; flex: 1;">
-                            {{-- Bloque fecha --}}
-                            <div
-                                style="background: {{ $esVencida ? '#FEF3C7' : '#E0F2FE' }}; padding: 10px; border-radius: 10px; text-align: center; min-width: 65px;">
-                                <span
-                                    style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : '#0369A1' }}; font-size: 1.3em;">
-                                    {{ $fechaCita->format('d') }}
-                                </span>
-                                <small style="color: #666; font-weight: 700; text-transform: uppercase; font-size: 0.75em;">
-                                    {{ $fechaCita->translatedFormat('M') }}
-                                </small>
-                            </div>
-
-                            {{-- Información del Paciente --}}
-                            <div style="overflow: hidden;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                    <h4
-                                        style="margin: 0; font-size: 1.15em; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        {{ optional($cita->paciente)->nombre ?? 'Paciente eliminado' }}
-                                        {{ optional($cita->paciente)->apellido_paterno ?? '' }}
-                                    </h4>
-                                    @if($esVencida)
-                                        <span
-                                            style="background: #FEF3C7; color: #B45309; font-size: 0.65em; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 1px solid #FCD34D;">VENCIDA</span>
-                                    @endif
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px; color: #6b7280; font-size: 0.9em;">
-                                    <span><i class="fa-regular fa-clock"></i> {{ $fechaCita->format('h:i A') }}</span>
-                                    <span style="color: #d1d5db;">|</span>
+                        {{-- Información del Paciente --}}
+                        <div style="overflow: hidden;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <h4
+                                    style="margin: 0; font-size: 1.15em; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ optional($cita->paciente)->nombre ?? 'Paciente eliminado' }}
+                                    {{ optional($cita->paciente)->apellido_paterno ?? '' }}
+                                </h4>
+                                @if($esVencida)
                                     <span
-                                        style="font-weight: 600; color: #4b5563;">{{ optional($cita->servicio)->nombre_servicio ?? 'Consulta General' }}</span>
-                                </div>
+                                        style="background: #FEF3C7; color: #B45309; font-size: 0.65em; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 1px solid #FCD34D;">VENCIDA</span>
+                                @endif
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px; color: #6b7280; font-size: 0.9em;">
+                                <span><i class="fa-regular fa-clock"></i> {{ $fechaCita->format('h:i A') }}</span>
+                                <span style="color: #d1d5db;">|</span>
+                                <span
+                                    style="font-weight: 600; color: #4b5563;">{{ optional($cita->servicio)->nombre_servicio ?? 'Consulta General' }}</span>
                             </div>
                         </div>
+                    </div>
 
-                        {{-- Acciones: Solo botón de completar --}}
-                        <div onclick="event.stopPropagation();">
-                            <button id="btn-completar-{{ $cita->id_cita }}" onclick="completarCita({{ $cita->id_cita }})"
-                                style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.2s;">
-                                <i class="fa-regular fa-circle-check"></i> Completar
-                            </button>
-                        </div>
+                    {{-- Acciones: Solo botón de completar --}}
+                    <div onclick="event.stopPropagation();">
+                        <button id="btn-completar-{{ $cita->id_cita }}" onclick="completarCita({{ $cita->id_cita }})"
+                            style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.2s;">
+                            <i class="fa-regular fa-circle-check"></i> Completar
+                        </button>
                     </div>
-                @empty
-                    <div style="text-align: center; color: #9ca3af; padding: 40px;">
-                        <i class="fa-regular fa-calendar-xmark" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
-                        <p>No hay citas próximas agendadas.</p>
-                    </div>
-                @endforelse
-            </div>
+                </div>
+            @empty
+                <div style="text-align: center; color: #9ca3af; padding: 40px;">
+                    <i class="fa-regular fa-calendar-xmark" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
+                    <p>No hay citas próximas agendadas.</p>
+                </div>
+            @endforelse
         </div>
+    </div>
 
-        <div class="modal-overlay" id="modal-detalle-cita">
-            <div class="modal-glass modal-xl"
-                style="background: #F8FDFF; padding: 0; max-width: 1750px; width: 98vw; height: 95vh; display: flex; overflow: hidden; border-radius: 20px; border: 1px solid #dceeef;">
+    <div class="modal-overlay" id="modal-detalle-cita">
+        <div class="modal-glass modal-xl"
+            style="background: #F8FDFF; padding: 0; max-width: 1750px; width: 98vw; height: 95vh; display: flex; overflow: hidden; border-radius: 20px; border: 1px solid #dceeef;">
+
+            <div
+                style="width: 30%; background: #E0FBFC; padding: 30px; display: flex; flex-direction: column; border-right: 2px solid #bcebf5; overflow-y: auto;">
+
+                <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
 
                 <div
-                    style="width: 30%; background: #E0FBFC; padding: 30px; display: flex; flex-direction: column; border-right: 2px solid #bcebf5; overflow-y: auto;">
-
-                    <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
+                    style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
 
                     <div
-                        style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
+                        <button class="ghost-btn"
+                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
+                            onclick="cambiarMes(-1)">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
 
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
-                            <button class="ghost-btn"
-                                style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
-                                onclick="cambiarMes(-1)">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
+                        <span id="cal-mes-anio"
+                            style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
 
-                            <span id="cal-mes-anio"
-                                style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
+                        <button class="ghost-btn"
+                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
+                            onclick="cambiarMes(1)">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
 
-                            <button class="ghost-btn"
-                                style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
-                                onclick="cambiarMes(1)">
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
-                        </div>
+                    <div class="calendar-grid-functional"
+                        style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em;">
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">D</span>
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">L</span>
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">J</span>
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">V</span>
+                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">S</span>
 
-                        <div class="calendar-grid-functional"
-                            style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em;">
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">D</span>
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">L</span>
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">J</span>
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">V</span>
-                            <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">S</span>
-
-                            <div id="functional-calendar-days"
-                                style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px;">
-                            </div>
-                        </div>
-
-                        <div
-                            style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; font-size: 0.7em; color: #666;">
-                            <div style="display:flex; align-items:center;"><span
-                                    style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre
-                            </div>
-                            <div style="display:flex; align-items:center;"><span
-                                    style="width:8px;height:8px;background:#FFC107;border-radius:50%;margin-right:4px;"></span>Ocupado
-                            </div>
-                            <div style="display:flex; align-items:center;"><span
-                                    style="width:8px;height:8px;background:#EF4444;border-radius:50%;margin-right:4px;"></span>Lleno
-                            </div>
+                        <div id="functional-calendar-days"
+                            style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px;">
                         </div>
                     </div>
 
-                    <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
-                        <button class="ghost-btn" onclick="openWidget('widget-seguimiento')"
-                            style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Seguimiento</button>
-                        <button type="button" class="ghost-btn" onclick="openWidget('widget-pago')"
-                            style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Pago
-                            de hoy</button>
-
-                        <button type="button" class="ghost-btn" onclick="switchTab('tab-odontograma')"
-                            style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">
-                            Odontograma
-                        </button>
-
-                        <button class="ghost-btn" id="btn-actualizar-cita"
-                            style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
-                                                                                                                                                                                                                                            margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
-                            GUARDAR CAMBIOS
-                        </button>
-
+                    <div
+                        style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; font-size: 0.7em; color: #666;">
+                        <div style="display:flex; align-items:center;"><span
+                                style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre
+                        </div>
+                        <div style="display:flex; align-items:center;"><span
+                                style="width:8px;height:8px;background:#FFC107;border-radius:50%;margin-right:4px;"></span>Ocupado
+                        </div>
+                        <div style="display:flex; align-items:center;"><span
+                                style="width:8px;height:8px;background:#EF4444;border-radius:50%;margin-right:4px;"></span>Lleno
+                        </div>
                     </div>
                 </div>
 
-                <!-- Formulario Principal -->
-                <form id="form-actualizar-cita" method="POST" onsubmit="return false;"
-                    style="width: 70%; padding: 40px; position: relative; overflow-y: auto; display: flex; flex-direction: column;">
-                    @csrf
+                <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
+                    <button class="ghost-btn" onclick="openWidget('widget-seguimiento')"
+                        style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Seguimiento</button>
+                    <button type="button" class="ghost-btn" onclick="openWidget('widget-pago')"
+                        style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Pago
+                        de hoy</button>
 
-                    <button type="button" class="close-modal" onclick="closeModal('modal-detalle-cita')"
-                        style="position: absolute; top: 25px; right: 25px; font-size: 1.5rem; background: #f0f0f0; width: 40px; height: 40px; border-radius: 50%; color: #555; border: none; cursor: pointer; z-index: 5;">&times;</button>
+                    <button type="button" class="ghost-btn" onclick="switchTab('tab-odontograma')"
+                        style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">
+                        Odontograma
+                    </button>
 
-                    <!-- OVERLAY PARA WIDGETS INTERNOS -->
-                    <div id="internal-widget-overlay"
-                        style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 50; border-radius: 20px;">
-                    </div>
+                    <button class="ghost-btn" id="btn-actualizar-cita"
+                        style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
+                                                                                                                                                                                                                                                margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
+                        GUARDAR CAMBIOS
+                    </button>
 
-                    <!-- TAB 1: RESUMEN (Visible por defecto) -->
-                    <div id="tab-resumen" class="tab-content active"
-                        style="min-height: 100%; display: flex; flex-direction: column; flex: 1 0 auto; padding-bottom: 20px;">
-                        <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0 0 30px 0; color: #000; flex-shrink: 0;">
-                            Detalles del Paciente
-                        </h1>
-
-                        <div
-                            style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 30px; border: 1px solid #eee; flex-shrink: 0;">
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
-                                <div><small style="font-weight:700; color:#555;">Nombre(s):</small>
-                                    <div id="lbl-nombre" style="font-size:1.1em;">...</div>
-                                </div>
-                                <div><small style="font-weight:700; color:#555;">Apellido Paterno:</small>
-                                    <div id="lbl-paterno" style="font-size:1.1em;">...</div>
-                                </div>
-                                <div><small style="font-weight:700; color:#555;">Apellido Materno:</small>
-                                    <div id="lbl-materno" style="font-size:1.1em;">...</div>
-                                </div>
-                                <div><small style="font-weight:700; color:#555;">Edad:</small>
-                                    <div id="lbl-edad" style="font-size:1.1em;">...</div>
-                                </div>
-
-                                <div><small style="font-weight:700; color:#555;">Sexo:</small>
-                                    <div id="lbl-sexo" style="font-size:1.1em;">...</div>
-                                </div>
-                                <div><small style="font-weight:700; color:#555;">Teléfono:</small>
-                                    <div id="lbl-telefono" style="font-size:1.1em;">...</div>
-                                </div>
-                                <div><small style="font-weight:700; color:#555;">Tipo Sangre:</small>
-                                    <div id="lbl-sangre" style="font-weight:800; color: var(--primary-color);">...</div>
-                                </div>
-                                <div><small style="font-weight:700; color:#555;">Peso:</small>
-                                    <div id="lbl-peso">...</div>
-                                </div>
-
-                                <div style="grid-column: span 2;">
-                                    <small style="font-weight:700; color:#ef4444;"><i
-                                            class="fa-solid fa-triangle-exclamation"></i>
-                                        Alergias:</small>
-                                    <div id="lbl-alergias" style="color:#ef4444;">...</div>
-                                </div>
-                                <div style="grid-column: span 2;">
-                                    <small style="font-weight:700; color:#ef4444;"><i class="fa-solid fa-notes-medical"></i>
-                                        Enfermedades Crónicas:</small>
-                                    <div id="lbl-enfermedades" style="color:#ef4444;">...</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            style="border: 2px solid #00D1FF; border-radius: 8px; overflow: hidden; margin-bottom: auto; flex-shrink: 0;">
-                            <table style="width: 100%; border-collapse: collapse; text-align: center;">
-                                <thead style="background: #CCFBFD;">
-                                    <tr>
-                                        <th
-                                            style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
-                                            Día</th>
-                                        <th
-                                            style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
-                                            Hora</th>
-                                        <th
-                                            style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
-                                            Seguimiento</th>
-                                        <th
-                                            style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
-                                            Abono</th>
-                                        <th style="padding: 15px; color:#000; font-weight: 700;">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cita-tabla-body" style="background: white;">
-                                    {{-- JS renderiza aquí todas las filas del historial --}}
-                                </tbody>
-                            </table>
-
-                            <!-- Controles de paginación -->
-                            <div id="paginacion-controles"
-                                style="display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-top: 2px solid #00D1FF;">
-                                <button type="button" id="btn-pag-anterior" onclick="cambiarPagina(-1)"
-                                    style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                                    <i class="fa-solid fa-chevron-left"></i> Anterior
-                                </button>
-                                <span id="info-paginacion" style="font-weight: 600; color: #333;">Página 1 de 1</span>
-                                <button type="button" id="btn-pag-siguiente" onclick="cambiarPagina(1)"
-                                    style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                                    Siguiente <i class="fa-solid fa-chevron-right"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div
-                            style="display: flex; gap: 20px; align-items: center; margin-top: 30px; justify-content: flex-end; flex-wrap: wrap; flex-shrink: 0;">
-
-                            {{-- TOTAL DE LA CITA COMO ETIQUETA ESTATICA --}}
-                            <div
-                                style="font-size: 1.5rem; font-weight: 700; color: #000; display: flex; align-items: center; white-space: nowrap;">
-                                Total:
-                                <span
-                                    style="background: #FFFFFF; padding: 8px 20px; border-radius: 8px; border: 2px solid #00D1FF; margin-left: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 120px; text-align: center;">
-                                    <span id="lbl-total">0.00</span>
-                                </span>
-                            </div>
-
-                            <div
-                                style="font-size: 1.5rem; font-weight: 700; color: #000; display: flex; align-items: center; white-space: nowrap;">
-                                <span style="font-weight: 700; font-size: 1em;">Restante:</span>
-                                <span style="margin-left: 10px; font-weight: 700;">
-                                    $<span id="lbl-restante">0.00</span>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Datos Ocultos para cálculos Matemáticos Crudos -->
-                        <input type="hidden" id="raw-costo-total" value="0">
-                        <input type="hidden" id="raw-total-abonado" value="0">
-                    </div>
-
-                    <!-- WIDGET 2: HORARIO (Aparece sobre Resumen/Odontograma) -->
-                    <div id="widget-horario" class="inner-widget"
-                        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                                                                           background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
-                                                                           border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-                                                                           padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
-
-                        <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 5px;">
-                            <i class="fa-regular fa-calendar-check"></i> Reprogramar Cita
-                        </h2>
-                        <p style="color: #555; margin-bottom: 25px; font-size: 1.05rem;">
-                            Selecciona la fecha y un horario de atención disponible.
-                        </p>
-
-                        <div style="display: flex; flex-direction: column; gap: 20px;">
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="font-weight: 700; color: #333;">Fecha seleccionada</label>
-                                <input type="date" name="nueva_fecha" id="input-nueva-fecha"
-                                    style="padding: 14px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1.1rem; 
-                                                                                       background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
-                                    onchange="generarHorariosDisponibles(this.value)">
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="font-weight: 700; color: #333;">Horarios Disponibles</label>
-                                <input type="hidden" name="nueva_hora" id="input-nueva-hora">
-
-                                <div id="contenedor-horarios"
-                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; 
-                                                                                        max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
-                                    <div
-                                        style="grid-column: 1 / -1; color: #888; text-align: center; padding: 20px; font-style: italic;">
-                                        Selecciona una fecha primero...
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 15px; margin-top: 30px;">
-                            <button type="button" onclick="closeWidgets()"
-                                style="flex: 1; background: rgba(0,0,0,0.05); color: #555; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
-                                Cancelar
-                            </button>
-                            <button type="button" onclick="confirmarHorario()"
-                                style="flex: 2; background: var(--primary-color); color: white; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 209, 255, 0.3);">
-                                Confirmar Horario
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- WIDGET 3: SEGUIMIENTO -->
-                    <div id="widget-seguimiento" class="inner-widget"
-                        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; width: 80%; max-width: 600px;">
-                        <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 10px;">
-                            Seguimiento Clínico</h2>
-                        <p style="color: #666; margin-bottom: 30px; font-size: 1.1rem;">Tratamiento que se realizara la proxima
-                            cita.</p>
-
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <label style="font-weight: 700; color: #444;">Notas / Observaciones</label>
-                            <textarea name="notas_seguimiento"
-                                style="padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; resize: none; min-height: 150px;"
-                                placeholder="Escribe aquí los detalles del tratamiento..."></textarea>
-                        </div>
-                        <button type="button"
-                            style="background: #eee; color: #555; margin-top: 30px; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center;"
-                            onclick="closeWidgets()">Confirmar / Volver</button>
-                    </div>
-
-                    <!-- WIDGET 4: PAGO -->
-                    <div id="widget-pago" class="inner-widget"
-                        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; width: 80%; max-width: 400px;">
-                        <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 10px;">
-                            Registrar Pago</h2>
-                        <p style="color: #666; margin-bottom: 30px; font-size: 1.1rem;">Ingresa el monto abonado hoy por el
-                            paciente.</p>
-
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <label style="font-weight: 700; color: #444;">Monto a Abonar en esta Cita ($)</label>
-                            <input type="number" name="monto_abono" id="input-monto-abono"
-                                style="padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 1.5rem; font-weight: bold;"
-                                step="0.01" min="0" placeholder="0.00"
-                                oninput="if(this.value < 0) { this.value = 0; } calcularVueltoReal();">
-                        </div>
-                        <button type="button"
-                            style="background: #eee; color: #555; margin-top: 30px; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center;"
-                            onclick="closeWidgets()">Confirmar / Volver</button>
-                    </div>
-
-                    <!-- TAB O: ODONTOGRAMA -->
-                    <div id="tab-odontograma" class="tab-content" style="display: none; height: 100%;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                            <div>
-                                <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin: 0;">
-                                    Odontograma Digital</h2>
-                                <p style="color: #666; margin-top: 5px; font-size: 1.1rem;">Selecciona una herramienta y haz
-                                    clic en las piezas dentales.</p>
-                            </div>
-                            <button type="button" class="ghost-btn" onclick="switchTab('tab-resumen')"
-                                style="background: #f0f0f0; border: 1px solid #ccc; color: #333; font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
-                                <i class="fa-solid fa-arrow-left"></i> Volver a Detalles
-                            </button>
-                        </div>
-
-                        <svg style="display: none;">
-                            <defs>
-                                <symbol id="tooth-incisor" viewBox="0 0 80 120">
-                                    <path
-                                        d="M20 15 Q40 0 60 15 L65 45 Q60 75 50 85 L45 110 Q40 118 35 110 L30 85 Q20 75 15 45 Z"
-                                        fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                </symbol>
-                                <symbol id="tooth-canine" viewBox="0 0 80 130">
-                                    <path
-                                        d="M20 25 Q40 0 60 25 L65 50 Q55 80 50 90 L45 120 Q40 128 35 120 L30 90 Q20 80 15 50 Z"
-                                        fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                </symbol>
-                                <symbol id="tooth-premolar" viewBox="0 0 90 130">
-                                    <path
-                                        d="M20 30 Q45 5 70 30 L75 60 Q70 80 60 90 L55 115 Q45 125 35 115 L30 90 Q20 80 15 60 Z"
-                                        fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                </symbol>
-                                <symbol id="tooth-molar-upper" viewBox="0 0 110 140">
-                                    <path d="M20 40 Q55 5 90 40 L85 70 Q80 90 65 100 Q55 105 45 100 Q30 90 25 70 Z"
-                                        fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                    <path d="M40 100 L30 130 Q45 135 50 110 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                    <path d="M70 100 L80 130 Q65 135 60 110 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                    <path d="M55 100 L50 135 Q60 138 58 110 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                </symbol>
-                                <symbol id="tooth-molar-lower" viewBox="0 0 110 140">
-                                    <path d="M20 40 Q55 5 90 40 L85 75 Q75 95 55 105 Q35 95 25 75 Z" fill="#f8f1e4"
-                                        stroke="#222" stroke-width="2" />
-                                    <path d="M45 105 L35 135 Q50 140 55 115 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                    <path d="M65 105 L75 135 Q60 140 55 115 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
-                                </symbol>
-                            </defs>
-                        </svg>
-
-                        <div
-                            style="background: #f8f9fa; padding: 15px; border-radius: 12px; display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px; border: 1px solid #ddd;">
-                            <div style="flex: 1;">
-                                <label style="font-weight: 700; color: #444; display: block; margin-bottom: 5px;">Tratamiento a
-                                    aplicar:</label>
-                                <select id="select-servicio"
-                                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
-                                    <option value="">-- Seleccionar --</option>
-                                    @foreach($servicios as $srv)
-                                        <option value="{{ $srv->id_servicio }}">{{ $srv->nombre_servicio }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div style="display: flex; gap: 15px;">
-                                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                    <input type="radio" name="tipo_registro" value="hallazgo" id="tipo-hallazgo" checked>
-                                    <span style="color: blue; font-weight: 700;">Hallazgo (Azul)</span>
-                                </label>
-                                <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                    <input type="radio" name="tipo_registro" value="tratamiento" id="tipo-tratamiento">
-                                    <span style="color: red; font-weight: 700;">Plan/Realizado (Rojo)</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <style>
-                            .odontograma-lienzo {
-                                display: flex;
-                                flex-direction: column;
-                                gap: 30px;
-                                padding: 20px;
-                                background: #fff;
-                                border-radius: 12px;
-                                border: 2px dashed #ccc;
-                                flex: 1;
-                                overflow-x: auto;
-                                min-height: 400px;
-                            }
-
-                            .fila-dientes {
-                                display: flex;
-                                justify-content: space-between;
-                                gap: 5px;
-                                min-width: 600px;
-                            }
-
-                            .fila-dientes.centrada {
-                                justify-content: center;
-                                gap: 15px;
-                            }
-
-                            .diente-wrapper {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                width: 50px;
-                            }
-
-                            .fila-dientes.temporales .diente-wrapper {
-                                width: 38px;
-                            }
-
-                            .numero-diente {
-                                color: #5bc0be;
-                                font-size: 13px;
-                                font-weight: bold;
-                                margin: 4px 0;
-                            }
-
-                            .caras-interactivas {
-                                width: 40px;
-                                height: 40px;
-                                border-radius: 50%;
-                                overflow: hidden;
-                                border: 1px solid #999;
-                                cursor: pointer;
-                            }
-
-                            .odontograma-svg {
-                                width: 100%;
-                                height: 100%;
-                            }
-
-                            .cara-diente {
-                                fill: #ffffff;
-                                stroke: #999;
-                                stroke-width: 2;
-                                transition: fill 0.2s;
-                                cursor: pointer;
-                            }
-
-                            .cara-diente:hover {
-                                fill: #f0f0f0;
-                            }
-
-                            .anatomia {
-                                width: 100%;
-                                height: 55px;
-                                display: flex;
-                                justify-content: center;
-                                align-items: flex-end;
-                            }
-
-                            .anatomia svg {
-                                height: 100%;
-                                width: auto;
-                            }
-
-                            .diente-wrapper.superior .anatomia svg {
-                                transform: scale(1, -1);
-                            }
-                        </style>
-
-                        <div id="odontograma-lienzo" class="odontograma-lienzo">
-                            <div id="fila-perm-sup" class="fila-dientes superior"></div>
-                            <div id="fila-temp-sup" class="fila-dientes centrada temporales superior"></div>
-                            <div id="fila-temp-inf" class="fila-dientes centrada temporales inferior"></div>
-                            <div id="fila-perm-inf" class="fila-dientes inferior"></div>
-                        </div>
-
-                        <input type="hidden" id="odontograma-paciente-id" value="">
-                        <input type="hidden" id="odontograma-paciente-edad" value="0">
-                    </div>
-
-                </form>
+                </div>
             </div>
+
+            <!-- Formulario Principal -->
+            <form id="form-actualizar-cita" method="POST" onsubmit="return false;"
+                style="width: 70%; padding: 40px; position: relative; overflow-y: auto; display: flex; flex-direction: column;">
+                @csrf
+
+                <button type="button" class="close-modal" onclick="closeModal('modal-detalle-cita')"
+                    style="position: absolute; top: 25px; right: 25px; font-size: 1.5rem; background: #f0f0f0; width: 40px; height: 40px; border-radius: 50%; color: #555; border: none; cursor: pointer; z-index: 5;">&times;</button>
+
+                <!-- OVERLAY PARA WIDGETS INTERNOS -->
+                <div id="internal-widget-overlay"
+                    style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 50; border-radius: 20px;">
+                </div>
+
+                <!-- TAB 1: RESUMEN (Visible por defecto) -->
+                <div id="tab-resumen" class="tab-content active"
+                    style="min-height: 100%; display: flex; flex-direction: column; flex: 1 0 auto; padding-bottom: 20px;">
+                    <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0 0 30px 0; color: #000; flex-shrink: 0;">
+                        Detalles del Paciente
+                    </h1>
+
+                    <div
+                        style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 30px; border: 1px solid #eee; flex-shrink: 0;">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                            <div><small style="font-weight:700; color:#555;">Nombre(s):</small>
+                                <div id="lbl-nombre" style="font-size:1.1em;">...</div>
+                            </div>
+                            <div><small style="font-weight:700; color:#555;">Apellido Paterno:</small>
+                                <div id="lbl-paterno" style="font-size:1.1em;">...</div>
+                            </div>
+                            <div><small style="font-weight:700; color:#555;">Apellido Materno:</small>
+                                <div id="lbl-materno" style="font-size:1.1em;">...</div>
+                            </div>
+                            <div><small style="font-weight:700; color:#555;">Edad:</small>
+                                <div id="lbl-edad" style="font-size:1.1em;">...</div>
+                            </div>
+
+                            <div><small style="font-weight:700; color:#555;">Sexo:</small>
+                                <div id="lbl-sexo" style="font-size:1.1em;">...</div>
+                            </div>
+                            <div><small style="font-weight:700; color:#555;">Teléfono:</small>
+                                <div id="lbl-telefono" style="font-size:1.1em;">...</div>
+                            </div>
+                            <div><small style="font-weight:700; color:#555;">Tipo Sangre:</small>
+                                <div id="lbl-sangre" style="font-weight:800; color: var(--primary-color);">...</div>
+                            </div>
+                            <div><small style="font-weight:700; color:#555;">Peso:</small>
+                                <div id="lbl-peso">...</div>
+                            </div>
+
+                            <div style="grid-column: span 2;">
+                                <small style="font-weight:700; color:#ef4444;"><i
+                                        class="fa-solid fa-triangle-exclamation"></i>
+                                    Alergias:</small>
+                                <div id="lbl-alergias" style="color:#ef4444;">...</div>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <small style="font-weight:700; color:#ef4444;"><i class="fa-solid fa-notes-medical"></i>
+                                    Enfermedades Crónicas:</small>
+                                <div id="lbl-enfermedades" style="color:#ef4444;">...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        style="border: 2px solid #00D1FF; border-radius: 8px; overflow: hidden; margin-bottom: auto; flex-shrink: 0;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                            <thead style="background: #CCFBFD;">
+                                <tr>
+                                    <th
+                                        style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
+                                        Día</th>
+                                    <th
+                                        style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
+                                        Hora</th>
+                                    <th
+                                        style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
+                                        Seguimiento</th>
+                                    <th
+                                        style="padding: 15px; border-right: 2px solid #00D1FF; color:#000; font-weight: 700;">
+                                        Abono</th>
+                                    <th style="padding: 15px; color:#000; font-weight: 700;">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cita-tabla-body" style="background: white;">
+                                {{-- JS renderiza aquí todas las filas del historial --}}
+                            </tbody>
+                        </table>
+
+                        <!-- Controles de paginación -->
+                        <div id="paginacion-controles"
+                            style="display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-top: 2px solid #00D1FF;">
+                            <button type="button" id="btn-pag-anterior" onclick="cambiarPagina(-1)"
+                                style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                <i class="fa-solid fa-chevron-left"></i> Anterior
+                            </button>
+                            <span id="info-paginacion" style="font-weight: 600; color: #333;">Página 1 de 1</span>
+                            <button type="button" id="btn-pag-siguiente" onclick="cambiarPagina(1)"
+                                style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                                Siguiente <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        style="display: flex; gap: 20px; align-items: center; margin-top: 30px; justify-content: flex-end; flex-wrap: wrap; flex-shrink: 0;">
+
+                        {{-- TOTAL DE LA CITA COMO ETIQUETA ESTATICA --}}
+                        <div
+                            style="font-size: 1.5rem; font-weight: 700; color: #000; display: flex; align-items: center; white-space: nowrap;">
+                            Total:
+                            <span
+                                style="background: #FFFFFF; padding: 8px 20px; border-radius: 8px; border: 2px solid #00D1FF; margin-left: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 120px; text-align: center;">
+                                <span id="lbl-total">0.00</span>
+                            </span>
+                        </div>
+
+                        <div
+                            style="font-size: 1.5rem; font-weight: 700; color: #000; display: flex; align-items: center; white-space: nowrap;">
+                            <span style="font-weight: 700; font-size: 1em;">Restante:</span>
+                            <span style="margin-left: 10px; font-weight: 700;">
+                                $<span id="lbl-restante">0.00</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Datos Ocultos para cálculos Matemáticos Crudos -->
+                    <input type="hidden" id="raw-costo-total" value="0">
+                    <input type="hidden" id="raw-total-abonado" value="0">
+                </div>
+
+                <!-- WIDGET 2: HORARIO (Aparece sobre Resumen/Odontograma) -->
+                <div id="widget-horario" class="inner-widget"
+                    style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                                                               background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+                                                                               border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+                                                                               padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
+
+                    <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 5px;">
+                        <i class="fa-regular fa-calendar-check"></i> Reprogramar Cita
+                    </h2>
+                    <p style="color: #555; margin-bottom: 25px; font-size: 1.05rem;">
+                        Selecciona la fecha y un horario de atención disponible.
+                    </p>
+
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: #333;">Fecha seleccionada</label>
+                            <input type="date" name="nueva_fecha" id="input-nueva-fecha"
+                                style="padding: 14px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1.1rem; 
+                                                                                           background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
+                                onchange="generarHorariosDisponibles(this.value)">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: #333;">Horarios Disponibles</label>
+                            <input type="hidden" name="nueva_hora" id="input-nueva-hora">
+
+                            <div id="contenedor-horarios"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; 
+                                                                                            max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
+                                <div
+                                    style="grid-column: 1 / -1; color: #888; text-align: center; padding: 20px; font-style: italic;">
+                                    Selecciona una fecha primero...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button type="button" onclick="closeWidgets()"
+                            style="flex: 1; background: rgba(0,0,0,0.05); color: #555; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                            Cancelar
+                        </button>
+                        <button type="button" onclick="confirmarHorario()"
+                            style="flex: 2; background: var(--primary-color); color: white; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 209, 255, 0.3);">
+                            Confirmar Horario
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WIDGET 3: SEGUIMIENTO -->
+                <div id="widget-seguimiento" class="inner-widget"
+                    style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; width: 80%; max-width: 600px;">
+                    <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 10px;">
+                        Seguimiento Clínico</h2>
+                    <p style="color: #666; margin-bottom: 30px; font-size: 1.1rem;">Tratamiento que se realizara la proxima
+                        cita.</p>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-weight: 700; color: #444;">Notas / Observaciones</label>
+                        <textarea name="notas_seguimiento"
+                            style="padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; resize: none; min-height: 150px;"
+                            placeholder="Escribe aquí los detalles del tratamiento..."></textarea>
+                    </div>
+                    <button type="button"
+                        style="background: #eee; color: #555; margin-top: 30px; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center;"
+                        onclick="closeWidgets()">Confirmar / Volver</button>
+                </div>
+
+                <!-- WIDGET 4: PAGO -->
+                <div id="widget-pago" class="inner-widget"
+                    style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; width: 80%; max-width: 400px;">
+                    <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 10px;">
+                        Registrar Pago</h2>
+                    <p style="color: #666; margin-bottom: 30px; font-size: 1.1rem;">Ingresa el monto abonado hoy por el
+                        paciente.</p>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-weight: 700; color: #444;">Monto a Abonar en esta Cita ($)</label>
+                        <input type="number" name="monto_abono" id="input-monto-abono"
+                            style="padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 1.5rem; font-weight: bold;"
+                            step="0.01" min="0" placeholder="0.00"
+                            oninput="if(this.value < 0) { this.value = 0; } calcularVueltoReal();">
+                    </div>
+                    <button type="button"
+                        style="background: #eee; color: #555; margin-top: 30px; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center;"
+                        onclick="closeWidgets()">Confirmar / Volver</button>
+                </div>
+
+                <!-- TAB O: ODONTOGRAMA -->
+                <div id="tab-odontograma" class="tab-content" style="display: none; height: 100%;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin: 0;">
+                                Odontograma Digital</h2>
+                            <p style="color: #666; margin-top: 5px; font-size: 1.1rem;">Selecciona una herramienta y haz
+                                clic en las piezas dentales.</p>
+                        </div>
+                        <button type="button" class="ghost-btn" onclick="switchTab('tab-resumen')"
+                            style="background: #f0f0f0; border: 1px solid #ccc; color: #333; font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                            <i class="fa-solid fa-arrow-left"></i> Volver a Detalles
+                        </button>
+                    </div>
+
+                    <svg style="display: none;">
+                        <defs>
+                            <symbol id="tooth-incisor" viewBox="0 0 80 120">
+                                <path
+                                    d="M20 15 Q40 0 60 15 L65 45 Q60 75 50 85 L45 110 Q40 118 35 110 L30 85 Q20 75 15 45 Z"
+                                    fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                            </symbol>
+                            <symbol id="tooth-canine" viewBox="0 0 80 130">
+                                <path
+                                    d="M20 25 Q40 0 60 25 L65 50 Q55 80 50 90 L45 120 Q40 128 35 120 L30 90 Q20 80 15 50 Z"
+                                    fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                            </symbol>
+                            <symbol id="tooth-premolar" viewBox="0 0 90 130">
+                                <path
+                                    d="M20 30 Q45 5 70 30 L75 60 Q70 80 60 90 L55 115 Q45 125 35 115 L30 90 Q20 80 15 60 Z"
+                                    fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                            </symbol>
+                            <symbol id="tooth-molar-upper" viewBox="0 0 110 140">
+                                <path d="M20 40 Q55 5 90 40 L85 70 Q80 90 65 100 Q55 105 45 100 Q30 90 25 70 Z"
+                                    fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                                <path d="M40 100 L30 130 Q45 135 50 110 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                                <path d="M70 100 L80 130 Q65 135 60 110 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                                <path d="M55 100 L50 135 Q60 138 58 110 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                            </symbol>
+                            <symbol id="tooth-molar-lower" viewBox="0 0 110 140">
+                                <path d="M20 40 Q55 5 90 40 L85 75 Q75 95 55 105 Q35 95 25 75 Z" fill="#f8f1e4"
+                                    stroke="#222" stroke-width="2" />
+                                <path d="M45 105 L35 135 Q50 140 55 115 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                                <path d="M65 105 L75 135 Q60 140 55 115 Z" fill="#f8f1e4" stroke="#222" stroke-width="2" />
+                            </symbol>
+                        </defs>
+                    </svg>
+
+                    <div
+                        style="background: #f8f9fa; padding: 15px; border-radius: 12px; display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px; border: 1px solid #ddd;">
+                        <div style="flex: 1;">
+                            <label style="font-weight: 700; color: #444; display: block; margin-bottom: 5px;">Tratamiento a
+                                aplicar:</label>
+                            <select id="select-servicio"
+                                style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                                <option value="">-- Seleccionar --</option>
+                                @foreach($servicios as $srv)
+                                    <option value="{{ $srv->id_servicio }}">{{ $srv->nombre_servicio }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div style="display: flex; gap: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="tipo_registro" value="hallazgo" id="tipo-hallazgo" checked>
+                                <span style="color: blue; font-weight: 700;">Hallazgo (Azul)</span>
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="tipo_registro" value="tratamiento" id="tipo-tratamiento">
+                                <span style="color: red; font-weight: 700;">Plan/Realizado (Rojo)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <style>
+                        .odontograma-lienzo {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 30px;
+                            padding: 20px;
+                            background: #fff;
+                            border-radius: 12px;
+                            border: 2px dashed #ccc;
+                            flex: 1;
+                            overflow-x: auto;
+                            min-height: 400px;
+                        }
+
+                        .fila-dientes {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 5px;
+                            min-width: 600px;
+                        }
+
+                        .fila-dientes.centrada {
+                            justify-content: center;
+                            gap: 15px;
+                        }
+
+                        .diente-wrapper {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            width: 50px;
+                        }
+
+                        .fila-dientes.temporales .diente-wrapper {
+                            width: 38px;
+                        }
+
+                        .numero-diente {
+                            color: #5bc0be;
+                            font-size: 13px;
+                            font-weight: bold;
+                            margin: 4px 0;
+                        }
+
+                        .caras-interactivas {
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            overflow: hidden;
+                            border: 1px solid #999;
+                            cursor: pointer;
+                        }
+
+                        .odontograma-svg {
+                            width: 100%;
+                            height: 100%;
+                        }
+
+                        .cara-diente {
+                            fill: #ffffff;
+                            stroke: #999;
+                            stroke-width: 2;
+                            transition: fill 0.2s;
+                            cursor: pointer;
+                        }
+
+                        .cara-diente:hover {
+                            fill: #f0f0f0;
+                        }
+
+                        .anatomia {
+                            width: 100%;
+                            height: 55px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: flex-end;
+                        }
+
+                        .anatomia svg {
+                            height: 100%;
+                            width: auto;
+                        }
+
+                        .diente-wrapper.superior .anatomia svg {
+                            transform: scale(1, -1);
+                        }
+                    </style>
+
+                    <div id="odontograma-lienzo" class="odontograma-lienzo">
+                        <div id="fila-perm-sup" class="fila-dientes superior"></div>
+                        <div id="fila-temp-sup" class="fila-dientes centrada temporales superior"></div>
+                        <div id="fila-temp-inf" class="fila-dientes centrada temporales inferior"></div>
+                        <div id="fila-perm-inf" class="fila-dientes inferior"></div>
+                    </div>
+
+                    <input type="hidden" id="odontograma-paciente-id" value="">
+                    <input type="hidden" id="odontograma-paciente-edad" value="0">
+                </div>
+
+            </form>
         </div>
+    </div>
 
-    @endsection
-    @section('scripts')
-        <script>
-            // ==========================================
-            // aqui va ek calendario
-            // ==========================================
-            let horasOcupadas = [];
-            let calMesActual = new Date().getMonth() + 1;
-            let calAnioActual = new Date().getFullYear();
-            let fechaCitaActual = null;
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+@endsection
+@section('scripts')
+    <script>
+        // ==========================================
+        // aqui va ek calendario
+        // ==========================================
+        let horasOcupadas = [];
+        let calMesActual = new Date().getMonth() + 1;
+        let calAnioActual = new Date().getFullYear();
+        let fechaCitaActual = null;
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-            function cargarCalendarioFuncional(mes, anio) {
-                document.getElementById('cal-mes-anio').innerText = `${monthNames[mes - 1]} ${anio}`;
-                const grid = document.getElementById('functional-calendar-days');
-                grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i></div>';
+        function cargarCalendarioFuncional(mes, anio) {
+            document.getElementById('cal-mes-anio').innerText = `${monthNames[mes - 1]} ${anio}`;
+            const grid = document.getElementById('functional-calendar-days');
+            grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i></div>';
 
-                fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
-                    .then(res => res.ok ? res.json() : Promise.reject('Error en disponibilidad')) // Validación de respuesta
-                    .then(disponibilidad => {
-                        grid.innerHTML = '';
-                        const hoy = new Date();
-                        hoy.setHours(0, 0, 0, 0);
+            fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
+                .then(res => res.ok ? res.json() : Promise.reject('Error en disponibilidad')) // Validación de respuesta
+                .then(disponibilidad => {
+                    grid.innerHTML = '';
+                    const hoy = new Date();
+                    hoy.setHours(0, 0, 0, 0);
 
-                        let minFechaPermitida = hoy;
-                        if (fechaCitaActual) {
-                            const unDiaAntes = new Date(fechaCitaActual);
-                            unDiaAntes.setDate(unDiaAntes.getDate() - 1);
-                            unDiaAntes.setHours(0, 0, 0, 0);
-                            minFechaPermitida = unDiaAntes > hoy ? unDiaAntes : hoy;
-                        }
-
-                        const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
-                        for (let i = 0; i < primerDiaSemana; i++) grid.appendChild(document.createElement('div'));
-
-                        for (const [dia, data] of Object.entries(disponibilidad)) {
-                            let div = document.createElement('div');
-                            div.innerText = dia;
-                            div.style.padding = '8px 5px';
-                            div.style.borderRadius = '8px';
-                            div.style.fontWeight = '600';
-                            div.style.fontSize = '0.9em';
-                            div.style.transition = '0.2s';
-
-                            let tooltipText = `Día ${dia}`;
-                            if (data.horas_disponibles !== undefined) {
-                                tooltipText += `\n📅 Horas disponibles: ${data.horas_disponibles}/8`;
-                                tooltipText += `\n📌 Horas ocupadas: ${data.horas_ocupadas}/8`;
-                            }
-                            div.title = tooltipText;
-
-                            const estaFecha = new Date(anio, mes - 1, parseInt(dia));
-                            estaFecha.setHours(0, 0, 0, 0);
-                            const esBloqueado = estaFecha < minFechaPermitida;
-
-                            if (esBloqueado) {
-                                div.style.background = '#d1d5db';
-                                div.style.color = '#9ca3af';
-                                div.style.cursor = 'not-allowed';
-                                div.style.opacity = '0.5';
-                                div.title = 'No disponible para reagendar';
-                            } else if (data.estado === 'verde') {
-                                div.style.background = '#32D74B';
-                                div.style.color = 'white';
-                                div.title = `${tooltipText}\n✅ Horario completamente disponible`;
-                            } else if (data.estado === 'amarillo') {
-                                div.style.background = '#FFC107';
-                                div.style.color = '#333';
-                                div.title = `${tooltipText}\n⚠️ Algunas horas disponibles`;
-                            } else if (data.estado === 'rojo') {
-                                div.style.background = '#EF4444';
-                                div.style.color = 'white';
-                                div.title = `${tooltipText}\n❌ Sin horarios disponibles`;
-                            } else {
-                                div.style.background = '#f0f0f0';
-                                div.style.color = '#ccc';
-                            }
-
-                            if (!esBloqueado && data.clickable) {
-                                div.style.cursor = 'pointer';
-                                div.onclick = () => abrirModalAgendar(dia, mes, anio, data.hora_inicio, data.hora_fin);
-                                div.onmouseover = () => div.style.transform = 'scale(1.1)';
-                                div.onmouseout = () => div.style.transform = 'scale(1)';
-                            } else if (!esBloqueado && data.estado === 'rojo') {
-                                div.style.cursor = 'not-allowed';
-                                div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.`);
-                            } else if (esBloqueado) {
-                                div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
-                            }
-                            grid.appendChild(div);
-                        }
-                    })
-                    .catch(err => console.error("Error en disponibilidad:", err));
-            }
-
-            function cambiarMes(delta) {
-                calMesActual += delta;
-                if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
-                if (calMesActual < 1) { calMesActual = 12; calAnioActual--; }
-                cargarCalendarioFuncional(calMesActual, calAnioActual);
-            }
-
-            function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00', horasOcupadas = []) {
-                const contenedor = document.getElementById('contenedor-horarios');
-                const inputHora = document.getElementById('input-nueva-hora');
-                inputHora.value = '';
-                if (!fechaSeleccionada) return;
-
-                let horariosClinica = [];
-                // Validación por si el backend manda nulo en las horas
-                let [hInicio, mInicio] = (horaInicioStr || '09:00').split(':').map(Number);
-                let [hFin, mFin] = (horaFinStr || '18:00').split(':').map(Number);
-
-                let currentDate = new Date();
-                currentDate.setHours(hInicio, mInicio, 0, 0);
-                let endDate = new Date();
-                endDate.setHours(hFin, mFin, 0, 0);
-
-                while (currentDate < endDate && horariosClinica.length < 48) {
-                    let h = String(currentDate.getHours()).padStart(2, '0');
-                    let m = String(currentDate.getMinutes()).padStart(2, '0');
-                    horariosClinica.push(`${h}:${m}`);
-                    currentDate.setMinutes(currentDate.getMinutes() + 30);
-                }
-
-                contenedor.innerHTML = '';
-                horariosClinica.forEach(hora => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'slot-horario';
-                    const [h, m] = hora.split(':');
-                    const ampm = h >= 12 ? 'PM' : 'AM';
-                    const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
-                    btn.innerText = hora12;
-                    btn.dataset.hora = hora;
-                    btn.style.padding = "12px 5px";
-                    btn.style.borderRadius = "10px";
-                    btn.style.fontWeight = "700";
-                    btn.style.transition = "0.2s";
-
-                    if (horasOcupadas.includes(hora)) {
-                        btn.disabled = true;
-                        btn.style.background = "#ef4444";
-                        btn.style.color = "white";
-                        btn.style.cursor = "not-allowed";
-                        btn.style.opacity = "0.6";
-                    } else {
-                        btn.style.background = "rgba(255,255,255,0.6)";
-                        btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
-                        btn.style.cursor = "pointer";
-                        btn.onclick = () => {
-                            document.querySelectorAll('.slot-horario').forEach(b => {
-                                if (!b.disabled) {
-                                    b.style.background = "rgba(255,255,255,0.6)";
-                                    b.style.color = "#333";
-                                }
-                            });
-                            btn.style.background = "var(--primary-color)";
-                            btn.style.color = "white";
-                            inputHora.value = hora;
-                        };
+                    let minFechaPermitida = hoy;
+                    if (fechaCitaActual) {
+                        const unDiaAntes = new Date(fechaCitaActual);
+                        unDiaAntes.setDate(unDiaAntes.getDate() - 1);
+                        unDiaAntes.setHours(0, 0, 0, 0);
+                        minFechaPermitida = unDiaAntes > hoy ? unDiaAntes : hoy;
                     }
-                    contenedor.appendChild(btn);
-                });
-            }
 
-            function abrirModalAgendar(dia, mes, anio, horaInicio, horaFin) {
-                const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-                document.getElementById('input-nueva-fecha').value = fechaString;
+                    const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
+                    for (let i = 0; i < primerDiaSemana; i++) grid.appendChild(document.createElement('div'));
 
-                // MODIFICACIÓN: Manejo de error 500 para evitar el SyntaxError
-                fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
-                    .then(res => {
-                        if (!res.ok) throw new Error('Error 500 del servidor');
-                        return res.json();
-                    })
-                    .then(data => {
-                        horasOcupadas = data.horas_ocupadas || [];
-                        generarHorariosDisponibles(fechaString, horaInicio, horaFin, horasOcupadas);
-                        openWidget('widget-horario');
-                    })
-                    .catch(err => {
-                        console.error("Error al cargar horas ocupadas:", err);
-                        alert("Error al obtener disponibilidad del servidor. Revisa los logs.");
-                    });
-            }
+                    for (const [dia, data] of Object.entries(disponibilidad)) {
+                        let div = document.createElement('div');
+                        div.innerText = dia;
+                        div.style.padding = '8px 5px';
+                        div.style.borderRadius = '8px';
+                        div.style.fontWeight = '600';
+                        div.style.fontSize = '0.9em';
+                        div.style.transition = '0.2s';
 
-            function confirmarHorario() {
-                const horaSeleccionada = document.getElementById('input-nueva-hora').value;
-                if (!horaSeleccionada) {
-                    alert("Por favor, selecciona una hora de la cuadrícula.");
-                    return;
-                }
-                closeWidgets();
-            }
+                        let tooltipText = `Día ${dia}`;
+                        if (data.horas_disponibles !== undefined) {
+                            tooltipText += `\n📅 Horas disponibles: ${data.horas_disponibles}/8`;
+                            tooltipText += `\n📌 Horas ocupadas: ${data.horas_ocupadas}/8`;
+                        }
+                        div.title = tooltipText;
 
-            function cargarModalCita(idCita) {
-                openModal('modal-detalle-cita');
-                document.getElementById('form-actualizar-cita').action = `/citas/${idCita}/actualizar`;
-                document.getElementById('lbl-nombre').innerText = 'Cargando...';
+                        const estaFecha = new Date(anio, mes - 1, parseInt(dia));
+                        estaFecha.setHours(0, 0, 0, 0);
+                        const esBloqueado = estaFecha < minFechaPermitida;
 
-                fetch(`/api/citas/${idCita}/modal-detalles`)
-                    .then(res => res.ok ? res.json() : Promise.reject('Error modal'))
-                    .then(data => {
-                        document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
-                        document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
-                        document.getElementById('lbl-materno').innerText = data.paciente.materno;
-                        document.getElementById('lbl-edad').innerText = data.paciente.edad;
-                        document.getElementById('lbl-sexo').innerText = data.paciente.sexo;
-                        document.getElementById('lbl-telefono').innerText = data.paciente.telefono;
-
-                        if (document.getElementById('lbl-sangre')) document.getElementById('lbl-sangre').innerText = data.paciente.tipo_sangre;
-                        if (document.getElementById('lbl-peso')) document.getElementById('lbl-peso').innerText = data.paciente.peso;
-                        if (document.getElementById('lbl-alergias')) document.getElementById('lbl-alergias').innerText = data.paciente.alergias;
-                        if (document.getElementById('lbl-enfermedades')) document.getElementById('lbl-enfermedades').innerText = data.paciente.enfermedades;
-
-                        const tbody = document.getElementById('cita-tabla-body');
-                        tbody.innerHTML = '';
-                        window.todasLasFilas = [];
-                        window.paginaActual = 1;
-                        window.filasPorPagina = 4;
-
-                        if (data.historial_citas && data.historial_citas.length > 0) {
-                            window.todasLasFilas = data.historial_citas.map(function (fila) {
-                                const esActual = fila.es_actual;
-                                const bgFila = esActual ? '#E8FFF4' : 'white';
-                                const borde = '2px solid #00D1FF';
-                                const tdStyle = `padding:14px 15px; border-right:${borde}; font-size:1em; color:#333; background:${bgFila};`;
-                                const tr = document.createElement('tr');
-                                tr.style.borderBottom = borde;
-                                if (esActual) {
-                                    tr.style.fontWeight = '700';
-                                    tr.setAttribute('data-cita-actual', 'true');
-                                }
-
-                                let colorEstado = '#999';
-                                let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
-                                let textoEstado = 'Pendiente';
-                                const estadoLower = (fila.estado || '').toLowerCase().trim();
-                                if (estadoLower === 'completada') {
-                                    colorEstado = '#22C55E';
-                                    iconoEstado = '<i class="fa-solid fa-circle-check"></i>';
-                                    textoEstado = 'Completada';
-                                } else if (estadoLower === 'pendiente') {
-                                    colorEstado = '#FFC107';
-                                    iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
-                                    textoEstado = 'Pendiente';
-                                }
-
-                                tr.innerHTML = `
-                                        <td style="${tdStyle}">${fila.dia}</td>
-                                        <td style="${tdStyle}">${fila.hora}</td>
-                                        <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                        <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                        <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                    `;
-                                return tr;
-                            });
-                            window.citasData = data.historial_citas;
-                            renderizarPagina();
+                        if (esBloqueado) {
+                            div.style.background = '#d1d5db';
+                            div.style.color = '#9ca3af';
+                            div.style.cursor = 'not-allowed';
+                            div.style.opacity = '0.5';
+                            div.title = 'No disponible para reagendar';
+                        } else if (data.estado === 'verde') {
+                            div.style.background = '#32D74B';
+                            div.style.color = 'white';
+                            div.title = `${tooltipText}\n✅ Horario completamente disponible`;
+                        } else if (data.estado === 'amarillo') {
+                            div.style.background = '#FFC107';
+                            div.style.color = '#333';
+                            div.title = `${tooltipText}\n⚠️ Algunas horas disponibles`;
+                        } else if (data.estado === 'rojo') {
+                            div.style.background = '#EF4444';
+                            div.style.color = 'white';
+                            div.title = `${tooltipText}\n❌ Sin horarios disponibles`;
                         } else {
-                            tbody.innerHTML = '<tr><td colspan="5" style="padding:18px; color:#888; text-align:center;">Sin historial</td></tr>';
+                            div.style.background = '#f0f0f0';
+                            div.style.color = '#ccc';
                         }
 
-                        const rawCosto = parseFloat(data.finanzas.total.replace(/,/g, ''));
-                        const rawRestante = parseFloat(data.finanzas.restante.replace(/,/g, ''));
-                        const rawPagado = rawCosto - rawRestante;
-                        document.getElementById('raw-costo-total').value = rawCosto;
-                        document.getElementById('raw-total-abonado').value = rawPagado;
-                        document.getElementById('lbl-total').innerText = '$' + data.finanzas.total;
-                        document.getElementById('lbl-restante').innerText = data.finanzas.restante;
-
-                        if (data.fila_tabla && data.fila_tabla.dia) {
-                            const partesFecha = data.fila_tabla.dia.split('/');
-                            if (partesFecha.length === 3) {
-                                fechaCitaActual = new Date(parseInt(partesFecha[2]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[0]));
-                            }
+                        if (!esBloqueado && data.clickable) {
+                            div.style.cursor = 'pointer';
+                            div.onclick = () => abrirModalAgendar(dia, mes, anio, data.hora_inicio, data.hora_fin);
+                            div.onmouseover = () => div.style.transform = 'scale(1.1)';
+                            div.onmouseout = () => div.style.transform = 'scale(1)';
+                        } else if (!esBloqueado && data.estado === 'rojo') {
+                            div.style.cursor = 'not-allowed';
+                            div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.`);
+                        } else if (esBloqueado) {
+                            div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
                         }
+                        grid.appendChild(div);
+                    }
+                })
+                .catch(err => console.error("Error en disponibilidad:", err));
+        }
 
-                        if (data.fecha_cita) {
-                            calMesActual = data.fecha_cita.mes + 1;
-                            calAnioActual = data.fecha_cita.anio;
-                            if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
-                            cargarCalendarioFuncional(calMesActual, calAnioActual);
-                        }
+        function cambiarMes(delta) {
+            calMesActual += delta;
+            if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
+            if (calMesActual < 1) { calMesActual = 12; calAnioActual--; }
+            cargarCalendarioFuncional(calMesActual, calAnioActual);
+        }
 
-                        document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
-                        if (document.getElementById('odontograma-paciente-edad')) {
-                            document.getElementById('odontograma-paciente-edad').value = data.paciente.edad_numero;
-                            document.dispatchEvent(new CustomEvent('odontograma:edadCargada', { detail: { edad: data.paciente.edad_numero } }));
-                        }
+        function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00', horasOcupadas = []) {
+            const contenedor = document.getElementById('contenedor-horarios');
+            const inputHora = document.getElementById('input-nueva-hora');
+            inputHora.value = '';
+            if (!fechaSeleccionada) return;
 
-                        if (data.odontograma) {
-                            document.querySelectorAll('.cara-diente').forEach(c => c.style.fill = 'white');
-                            data.odontograma.forEach(registro => {
-                                const caraElement = document.querySelector(`.diente[data-diente="${registro.numero_diente}"] .cara-diente[data-cara="${registro.cara_diente}"]`);
-                                if (caraElement) {
-                                    const color = (registro.estado_diente === 'hallazgo') ? 'blue' : 'red';
-                                    caraElement.style.fill = color;
-                                }
-                            });
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Error:", err);
-                        document.getElementById('lbl-nombre').innerText = 'Error al cargar';
-                    });
+            let horariosClinica = [];
+            // Validación por si el backend manda nulo en las horas
+            let [hInicio, mInicio] = (horaInicioStr || '09:00').split(':').map(Number);
+            let [hFin, mFin] = (horaFinStr || '18:00').split(':').map(Number);
+
+            let currentDate = new Date();
+            currentDate.setHours(hInicio, mInicio, 0, 0);
+            let endDate = new Date();
+            endDate.setHours(hFin, mFin, 0, 0);
+
+            while (currentDate < endDate && horariosClinica.length < 48) {
+                let h = String(currentDate.getHours()).padStart(2, '0');
+                let m = String(currentDate.getMinutes()).padStart(2, '0');
+                horariosClinica.push(`${h}:${m}`);
+                currentDate.setMinutes(currentDate.getMinutes() + 30);
             }
-    @endsection
+
+            contenedor.innerHTML = '';
+            horariosClinica.forEach(hora => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'slot-horario';
+                const [h, m] = hora.split(':');
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+                btn.innerText = hora12;
+                btn.dataset.hora = hora;
+                btn.style.padding = "12px 5px";
+                btn.style.borderRadius = "10px";
+                btn.style.fontWeight = "700";
+                btn.style.transition = "0.2s";
+
+                if (horasOcupadas.includes(hora)) {
+                    btn.disabled = true;
+                    btn.style.background = "#ef4444";
+                    btn.style.color = "white";
+                    btn.style.cursor = "not-allowed";
+                    btn.style.opacity = "0.6";
+                } else {
+                    btn.style.background = "rgba(255,255,255,0.6)";
+                    btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
+                    btn.style.cursor = "pointer";
+                    btn.onclick = () => {
+                        document.querySelectorAll('.slot-horario').forEach(b => {
+                            if (!b.disabled) {
+                                b.style.background = "rgba(255,255,255,0.6)";
+                                b.style.color = "#333";
+                            }
+                        });
+                        btn.style.background = "var(--primary-color)";
+                        btn.style.color = "white";
+                        inputHora.value = hora;
+                    };
+                }
+                contenedor.appendChild(btn);
+            });
+        }
+
+        function abrirModalAgendar(dia, mes, anio, horaInicio, horaFin) {
+            const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+            document.getElementById('input-nueva-fecha').value = fechaString;
+
+            // MODIFICACIÓN: Manejo de error 500 para evitar el SyntaxError
+            fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Error 500 del servidor');
+                    return res.json();
+                })
+                .then(data => {
+                    horasOcupadas = data.horas_ocupadas || [];
+                    generarHorariosDisponibles(fechaString, horaInicio, horaFin, horasOcupadas);
+                    openWidget('widget-horario');
+                })
+                .catch(err => {
+                    console.error("Error al cargar horas ocupadas:", err);
+                    alert("Error al obtener disponibilidad del servidor. Revisa los logs.");
+                });
+        }
+
+        function confirmarHorario() {
+            const horaSeleccionada = document.getElementById('input-nueva-hora').value;
+            if (!horaSeleccionada) {
+                alert("Por favor, selecciona una hora de la cuadrícula.");
+                return;
+            }
+            closeWidgets();
+        }
+
+        function cargarModalCita(idCita) {
+            openModal('modal-detalle-cita');
+            document.getElementById('form-actualizar-cita').action = `/citas/${idCita}/actualizar`;
+            document.getElementById('lbl-nombre').innerText = 'Cargando...';
+
+            fetch(`/api/citas/${idCita}/modal-detalles`)
+                .then(res => res.ok ? res.json() : Promise.reject('Error modal'))
+                .then(data => {
+                    document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
+                    document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
+                    document.getElementById('lbl-materno').innerText = data.paciente.materno;
+                    document.getElementById('lbl-edad').innerText = data.paciente.edad;
+                    document.getElementById('lbl-sexo').innerText = data.paciente.sexo;
+                    document.getElementById('lbl-telefono').innerText = data.paciente.telefono;
+
+                    if (document.getElementById('lbl-sangre')) document.getElementById('lbl-sangre').innerText = data.paciente.tipo_sangre;
+                    if (document.getElementById('lbl-peso')) document.getElementById('lbl-peso').innerText = data.paciente.peso;
+                    if (document.getElementById('lbl-alergias')) document.getElementById('lbl-alergias').innerText = data.paciente.alergias;
+                    if (document.getElementById('lbl-enfermedades')) document.getElementById('lbl-enfermedades').innerText = data.paciente.enfermedades;
+
+                    const tbody = document.getElementById('cita-tabla-body');
+                    tbody.innerHTML = '';
+                    window.todasLasFilas = [];
+                    window.paginaActual = 1;
+                    window.filasPorPagina = 4;
+
+                    if (data.historial_citas && data.historial_citas.length > 0) {
+                        window.todasLasFilas = data.historial_citas.map(function (fila) {
+                            const esActual = fila.es_actual;
+                            const bgFila = esActual ? '#E8FFF4' : 'white';
+                            const borde = '2px solid #00D1FF';
+                            const tdStyle = `padding:14px 15px; border-right:${borde}; font-size:1em; color:#333; background:${bgFila};`;
+                            const tr = document.createElement('tr');
+                            tr.style.borderBottom = borde;
+                            if (esActual) {
+                                tr.style.fontWeight = '700';
+                                tr.setAttribute('data-cita-actual', 'true');
+                            }
+
+                            let colorEstado = '#999';
+                            let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
+                            let textoEstado = 'Pendiente';
+                            const estadoLower = (fila.estado || '').toLowerCase().trim();
+                            if (estadoLower === 'completada') {
+                                colorEstado = '#22C55E';
+                                iconoEstado = '<i class="fa-solid fa-circle-check"></i>';
+                                textoEstado = 'Completada';
+                            } else if (estadoLower === 'pendiente') {
+                                colorEstado = '#FFC107';
+                                iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
+                                textoEstado = 'Pendiente';
+                            }
+
+                            tr.innerHTML = `
+                                            <td style="${tdStyle}">${fila.dia}</td>
+                                            <td style="${tdStyle}">${fila.hora}</td>
+                                            <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
+                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
+                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
+                                        `;
+                            return tr;
+                        });
+                        window.citasData = data.historial_citas;
+                        renderizarPagina();
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="5" style="padding:18px; color:#888; text-align:center;">Sin historial</td></tr>';
+                    }
+
+                    const rawCosto = parseFloat(data.finanzas.total.replace(/,/g, ''));
+                    const rawRestante = parseFloat(data.finanzas.restante.replace(/,/g, ''));
+                    const rawPagado = rawCosto - rawRestante;
+                    document.getElementById('raw-costo-total').value = rawCosto;
+                    document.getElementById('raw-total-abonado').value = rawPagado;
+                    document.getElementById('lbl-total').innerText = '$' + data.finanzas.total;
+                    document.getElementById('lbl-restante').innerText = data.finanzas.restante;
+
+                    if (data.fila_tabla && data.fila_tabla.dia) {
+                        const partesFecha = data.fila_tabla.dia.split('/');
+                        if (partesFecha.length === 3) {
+                            fechaCitaActual = new Date(parseInt(partesFecha[2]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[0]));
+                        }
+                    }
+
+                    if (data.fecha_cita) {
+                        calMesActual = data.fecha_cita.mes + 1;
+                        calAnioActual = data.fecha_cita.anio;
+                        if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
+                        cargarCalendarioFuncional(calMesActual, calAnioActual);
+                    }
+
+                    document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
+                    if (document.getElementById('odontograma-paciente-edad')) {
+                        document.getElementById('odontograma-paciente-edad').value = data.paciente.edad_numero;
+                        document.dispatchEvent(new CustomEvent('odontograma:edadCargada', { detail: { edad: data.paciente.edad_numero } }));
+                    }
+
+                    if (data.odontograma) {
+                        document.querySelectorAll('.cara-diente').forEach(c => c.style.fill = 'white');
+                        data.odontograma.forEach(registro => {
+                            const caraElement = document.querySelector(`.diente[data-diente="${registro.numero_diente}"] .cara-diente[data-cara="${registro.cara_diente}"]`);
+                            if (caraElement) {
+                                const color = (registro.estado_diente === 'hallazgo') ? 'blue' : 'red';
+                                caraElement.style.fill = color;
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    document.getElementById('lbl-nombre').innerText = 'Error al cargar';
+                });
+        }
+
 
         // ==========================================
         // LÓGICA INTERACTIVA ODONTOGRAMA (Dinámica)
@@ -936,14 +936,14 @@
             const dientesPermInf = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const svgCaras = `
-                                                                                                                                                                <svg viewBox="0 0 100 100" class="odontograma-svg">
-                                                                                                                                                                    <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
-                                                                                                                                                                    <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
-                                                                                                                                                                    <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
-                                                                                                                                                                    <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
-                                                                                                                                                                    <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
-                                                                                                                                                                </svg>
-                                                                                                                                                            `;
+                                                                                                                                                                    <svg viewBox="0 0 100 100" class="odontograma-svg">
+                                                                                                                                                                        <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
+                                                                                                                                                                        <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
+                                                                                                                                                                        <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
+                                                                                                                                                                        <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
+                                                                                                                                                                        <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
+                                                                                                                                                                    </svg>
+                                                                                                                                                                `;
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -975,9 +975,9 @@
 
                     const svgId = obtenerIdAnatomia(numero);
                     const divAnatomia = `
-                                                                                                                                                    <div class="anatomia">
-                                                                                                                                                        <svg><use href="${svgId}"></use></svg>
-                                                                                                                                                    </div>`;
+                                                                                                                                                        <div class="anatomia">
+                                                                                                                                                            <svg><use href="${svgId}"></use></svg>
+                                                                                                                                                        </div>`;
                     const divNumero = `<div class="numero-diente">${numero}</div>`;
                     const divCaras = `<div class="caras-interactivas">${svgCaras}</div>`;
 
