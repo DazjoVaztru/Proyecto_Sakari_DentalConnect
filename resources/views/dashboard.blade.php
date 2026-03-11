@@ -613,12 +613,60 @@
     .then(res => res.json())
     .then(data => {
 
+        // Datos del Paciente
         document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
         document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
         document.getElementById('lbl-materno').innerText = data.paciente.materno;
         document.getElementById('lbl-edad').innerText = data.paciente.edad;
         document.getElementById('lbl-sexo').innerText = data.paciente.sexo;
         document.getElementById('lbl-telefono').innerText = data.paciente.telefono;
+        
+        document.getElementById('lbl-sangre').innerText = data.paciente.tipo_sangre || 'N/A';
+        document.getElementById('lbl-peso').innerText = data.paciente.peso || 'N/A';
+        document.getElementById('lbl-alergias').innerText = data.paciente.alergias || 'Ninguna';
+        document.getElementById('lbl-enfermedades').innerText = data.paciente.enfermedades || 'Ninguna';
+
+        // Tabla de la Cita Actual
+        const tbody = document.getElementById('cita-tabla-body');
+        if(tbody && data.fila_tabla) {
+            tbody.innerHTML = `
+                <tr>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${data.fila_tabla.dia}</td>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${data.fila_tabla.hora}</td>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600;">${data.fila_tabla.seguimiento}</td>
+                    <td style="padding: 15px; border-right: 2px solid #eee; font-weight: 600; color: #10b981;">+$${data.fila_tabla.abono}</td>
+                    <td style="padding: 15px; font-weight: 600; color: #f59e0b;">En Proceso</td>
+                </tr>
+            `;
+        }
+
+        // Finanzas
+        if(data.finanzas) {
+            document.getElementById('lbl-total').innerText = data.finanzas.total;
+            document.getElementById('lbl-restante').innerText = data.finanzas.restante;
+            document.getElementById('raw-costo-total').value = data.finanzas.total.replace(/,/g, '');
+            document.getElementById('raw-total-abonado').value = data.finanzas.pagado.replace(/,/g, '');
+        }
+
+        // Odontograma
+        if(document.getElementById('odontograma-paciente-id')) {
+            document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
+        }
+        if(document.getElementById('odontograma-paciente-edad')) {
+            document.getElementById('odontograma-paciente-edad').value = data.paciente.edad_numero;
+            document.dispatchEvent(new CustomEvent('odontograma:edadCargada', { detail: { edad: data.paciente.edad_numero } }));
+        }
+
+        // Calendario
+        if(data.fecha_cita && data.fila_tabla) {
+            const parts = data.fila_tabla.dia.split('/');
+            if(parts.length === 3) {
+                fechaCitaActual = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            calMesActual = data.fecha_cita.mes;
+            calAnioActual = data.fecha_cita.anio;
+            cargarCalendarioFuncional(calMesActual, calAnioActual);
+        }
 
     })
     .catch(err=>{
