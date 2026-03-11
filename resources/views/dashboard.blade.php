@@ -168,22 +168,20 @@
                         </button>
                     </div>
 
-                    <div class="calendar-grid-functional"
-                        style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em;">
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">D</span>
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">L</span>
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">J</span>
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">V</span>
-                        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">S</span>
+                   <div class="calendar-grid-functional" 
+     style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center;">
+    
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">D</span>
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">L</span>
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">M</span>
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">M</span>
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">J</span>
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">V</span>
+    <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 10px;">S</span>
 
-                        <div id="functional-calendar-days"
-                            style="display:grid; grid-template-columns:repeat(7,1fr); gap:8px;">
-                        </div>
-                    </div>
-
-                    <div
+    <div id="functional-calendar-days" style="display: contents;">
+        </div>
+</div>
                         style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; font-size: 0.7em; color: #666;">
                         <div style="display:flex; align-items:center;"><span
                                 style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre
