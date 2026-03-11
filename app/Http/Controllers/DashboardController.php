@@ -293,108 +293,114 @@ class DashboardController extends Controller
      * - Rojo (lleno): Todas las horas disponibles del día están ocupadas (8 horas = 16 slots de 30 min)
      * - Gris: Días pasados (no pueden agendar)
      */
-   public function obtenerDisponibilidadMes(Request $request)
+    public function obtenerDisponibilidadMes(Request $request)
     {
+        $mes = $request->input('mes', Carbon::now()->month);
+        $anio = $request->input('anio', Carbon::now()->year);
 
-        $user = Auth::user();
-
-        if(!$user){
-            return response()->json([]);
-        }
-
-        $mes = $request->input('mes',Carbon::now()->month);
-        $anio = $request->input('anio',Carbon::now()->year);
-
-        $diasMes = Carbon::createFromDate($anio,$mes,1)->daysInMonth;
-
-        $slotsPorDia = 16;
+        $diasDelMes = Carbon::createFromDate($anio, $mes, 1)->daysInMonth;
+        
+        // Horas operativas: 8 horas (08:00 - 17:00) = 16 slots de 30 minutos
+        $slotsDisponiblesPorDia = 16;
 
         $eventos = [];
-
-        for($i=1;$i<=$diasMes;$i++){
-
-            $fecha = Carbon::createFromDate($anio,$mes,$i);
-
-            $totalCitas = Cita::where('id_clinica',$user->id_clinica)
-                ->whereDate('fecha_hora_inicio',$fecha)
-                ->where('estado_cita','!=','cancelada')
-                ->count();
-
-
-            $estado='verde';
-            $clickable=true;
-
-            if($totalCitas>0 && $totalCitas<$slotsPorDia){
-                $estado='amarillo';
+        
+        for ($i = 1; $i <= $diasDelMes; $i++) {
+            $fecha = Carbon::createFromDate($anio, $mes, $i);
+            
+            // Contar citas del día (solo no canceladas)
+            $citasDelDia = Cita::where('id_clinica', Auth::user()->id_clinica)
+                ->whereDate('fecha_hora_inicio', $fecha)
+                ->where('estado_cita', '!=', 'cancelada')
+                ->get();
+            
+            $totalCitas = $citasDelDia->count();
+            
+            // Estado del día basado en disponibilidad de slots
+            $estado = 'verde'; // Por defecto libre
+            $clickable = true;
+            
+            if ($totalCitas > 0 && $totalCitas < $slotsDisponiblesPorDia) {
+                // Está ocupado pero aún hay horas disponibles
+                $estado = 'amarillo';
+                $clickable = true;
+            } elseif ($totalCitas >= $slotsDisponiblesPorDia) {
+                // Todas las horas están ocupadas
+                $estado = 'rojo';
+                $clickable = false;
             }
 
-            if($totalCitas>=$slotsPorDia){
-                $estado='rojo';
-                $clickable=false;
+            // Días pasados en gris y no clickeables
+            $fechaFinal = $fecha->copy()->endOfDay();
+            if ($fechaFinal->isPast() && !$fecha->isToday()) {
+                $estado = 'gris';
+                $clickable = false;
             }
 
-            if($fecha->endOfDay()->isPast() && !$fecha->isToday()){
-                $estado='gris';
-                $clickable=false;
-            }
+            // Información sobre horas ocupadas y disponibles
+            $horasOcupadas = ceil($totalCitas / 2); // 2 slots = 1 hora
+            $horasDisponibles = max(0, 8 - $horasOcupadas);
 
-
-            $eventos[$i]=[
-                'estado'=>$estado,
-                'clickable'=>$clickable,
-                'total_citas'=>$totalCitas
+            $eventos[$i] = [
+                'estado' => $estado,
+                'clickable' => $clickable,
+                'total_citas' => $totalCitas,
+                'horas_ocupadas' => $horasOcupadas,
+                'horas_disponibles' => $horasDisponibles,
+                'slots_ocupados' => $totalCitas,
+                'slots_totales' => $slotsDisponiblesPorDia,
+                'hora_inicio' => '08:00',
+                'hora_fin' => '17:00'
             ];
         }
 
+        // El frontend espera directamente el mapa de días
         return response()->json($eventos);
     }
+    // --- FUNCIÓN 5: Obtener horas ocupadas de un día ---
+/**
+ * Devuelve los horarios ocupados de una fecha específica
+ * para bloquearlos en el calendario del frontend.
+ */
+public function horasOcupadas(Request $request)
+{
+    try {
 
+        $fecha = $request->input('fecha');
 
-
-    /**
-     * HORAS OCUPADAS
-     */
-    public function horasOcupadas(Request $request)
-    {
-
-        try{
-
-            $user = Auth::user();
-
-            if(!$user){
-                return response()->json([
-                    'horas_ocupadas'=>[]
-                ]);
-            }
-
-            $fecha = $request->input('fecha');
-
-            if(!$fecha){
-                return response()->json([
-                    'horas_ocupadas'=>[]
-                ]);
-            }
-
-
-            $horas = Cita::where('id_clinica',$user->id_clinica)
-                ->whereDate('fecha_hora_inicio',$fecha)
-                ->where('estado_cita','!=','cancelada')
-                ->pluck('fecha_hora_inicio')
-                ->map(function($hora){
-                    return Carbon::parse($hora)->format('H:i');
-                });
-
-
+        if (!$fecha) {
             return response()->json([
-                'horas_ocupadas'=>$horas
+                'horas_ocupadas' => []
             ]);
-
-        }catch(\Throwable $e){
-
-            return response()->json([
-                'error'=>$e->getMessage()
-            ],500);
         }
-    }
 
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'horas_ocupadas' => []
+            ]);
+        }
+
+        $horas = Cita::where('id_clinica', $user->id_clinica)
+            ->whereDate('fecha_hora_inicio', $fecha)
+            ->where('estado_cita', '!=', 'cancelada')
+            ->get()
+            ->map(function ($cita) {
+                return Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
+            })
+            ->toArray();
+
+        return response()->json([
+            'horas_ocupadas' => $horas
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'error' => $e->getMessage()
+        ], 500);
+
+    }
+}
 }
