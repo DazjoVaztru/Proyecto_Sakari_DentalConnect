@@ -338,45 +338,50 @@ class DashboardController extends Controller
      */
     public function horasOcupadas(Request $request)
     {
-
-        try{
-
-            $fecha=$request->input('fecha');
-            $user=Auth::user();
-
-            if(!$fecha || !$user){
-
+        try {
+            $fecha = $request->input('fecha');
+            $user = Auth::user();
+            
+            if (!$fecha || !$user) {
                 return response()->json([
-                    'horas_ocupadas'=>[]
+                    'horas_ocupadas' => []
                 ]);
+            }
+            
+            $idClinica = $user->id_clinica;
 
+            // Obtener el ID del doctor actual
+            $idDoctor = DB::table('doctores')
+                ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
+                ->where('usuarios_sistema.id_clinica', $idClinica)
+                ->value('doctores.id_doctor');
+
+            if (!$idDoctor) {
+                return response()->json(['horas_ocupadas' => []]);
             }
 
-            $horas=Cita::where('id_clinica',$user->id_clinica)
-                ->whereDate('fecha_hora_inicio',$fecha)
-                ->where('estado_cita','!=','cancelada')
-                ->get()
-                ->map(function($cita){
+            // Buscar las citas del día (Pendientes Y Confirmadas)
+            $citas = Cita::where('id_clinica', $idClinica)
+                ->where('id_doctor', $idDoctor)
+                ->whereDate('fecha_hora_inicio', $fecha)
+                ->whereIn('estado_cita', ['pendiente', 'confirmada']) // Fundamental para detectar tu cita de las 5:30
+                ->get();
 
-                    return Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
-
-                })
-                ->values()
-                ->toArray();
+            // Formatear exactamente a 'H:i'
+            $horasOcupadas = $citas->map(function ($cita) {
+                return Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
+            })->toArray();
 
             return response()->json([
-                'horas_ocupadas'=>$horas
+                'horas_ocupadas' => array_values($horasOcupadas)
             ]);
 
-        }catch(\Exception $e){
-
+        } catch (\Exception $e) {
             return response()->json([
-                'horas_ocupadas'=>[],
-                'error'=>$e->getMessage()
-            ],500);
-
+                'horas_ocupadas' => [],
+                'error' => $e->getMessage()
+            ], 500);
         }
-
     }
 
 }

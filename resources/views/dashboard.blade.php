@@ -876,31 +876,32 @@ function generarHorariosDisponibles(
 
 
 
-function abrirModalAgendar(dia,mes,anio,horaInicio,horaFin){
+    function abrirModalAgendar(dia,mes,anio,horaInicio,horaFin){
 
-    const fechaString =
-    `${anio}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+        const fechaString =
+        `${anio}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
 
-    document.getElementById('input-nueva-fecha').value=fechaString;
+        document.getElementById('input-nueva-fecha').value=fechaString;
 
-    fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
-    .then(res=>res.ok?res.json():{horas_ocupadas:[]})
-    .then(data=>{
+        fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
+        .then(res=>res.ok?res.json():{horas_ocupadas:[]})
+        .then(data=>{
 
-        horasOcupadas = data.horas_ocupadas || [];
+            // 1. Forzamos el formato 'HH:mm' recortando los segundos de lo que mande el servidor
+            horasOcupadas = (data.horas_ocupadas || []).map(hora => hora.substring(0, 5));
 
-        generarHorariosDisponibles(
-            fechaString,
-            horaInicio || '09:00',
-            horaFin || '18:00',
-            horasOcupadas
-        );
+            generarHorariosDisponibles(
+                fechaString,
+                horaInicio || '09:00',
+                horaFin || '18:00',
+                horasOcupadas
+            );
 
-        openWidget('widget-horario');
+            openWidget('widget-horario');
 
-    });
+        });
 
-}
+    }
 
 
 
