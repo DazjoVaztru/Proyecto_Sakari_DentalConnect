@@ -42,101 +42,96 @@
 
 
         {{-- Tarjeta: Ingresos del mes --}}
-        <div
-            style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
-            <div
-                style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
-            </div>
-            <div>
-                <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
-                    ${{ number_format($ingresosMes, 0) }}
-                </div>
-                <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
-            </div>
-        </div>
-
+       <div
+    style="background: white; border-radius: 15px; padding: 22px 25px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; border-left: 5px solid #FF9800;">
+    <div
+        style="background: #fff3e0; border-radius: 12px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <i class="fa-solid fa-dollar-sign" style="color: #FF9800; font-size: 1.4em;"></i>
     </div>
-    {{-- Tarjeta Principal: Citas --}}
-    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
-        <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
+    <div>
+        <div id="lbl-ingresos-mes" style="font-size: 1.8em; font-weight: 800; color: #333; line-height: 1;">
+            ${{ number_format($ingresosMes, 0) }}
+        </div>
+        <div style="color: #888; font-size: 0.85em; margin-top: 3px;">Ingresos del mes</div>
+    </div>
+</div>
 
-        <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
-            @forelse($proximasCitas as $cita)
-                @php
-                    $fechaCita = \Carbon\Carbon::parse($cita->fecha_hora_inicio);
-                    $esVencida = $fechaCita->isPast();
+</div>
+       {{-- Tarjeta Principal: Citas --}}
+<div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
+    <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
+    
+    <div class="appointment-list" id="appointment-list" style="display: flex; flex-direction: column; gap: 15px;">
+        @forelse($proximasCitas as $cita)
+            @php
+                $fechaCita = \Carbon\Carbon::parse($cita->fecha_hora_inicio);
+                $esVencida = $fechaCita->isPast();
 
-                    // Colores neutros y profesionales
-                    $borderColor = $esVencida ? '#FCD34D' : '#E5E7EB';
-                    $bgColor = $esVencida ? '#FFFBEB' : '#FFFFFF';
-                    $hoverColor = $esVencida ? '#F59E0B' : 'var(--primary-color)';
-                @endphp
+                // Colores neutros y profesionales
+                $borderColor = $esVencida ? '#FCD34D' : '#E5E7EB';
+                $bgColor = $esVencida ? '#FFFBEB' : '#FFFFFF';
+                $hoverColor = $esVencida ? '#F59E0B' : 'var(--primary-color)';
+            @endphp
 
-                <div class="appointment-card" id="cita-card-{{ $cita->id_cita }}"
-                    onclick="cargarModalCita({{ $cita->id_cita }})"
-                    style="position: relative; border: 1px solid {{ $borderColor }}; background: {{ $bgColor }}; padding: 18px 22px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between; gap: 15px;"
-                    onmouseover="this.style.boxShadow='0 6px 15px rgba(0,0,0,0.05)'; this.style.borderColor='{{ $hoverColor }}'"
-                    onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
+            <div class="appointment-card" 
+                 id="cita-card-{{ $cita->id_cita }}" 
+                 onclick="cargarModalCita({{ $cita->id_cita }})"
+                 style="position: relative; border: 1px solid {{ $borderColor }}; background: {{ $bgColor }}; padding: 18px 22px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between; gap: 15px;"
+                 onmouseover="this.style.boxShadow='0 6px 15px rgba(0,0,0,0.05)'; this.style.borderColor='{{ $hoverColor }}'"
+                 onmouseout="this.style.boxShadow='none'; this.style.borderColor='{{ $borderColor }}'">
 
-                    {{-- Overlay de éxito --}}
-                    <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
-                        style="display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center;">
-                        <i class="fa-solid fa-circle-check" style="color: #22C55E; font-size: 2.5em;"></i>
-                        <span style="font-weight: 800; color: #15803D; margin-top: 5px;">¡Cita completada!</span>
+                {{-- Overlay de éxito --}}
+                <div class="check-overlay" id="overlay-{{ $cita->id_cita }}"
+                    style="display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); border-radius: 12px; z-index: 10; flex-direction: column; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-circle-check" style="color: #22C55E; font-size: 2.5em;"></i>
+                    <span style="font-weight: 800; color: #15803D; margin-top: 5px;">¡Cita completada!</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 18px; flex: 1;">
+                    {{-- Bloque fecha --}}
+                    <div style="background: {{ $esVencida ? '#FEF3C7' : '#E0F2FE' }}; padding: 10px; border-radius: 10px; text-align: center; min-width: 65px;">
+                        <span style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : '#0369A1' }}; font-size: 1.3em;">
+                            {{ $fechaCita->format('d') }}
+                        </span>
+                        <small style="color: #666; font-weight: 700; text-transform: uppercase; font-size: 0.75em;">
+                            {{ $fechaCita->translatedFormat('M') }}
+                        </small>
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: 18px; flex: 1;">
-                        {{-- Bloque fecha --}}
-                        <div
-                            style="background: {{ $esVencida ? '#FEF3C7' : '#E0F2FE' }}; padding: 10px; border-radius: 10px; text-align: center; min-width: 65px;">
-                            <span
-                                style="display: block; font-weight: 800; color: {{ $esVencida ? '#B45309' : '#0369A1' }}; font-size: 1.3em;">
-                                {{ $fechaCita->format('d') }}
-                            </span>
-                            <small style="color: #666; font-weight: 700; text-transform: uppercase; font-size: 0.75em;">
-                                {{ $fechaCita->translatedFormat('M') }}
-                            </small>
+                    {{-- Información del Paciente --}}
+                    <div style="overflow: hidden;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <h4 style="margin: 0; font-size: 1.15em; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ $cita->paciente->nombre }} {{ $cita->paciente->apellido_paterno }}
+                            </h4>
+                            @if($esVencida)
+                                <span style="background: #FEF3C7; color: #B45309; font-size: 0.65em; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 1px solid #FCD34D;">VENCIDA</span>
+                            @endif
                         </div>
-
-                        {{-- Información del Paciente --}}
-                        <div style="overflow: hidden;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                <h4
-                                    style="margin: 0; font-size: 1.15em; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    {{ optional($cita->paciente)->nombre ?? 'Paciente eliminado' }}
-                                    {{ optional($cita->paciente)->apellido_paterno ?? '' }}
-                                </h4>
-                                @if($esVencida)
-                                    <span
-                                        style="background: #FEF3C7; color: #B45309; font-size: 0.65em; font-weight: 800; padding: 2px 8px; border-radius: 10px; border: 1px solid #FCD34D;">VENCIDA</span>
-                                @endif
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px; color: #6b7280; font-size: 0.9em;">
-                                <span><i class="fa-regular fa-clock"></i> {{ $fechaCita->format('h:i A') }}</span>
-                                <span style="color: #d1d5db;">|</span>
-                                <span
-                                    style="font-weight: 600; color: #4b5563;">{{ optional($cita->servicio)->nombre_servicio ?? 'Consulta General' }}</span>
-                            </div>
+                        <div style="display: flex; align-items: center; gap: 12px; color: #6b7280; font-size: 0.9em;">
+                            <span><i class="fa-regular fa-clock"></i> {{ $fechaCita->format('h:i A') }}</span>
+                            <span style="color: #d1d5db;">|</span>
+                            <span style="font-weight: 600; color: #4b5563;">{{ $cita->servicio->nombre_servicio ?? 'Consulta General' }}</span>
                         </div>
                     </div>
+                </div>
 
-                    {{-- Acciones: Solo botón de completar --}}
-                    <div onclick="event.stopPropagation();">
-                        <button id="btn-completar-{{ $cita->id_cita }}" onclick="completarCita({{ $cita->id_cita }})"
+                {{-- Acciones: Solo botón de completar --}}
+                <div onclick="event.stopPropagation();">
+                    <button id="btn-completar-{{ $cita->id_cita }}" onclick="completarCita({{ $cita->id_cita }})" 
                             style="background: #22C55E; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.2s;">
-                            <i class="fa-regular fa-circle-check"></i> Completar
-                        </button>
-                    </div>
+                        <i class="fa-regular fa-circle-check"></i> Completar
+                    </button>
                 </div>
-            @empty
-                <div style="text-align: center; color: #9ca3af; padding: 40px;">
-                    <i class="fa-regular fa-calendar-xmark" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
-                    <p>No hay citas próximas agendadas.</p>
-                </div>
-            @endforelse
-        </div>
+            </div>
+        @empty
+            <div style="text-align: center; color: #9ca3af; padding: 40px;">
+                <i class="fa-regular fa-calendar-xmark" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No hay citas próximas agendadas.</p>
+            </div>
+        @endforelse
     </div>
+</div>
 
     <div class="modal-overlay" id="modal-detalle-cita">
         <div class="modal-glass modal-xl"
@@ -147,44 +142,36 @@
 
                 <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
 
-                <div
-                    style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
+                <div style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: auto; box-sizing: border-box;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
+        <button class="ghost-btn" style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px; cursor: pointer;" onclick="cambiarMes(-1)">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span id="cal-mes-anio" style="font-weight: 700; color: #00D1FF; font-size: 0.95em;">Cargando...</span>
+        <button class="ghost-btn" style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px; cursor: pointer;" onclick="cambiarMes(1)">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </div>
 
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
-                        <button class="ghost-btn"
-                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
-                            onclick="cambiarMes(-1)">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-
-                        <span id="cal-mes-anio"
-                            style="font-weight: 700; color: var(--primary-color); font-size: 0.95em;">Cargando...</span>
-
-                        <button class="ghost-btn"
-                            style="padding: 5px 10px; background: transparent; color: #666; min-width: 30px;"
-                            onclick="cambiarMes(1)">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                  <div class="calendar-grid-functional" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; width: 100%;">
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">D</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">L</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">M</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">M</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">J</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">V</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">S</span>
+    <div id="calendar-main-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 0.85em;">
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">D</span>
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">L</span>
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">M</span>
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">J</span>
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">V</span>
+        <span style="color:#aaa; font-weight:600; font-size: 0.8em; margin-bottom: 5px;">S</span>
 
         <div id="functional-calendar-days" style="display: contents;"></div>
     </div>
 
-    <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; font-size: 0.7em; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
+    <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; font-size: 0.7em; color: #666;">
         <div style="display:flex; align-items:center;"><span style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre</div>
         <div style="display:flex; align-items:center;"><span style="width:8px;height:8px;background:#FFC107;border-radius:50%;margin-right:4px;"></span>Ocupado</div>
         <div style="display:flex; align-items:center;"><span style="width:8px;height:8px;background:#EF4444;border-radius:50%;margin-right:4px;"></span>Lleno</div>
     </div>
 </div>
-
                 <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 25px;">
                     <button class="ghost-btn" onclick="openWidget('widget-seguimiento')"
                         style="background: white; color: black; border: 2px solid #00D1FF; justify-content: center; font-weight: 700; border-radius: 10px; padding: 12px; cursor: pointer;">Seguimiento</button>
@@ -199,7 +186,7 @@
 
                     <button class="ghost-btn" id="btn-actualizar-cita"
                         style="background: #00D1FF; color: white; border: none; font-weight: 800; justify-content: center;
-                                                                                                                                                                                                                                                margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
+                                                                                                                                                                                                                                    margin-top: 10px; padding: 14px; box-shadow: 0 5px 15px rgba(0, 209, 255, 0.3); border-radius: 10px;">
                         GUARDAR CAMBIOS
                     </button>
 
@@ -339,9 +326,9 @@
                 <!-- WIDGET 2: HORARIO (Aparece sobre Resumen/Odontograma) -->
                 <div id="widget-horario" class="inner-widget"
                     style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                                                                               background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
-                                                                               border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
-                                                                               padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
+                                                                   background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+                                                                   border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+                                                                   padding: 40px; border-radius: 24px; z-index: 100; width: 90%; max-width: 550px;">
 
                     <h2 style="color: var(--primary-color); font-weight: 800; font-size: 2rem; margin-bottom: 5px;">
                         <i class="fa-regular fa-calendar-check"></i> Reprogramar Cita
@@ -355,7 +342,7 @@
                             <label style="font-weight: 700; color: #333;">Fecha seleccionada</label>
                             <input type="date" name="nueva_fecha" id="input-nueva-fecha"
                                 style="padding: 14px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1.1rem; 
-                                                                                           background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
+                                                                               background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
                                 onchange="generarHorariosDisponibles(this.value)">
                         </div>
 
@@ -365,7 +352,7 @@
 
                             <div id="contenedor-horarios"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; 
-                                                                                            max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
+                                                                                max-height: 220px; overflow-y: auto; padding-right: 5px; padding-bottom: 5px;">
                                 <div
                                     style="grid-column: 1 / -1; color: #888; text-align: center; padding: 20px; font-style: italic;">
                                     Selecciona una fecha primero...
@@ -595,322 +582,349 @@
                         <div id="fila-perm-inf" class="fila-dientes inferior"></div>
                     </div>
 
-                    <input type="hidden" id="odontograma-paciente-id" value="">
-                    <input type="hidden" id="odontograma-paciente-edad" value="0">
-                </div>
+                  <input type="hidden" id="odontograma-paciente-id" value="">
+<input type="hidden" id="odontograma-paciente-edad" value="0">
 
-            </form>
-        </div>
-    </div>
+</div>
+</form>
+</div>
+</div>
 
 @endsection
+
+//
 @section('scripts')
-    <script>
-        // ==========================================
-        // aqui va ek calendario
-        // ==========================================
-        let horasOcupadas = [];
-        let calMesActual = new Date().getMonth() + 1;
-        let calAnioActual = new Date().getFullYear();
-        let fechaCitaActual = null;
-        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+<script>
+    function cargarModalCita(idCita){
 
-        function cargarCalendarioFuncional(mes, anio) {
-            document.getElementById('cal-mes-anio').innerText = `${monthNames[mes - 1]} ${anio}`;
-            const grid = document.getElementById('functional-calendar-days');
-            grid.innerHTML = '<div style="grid-column:span 7; text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i></div>';
+    console.log("Abrir cita:", idCita);
 
-            fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
-                .then(res => res.ok ? res.json() : Promise.reject('Error en disponibilidad')) // Validación de respuesta
-                .then(disponibilidad => {
-                    grid.innerHTML = '';
-                    const hoy = new Date();
-                    hoy.setHours(0, 0, 0, 0);
+    openModal('modal-detalle-cita');
 
-                    let minFechaPermitida = hoy;
-                    if (fechaCitaActual) {
-                        const unDiaAntes = new Date(fechaCitaActual);
-                        unDiaAntes.setDate(unDiaAntes.getDate() - 1);
-                        unDiaAntes.setHours(0, 0, 0, 0);
-                        minFechaPermitida = unDiaAntes > hoy ? unDiaAntes : hoy;
-                    }
+    const form = document.getElementById('form-actualizar-cita');
 
-                    const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
-                    for (let i = 0; i < primerDiaSemana; i++) grid.appendChild(document.createElement('div'));
+    if(form){
+        form.action = `/citas/${idCita}/actualizar`;
+    }
 
-                    for (const [dia, data] of Object.entries(disponibilidad)) {
-                        let div = document.createElement('div');
-                        div.innerText = dia;
-                        div.style.padding = '8px 5px';
-                        div.style.borderRadius = '8px';
-                        div.style.fontWeight = '600';
-                        div.style.fontSize = '0.9em';
-                        div.style.transition = '0.2s';
+    document.getElementById('lbl-nombre').innerText = 'Cargando...';
 
-                        let tooltipText = `Día ${dia}`;
-                        if (data.horas_disponibles !== undefined) {
-                            tooltipText += `\n📅 Horas disponibles: ${data.horas_disponibles}/8`;
-                            tooltipText += `\n📌 Horas ocupadas: ${data.horas_ocupadas}/8`;
-                        }
-                        div.title = tooltipText;
+    fetch(`/api/citas/${idCita}/modal-detalles`)
+    .then(res => res.json())
+    .then(data => {
 
-                        const estaFecha = new Date(anio, mes - 1, parseInt(dia));
-                        estaFecha.setHours(0, 0, 0, 0);
-                        const esBloqueado = estaFecha < minFechaPermitida;
+        document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
+        document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
+        document.getElementById('lbl-materno').innerText = data.paciente.materno;
+        document.getElementById('lbl-edad').innerText = data.paciente.edad;
+        document.getElementById('lbl-sexo').innerText = data.paciente.sexo;
+        document.getElementById('lbl-telefono').innerText = data.paciente.telefono;
 
-                        if (esBloqueado) {
-                            div.style.background = '#d1d5db';
-                            div.style.color = '#9ca3af';
-                            div.style.cursor = 'not-allowed';
-                            div.style.opacity = '0.5';
-                            div.title = 'No disponible para reagendar';
-                        } else if (data.estado === 'verde') {
-                            div.style.background = '#32D74B';
-                            div.style.color = 'white';
-                            div.title = `${tooltipText}\n✅ Horario completamente disponible`;
-                        } else if (data.estado === 'amarillo') {
-                            div.style.background = '#FFC107';
-                            div.style.color = '#333';
-                            div.title = `${tooltipText}\n⚠️ Algunas horas disponibles`;
-                        } else if (data.estado === 'rojo') {
-                            div.style.background = '#EF4444';
-                            div.style.color = 'white';
-                            div.title = `${tooltipText}\n❌ Sin horarios disponibles`;
-                        } else {
-                            div.style.background = '#f0f0f0';
-                            div.style.color = '#ccc';
-                        }
+    })
+    .catch(err=>{
+        console.error("Error cargando cita:",err);
+    });
 
-                        if (!esBloqueado && data.clickable) {
-                            div.style.cursor = 'pointer';
-                            div.onclick = () => abrirModalAgendar(dia, mes, anio, data.hora_inicio, data.hora_fin);
-                            div.onmouseover = () => div.style.transform = 'scale(1.1)';
-                            div.onmouseout = () => div.style.transform = 'scale(1)';
-                        } else if (!esBloqueado && data.estado === 'rojo') {
-                            div.style.cursor = 'not-allowed';
-                            div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.`);
-                        } else if (esBloqueado) {
-                            div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
-                        }
-                        grid.appendChild(div);
-                    }
-                })
-                .catch(err => console.error("Error en disponibilidad:", err));
+}
+
+// ==========================================
+// CALENDARIO
+// ==========================================
+
+let horasOcupadas = [];
+let calMesActual = new Date().getMonth() + 1;
+let calAnioActual = new Date().getFullYear();
+let fechaCitaActual = null;
+
+const monthNames = [
+"Enero","Febrero","Marzo","Abril","Mayo","Junio",
+"Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+function cargarCalendarioFuncional(mes, anio){
+
+    const titulo = document.getElementById('cal-mes-anio');
+    const grid = document.getElementById('functional-calendar-days');
+
+    if(!grid) return;
+
+    if(titulo){
+        titulo.innerText = `${monthNames[mes-1]} ${anio}`;
+    }
+
+    grid.innerHTML =
+        '<div style="grid-column: span 7; text-align:center; padding:20px;">\
+        <i class="fa-solid fa-spinner fa-spin"></i></div>';
+
+    fetch(`/api/calendario/disponibilidad?mes=${mes}&anio=${anio}`)
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(disponibilidad => {
+
+        grid.innerHTML = '';
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+
+        let minFechaPermitida = hoy;
+
+        if(fechaCitaActual){
+
+            const unDiaAntes = new Date(fechaCitaActual);
+            unDiaAntes.setDate(unDiaAntes.getDate()-1);
+            unDiaAntes.setHours(0,0,0,0);
+
+            minFechaPermitida = unDiaAntes > hoy ? unDiaAntes : hoy;
         }
 
-        function cambiarMes(delta) {
-            calMesActual += delta;
-            if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
-            if (calMesActual < 1) { calMesActual = 12; calAnioActual--; }
-            cargarCalendarioFuncional(calMesActual, calAnioActual);
+        const primerDiaSemana = new Date(anio, mes-1, 1).getDay();
+
+        for(let i=0;i<primerDiaSemana;i++){
+            const spacer = document.createElement('div');
+            spacer.style.height="35px";
+            grid.appendChild(spacer);
         }
 
-        function generarHorariosDisponibles(fechaSeleccionada, horaInicioStr = '09:00', horaFinStr = '18:00', horasOcupadas = []) {
-            const contenedor = document.getElementById('contenedor-horarios');
-            const inputHora = document.getElementById('input-nueva-hora');
-            inputHora.value = '';
-            if (!fechaSeleccionada) return;
+        Object.entries(disponibilidad).forEach(([dia,data])=>{
 
-            let horariosClinica = [];
-            // Validación por si el backend manda nulo en las horas
-            let [hInicio, mInicio] = (horaInicioStr || '09:00').split(':').map(Number);
-            let [hFin, mFin] = (horaFinStr || '18:00').split(':').map(Number);
+            const div = document.createElement('div');
+            div.innerText = dia;
 
-            let currentDate = new Date();
-            currentDate.setHours(hInicio, mInicio, 0, 0);
-            let endDate = new Date();
-            endDate.setHours(hFin, mFin, 0, 0);
+            div.style.cssText = `
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                height:35px;
+                border-radius:8px;
+                font-weight:600;
+                font-size:0.9em;
+                transition:0.2s;
+            `;
 
-            while (currentDate < endDate && horariosClinica.length < 48) {
-                let h = String(currentDate.getHours()).padStart(2, '0');
-                let m = String(currentDate.getMinutes()).padStart(2, '0');
-                horariosClinica.push(`${h}:${m}`);
-                currentDate.setMinutes(currentDate.getMinutes() + 30);
+            let tooltip = `Día ${dia}`;
+
+            if(data.horas_disponibles !== undefined){
+                tooltip += `\nDisponibles: ${data.horas_disponibles}/8`;
             }
 
-            contenedor.innerHTML = '';
-            horariosClinica.forEach(hora => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'slot-horario';
-                const [h, m] = hora.split(':');
-                const ampm = h >= 12 ? 'PM' : 'AM';
-                const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
-                btn.innerText = hora12;
-                btn.dataset.hora = hora;
-                btn.style.padding = "12px 5px";
-                btn.style.borderRadius = "10px";
-                btn.style.fontWeight = "700";
-                btn.style.transition = "0.2s";
+            div.title = tooltip;
 
-                if (horasOcupadas.includes(hora)) {
-                    btn.disabled = true;
-                    btn.style.background = "#ef4444";
-                    btn.style.color = "white";
-                    btn.style.cursor = "not-allowed";
-                    btn.style.opacity = "0.6";
-                } else {
-                    btn.style.background = "rgba(255,255,255,0.6)";
-                    btn.style.border = "1px solid rgba(0, 209, 255, 0.4)";
-                    btn.style.cursor = "pointer";
-                    btn.onclick = () => {
-                        document.querySelectorAll('.slot-horario').forEach(b => {
-                            if (!b.disabled) {
-                                b.style.background = "rgba(255,255,255,0.6)";
-                                b.style.color = "#333";
-                            }
-                        });
-                        btn.style.background = "var(--primary-color)";
-                        btn.style.color = "white";
-                        inputHora.value = hora;
-                    };
+            const fecha = new Date(anio,mes-1,parseInt(dia));
+            fecha.setHours(0,0,0,0);
+
+            const esBloqueado = fecha < minFechaPermitida;
+
+            if(esBloqueado){
+
+                div.style.background="#d1d5db";
+                div.style.color="#9ca3af";
+                div.style.cursor="not-allowed";
+                div.style.opacity="0.5";
+
+            }else{
+
+                switch(data.estado){
+
+                    case 'verde':
+                        div.style.background="#32D74B";
+                        div.style.color="white";
+                    break;
+
+                    case 'amarillo':
+                        div.style.background="#FFC107";
+                        div.style.color="#333";
+                    break;
+
+                    case 'rojo':
+                        div.style.background="#EF4444";
+                        div.style.color="white";
+                    break;
+
+                    default:
+                        div.style.background="#f0f0f0";
+                        div.style.color="#ccc";
                 }
-                contenedor.appendChild(btn);
-            });
-        }
 
-        function abrirModalAgendar(dia, mes, anio, horaInicio, horaFin) {
-            const fechaString = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-            document.getElementById('input-nueva-fecha').value = fechaString;
-
-            // MODIFICACIÓN: Manejo de error 500 para evitar el SyntaxError
-            fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
-                .then(res => {
-                    if (!res.ok) throw new Error('Error 500 del servidor');
-                    return res.json();
-                })
-                .then(data => {
-                    horasOcupadas = data.horas_ocupadas || [];
-                    generarHorariosDisponibles(fechaString, horaInicio, horaFin, horasOcupadas);
-                    openWidget('widget-horario');
-                })
-                .catch(err => {
-                    console.error("Error al cargar horas ocupadas:", err);
-                    alert("Error al obtener disponibilidad del servidor. Revisa los logs.");
-                });
-        }
-
-        function confirmarHorario() {
-            const horaSeleccionada = document.getElementById('input-nueva-hora').value;
-            if (!horaSeleccionada) {
-                alert("Por favor, selecciona una hora de la cuadrícula.");
-                return;
             }
-            closeWidgets();
-        }
 
-        function cargarModalCita(idCita) {
-            openModal('modal-detalle-cita');
-            document.getElementById('form-actualizar-cita').action = `/citas/${idCita}/actualizar`;
-            document.getElementById('lbl-nombre').innerText = 'Cargando...';
+            if(!esBloqueado && data.clickable){
 
-            fetch(`/api/citas/${idCita}/modal-detalles`)
-                .then(res => res.ok ? res.json() : Promise.reject('Error modal'))
-                .then(data => {
-                    document.getElementById('lbl-nombre').innerText = data.paciente.nombres;
-                    document.getElementById('lbl-paterno').innerText = data.paciente.paterno;
-                    document.getElementById('lbl-materno').innerText = data.paciente.materno;
-                    document.getElementById('lbl-edad').innerText = data.paciente.edad;
-                    document.getElementById('lbl-sexo').innerText = data.paciente.sexo;
-                    document.getElementById('lbl-telefono').innerText = data.paciente.telefono;
+                div.style.cursor="pointer";
 
-                    if (document.getElementById('lbl-sangre')) document.getElementById('lbl-sangre').innerText = data.paciente.tipo_sangre;
-                    if (document.getElementById('lbl-peso')) document.getElementById('lbl-peso').innerText = data.paciente.peso;
-                    if (document.getElementById('lbl-alergias')) document.getElementById('lbl-alergias').innerText = data.paciente.alergias;
-                    if (document.getElementById('lbl-enfermedades')) document.getElementById('lbl-enfermedades').innerText = data.paciente.enfermedades;
+                div.onclick=()=>{
+                    abrirModalAgendar(dia,mes,anio,data.hora_inicio,data.hora_fin);
+                };
 
-                    const tbody = document.getElementById('cita-tabla-body');
-                    tbody.innerHTML = '';
-                    window.todasLasFilas = [];
-                    window.paginaActual = 1;
-                    window.filasPorPagina = 4;
+                div.onmouseover=()=>div.style.transform="scale(1.1)";
+                div.onmouseout=()=>div.style.transform="scale(1)";
 
-                    if (data.historial_citas && data.historial_citas.length > 0) {
-                        window.todasLasFilas = data.historial_citas.map(function (fila) {
-                            const esActual = fila.es_actual;
-                            const bgFila = esActual ? '#E8FFF4' : 'white';
-                            const borde = '2px solid #00D1FF';
-                            const tdStyle = `padding:14px 15px; border-right:${borde}; font-size:1em; color:#333; background:${bgFila};`;
-                            const tr = document.createElement('tr');
-                            tr.style.borderBottom = borde;
-                            if (esActual) {
-                                tr.style.fontWeight = '700';
-                                tr.setAttribute('data-cita-actual', 'true');
-                            }
+            }
 
-                            let colorEstado = '#999';
-                            let iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
-                            let textoEstado = 'Pendiente';
-                            const estadoLower = (fila.estado || '').toLowerCase().trim();
-                            if (estadoLower === 'completada') {
-                                colorEstado = '#22C55E';
-                                iconoEstado = '<i class="fa-solid fa-circle-check"></i>';
-                                textoEstado = 'Completada';
-                            } else if (estadoLower === 'pendiente') {
-                                colorEstado = '#FFC107';
-                                iconoEstado = '<i class="fa-regular fa-hourglass"></i>';
-                                textoEstado = 'Pendiente';
-                            }
+            grid.appendChild(div);
 
-                            tr.innerHTML = `
-                                            <td style="${tdStyle}">${fila.dia}</td>
-                                            <td style="${tdStyle}">${fila.hora}</td>
-                                            <td style="${tdStyle} max-width:200px; white-space:normal;">${fila.seguimiento}</td>
-                                            <td style="${tdStyle}; font-weight:700; color:var(--primary-color);">$${fila.abono}</td>
-                                            <td style="${tdStyle}; font-weight:700; color:${colorEstado}; display:flex; align-items:center; gap:6px; justify-content:center;">${iconoEstado} ${textoEstado}</td>
-                                        `;
-                            return tr;
-                        });
-                        window.citasData = data.historial_citas;
-                        renderizarPagina();
-                    } else {
-                        tbody.innerHTML = '<tr><td colspan="5" style="padding:18px; color:#888; text-align:center;">Sin historial</td></tr>';
-                    }
+        });
 
-                    const rawCosto = parseFloat(data.finanzas.total.replace(/,/g, ''));
-                    const rawRestante = parseFloat(data.finanzas.restante.replace(/,/g, ''));
-                    const rawPagado = rawCosto - rawRestante;
-                    document.getElementById('raw-costo-total').value = rawCosto;
-                    document.getElementById('raw-total-abonado').value = rawPagado;
-                    document.getElementById('lbl-total').innerText = '$' + data.finanzas.total;
-                    document.getElementById('lbl-restante').innerText = data.finanzas.restante;
+    })
+    .catch(()=>{
+        grid.innerHTML = "<div>Error cargando calendario</div>";
+    });
 
-                    if (data.fila_tabla && data.fila_tabla.dia) {
-                        const partesFecha = data.fila_tabla.dia.split('/');
-                        if (partesFecha.length === 3) {
-                            fechaCitaActual = new Date(parseInt(partesFecha[2]), parseInt(partesFecha[1]) - 1, parseInt(partesFecha[0]));
-                        }
-                    }
+}
 
-                    if (data.fecha_cita) {
-                        calMesActual = data.fecha_cita.mes + 1;
-                        calAnioActual = data.fecha_cita.anio;
-                        if (calMesActual > 12) { calMesActual = 1; calAnioActual++; }
-                        cargarCalendarioFuncional(calMesActual, calAnioActual);
-                    }
 
-                    document.getElementById('odontograma-paciente-id').value = data.paciente.id_paciente;
-                    if (document.getElementById('odontograma-paciente-edad')) {
-                        document.getElementById('odontograma-paciente-edad').value = data.paciente.edad_numero;
-                        document.dispatchEvent(new CustomEvent('odontograma:edadCargada', { detail: { edad: data.paciente.edad_numero } }));
-                    }
 
-                    if (data.odontograma) {
-                        document.querySelectorAll('.cara-diente').forEach(c => c.style.fill = 'white');
-                        data.odontograma.forEach(registro => {
-                            const caraElement = document.querySelector(`.diente[data-diente="${registro.numero_diente}"] .cara-diente[data-cara="${registro.cara_diente}"]`);
-                            if (caraElement) {
-                                const color = (registro.estado_diente === 'hallazgo') ? 'blue' : 'red';
-                                caraElement.style.fill = color;
-                            }
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error("Error:", err);
-                    document.getElementById('lbl-nombre').innerText = 'Error al cargar';
+function cambiarMes(delta){
+
+    calMesActual += delta;
+
+    if(calMesActual>12){
+        calMesActual=1;
+        calAnioActual++;
+    }
+
+    if(calMesActual<1){
+        calMesActual=12;
+        calAnioActual--;
+    }
+
+    cargarCalendarioFuncional(calMesActual,calAnioActual);
+
+}
+
+
+
+// ==========================================
+// HORARIOS
+// ==========================================
+
+function generarHorariosDisponibles(
+    fechaSeleccionada,
+    horaInicioStr='09:00',
+    horaFinStr='18:00',
+    horasOcupadas=[]
+){
+
+    const contenedor = document.getElementById('contenedor-horarios');
+    const inputHora = document.getElementById('input-nueva-hora');
+
+    if(!contenedor) return;
+
+    inputHora.value='';
+
+    let horariosClinica=[];
+
+    let [hInicio,mInicio]=horaInicioStr.split(':').map(Number);
+    let [hFin,mFin]=horaFinStr.split(':').map(Number);
+
+    let currentDate=new Date();
+    currentDate.setHours(hInicio,mInicio,0,0);
+
+    let endDate=new Date();
+    endDate.setHours(hFin,mFin,0,0);
+
+    while(currentDate<endDate){
+
+        let h=String(currentDate.getHours()).padStart(2,'0');
+        let m=String(currentDate.getMinutes()).padStart(2,'0');
+
+        horariosClinica.push(`${h}:${m}`);
+
+        currentDate.setMinutes(currentDate.getMinutes()+30);
+
+    }
+
+    contenedor.innerHTML='';
+
+    horariosClinica.forEach(hora=>{
+
+        const btn=document.createElement('button');
+
+        btn.type='button';
+        btn.className='slot-horario';
+        btn.dataset.hora=hora;
+
+        btn.innerText=hora;
+
+        if(horasOcupadas.includes(hora)){
+
+            btn.disabled=true;
+            btn.style.background="#ef4444";
+            btn.style.color="white";
+
+        }else{
+
+            btn.onclick=()=>{
+
+                document.querySelectorAll('.slot-horario').forEach(b=>{
+                    b.style.background="white";
+                    b.style.color="#333";
                 });
+
+                btn.style.background="var(--primary-color)";
+                btn.style.color="white";
+
+                inputHora.value=hora;
+
+            };
+
         }
+
+        contenedor.appendChild(btn);
+
+    });
+
+}
+
+
+
+function abrirModalAgendar(dia,mes,anio,horaInicio,horaFin){
+
+    const fechaString =
+    `${anio}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+
+    document.getElementById('input-nueva-fecha').value=fechaString;
+
+    fetch(`/api/citas/horas-ocupadas?fecha=${fechaString}`)
+    .then(res=>res.ok?res.json():{horas_ocupadas:[]})
+    .then(data=>{
+
+        horasOcupadas = data.horas_ocupadas || [];
+
+        generarHorariosDisponibles(
+            fechaString,
+            horaInicio || '09:00',
+            horaFin || '18:00',
+            horasOcupadas
+        );
+
+        openWidget('widget-horario');
+
+    });
+
+}
+
+
+
+// ==========================================
+// CONFIRMAR HORARIO
+// ==========================================
+
+function confirmarHorario(){
+
+    const hora =
+    document.getElementById('input-nueva-hora').value;
+
+    if(!hora){
+
+        alert("Selecciona una hora");
+
+        return;
+
+    }
+
+    closeWidgets();
+
+}
+
 
 
         // ==========================================
@@ -924,14 +938,14 @@
             const dientesPermInf = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
 
             const svgCaras = `
-                                                                                                                                                                    <svg viewBox="0 0 100 100" class="odontograma-svg">
-                                                                                                                                                                        <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
-                                                                                                                                                                        <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
-                                                                                                                                                                        <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
-                                                                                                                                                                        <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
-                                                                                                                                                                        <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
-                                                                                                                                                                    </svg>
-                                                                                                                                                                `;
+                                                                                                                                                            <svg viewBox="0 0 100 100" class="odontograma-svg">
+                                                                                                                                                                <polygon class="cara-diente" data-cara="vestibular" points="0,0 100,0 75,25 25,25" />
+                                                                                                                                                                <polygon class="cara-diente" data-cara="distal" points="100,0 100,100 75,75 75,25" />
+                                                                                                                                                                <polygon class="cara-diente" data-cara="palatina" points="0,100 100,100 75,75 25,75" />
+                                                                                                                                                                <polygon class="cara-diente" data-cara="mesial" points="0,0 0,100 25,75 25,25" />
+                                                                                                                                                                <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
+                                                                                                                                                            </svg>
+                                                                                                                                                        `;
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -963,9 +977,9 @@
 
                     const svgId = obtenerIdAnatomia(numero);
                     const divAnatomia = `
-                                                                                                                                                        <div class="anatomia">
-                                                                                                                                                            <svg><use href="${svgId}"></use></svg>
-                                                                                                                                                        </div>`;
+                                                                                                                                                <div class="anatomia">
+                                                                                                                                                    <svg><use href="${svgId}"></use></svg>
+                                                                                                                                                </div>`;
                     const divNumero = `<div class="numero-diente">${numero}</div>`;
                     const divCaras = `<div class="caras-interactivas">${svgCaras}</div>`;
 
@@ -1090,11 +1104,11 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // --- RECARGAR TODO EL MODAL DESDE EL SERVIDOR ---
+// --- RECARGAR TODO EL MODAL DESDE EL SERVIDOR ---
                         // Esto asegura que si se creó una nueva cita de seguimiento, aparezca en la lista
                         const pathSegments = actionUrl.split('/');
                         const currentIdCita = pathSegments[pathSegments.length - 2];
-
+                        
                         cargarModalCita(currentIdCita);
 
                         // --- ACTUALIZAR TARJETA DE INGRESOS DEL MES EN TIEMPO REAL ---
