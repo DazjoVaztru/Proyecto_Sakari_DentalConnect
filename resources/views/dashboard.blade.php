@@ -147,28 +147,31 @@
 
                 <h2 style="margin-top: 0; color: #000; margin-bottom: 20px; font-weight: 800;">Calendario</h2>
 
-               <div style="background: white; padding: 20px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; box-sizing: border-box;">
+               {{-- Calendario dentro del Modal --}}
+<div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 8px; border-radius: 10px;">
-        <button type="button" class="ghost-btn" style="background:transparent; border:none; cursor:pointer;" onclick="cambiarMes(-1)">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #F8F9FA; padding: 10px; border-radius: 10px;">
+        <button type="button" onclick="cambiarMes(-1)" style="background:transparent; border:none; cursor:pointer; color: #00D1FF;">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
-        <span id="cal-mes-anio" style="font-weight: 700; color: #00D1FF; font-size: 0.95em;">Cargando...</span>
-        <button type="button" class="ghost-btn" style="background:transparent; border:none; cursor:pointer;" onclick="cambiarMes(1)">
+        <span id="cal-mes-anio" style="font-weight: 700; color: #00D1FF; font-size: 1em;">Marzo 2026</span>
+        <button type="button" onclick="cambiarMes(1)" style="background:transparent; border:none; cursor:pointer; color: #00D1FF;">
             <i class="fa-solid fa-chevron-right"></i>
         </button>
     </div>
-                  <div class="calendar-grid-functional" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; width: 100%;">
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">D</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">L</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">M</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">M</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">J</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">V</span>
-        <span style="color:#aaa; font-weight:700; font-size: 0.75rem; padding-bottom: 5px;">S</span>
+
+    <div class="calendar-grid-functional">
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">DOM</span>
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">LUN</span>
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">MAR</span>
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">MIÉ</span>
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">JUE</span>
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">VIE</span>
+        <span style="color:#bbb; font-weight:800; font-size: 0.7rem;">SÁB</span>
 
         <div id="functional-calendar-days" style="display: contents;"></div>
     </div>
+</div>
 
     <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; font-size: 0.7em; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
         <div style="display:flex; align-items:center;"><span style="width:8px;height:8px;background:#32D74B;border-radius:50%;margin-right:4px;"></span>Libre</div>
@@ -578,6 +581,14 @@
                         .diente-wrapper.superior .anatomia svg {
                             transform: scale(1, -1);
                         }
+                        .cal-day-item {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
                     </style>
 
                     <div id="odontograma-lienzo" class="odontograma-lienzo">
@@ -630,62 +641,65 @@
                     const primerDiaSemana = new Date(anio, mes - 1, 1).getDay();
                     for (let i = 0; i < primerDiaSemana; i++) grid.appendChild(document.createElement('div'));
 
-                    for (const [dia, data] of Object.entries(disponibilidad)) {
-                        let div = document.createElement('div');
-                        div.innerText = dia;
-                        div.style.padding = '8px 5px';
-                        div.style.borderRadius = '8px';
-                        div.style.fontWeight = '600';
-                        div.style.fontSize = '0.9em';
-                        div.style.transition = '0.2s';
+                    for let div = document.createElement('div');
+div.innerText = dia;
+div.className = 'cal-day-item'; // <--- ESTO sustituye los estilos manuales de padding y radius
 
-                        let tooltipText = `Día ${dia}`;
-                        if (data.horas_disponibles !== undefined) {
-                            tooltipText += `\n📅 Horas disponibles: ${data.horas_disponibles}/8`;
-                            tooltipText += `\n📌 Horas ocupadas: ${data.horas_ocupadas}/8`;
-                        }
-                        div.title = tooltipText;
+// 1. Tooltip de información
+let tooltipText = `Día ${dia}`;
+if (data.horas_disponibles !== undefined) {
+    tooltipText += `\n📅 Disponibles: ${data.horas_disponibles}/8`;
+    tooltipText += `\n📌 Ocupadas: ${data.horas_ocupadas}/8`;
+}
+div.title = tooltipText;
 
-                        const estaFecha = new Date(anio, mes - 1, parseInt(dia));
-                        estaFecha.setHours(0, 0, 0, 0);
-                        const esBloqueado = estaFecha < minFechaPermitida;
+// 2. Lógica de Bloqueo por fecha
+const estaFecha = new Date(anio, mes - 1, parseInt(dia));
+estaFecha.setHours(0, 0, 0, 0);
+const esBloqueado = estaFecha < minFechaPermitida;
 
-                        if (esBloqueado) {
-                            div.style.background = '#d1d5db';
-                            div.style.color = '#9ca3af';
-                            div.style.cursor = 'not-allowed';
-                            div.style.opacity = '0.5';
-                            div.title = 'No disponible para reagendar';
-                        } else if (data.estado === 'verde') {
-                            div.style.background = '#32D74B';
-                            div.style.color = 'white';
-                            div.title = `${tooltipText}\n✅ Horario completamente disponible`;
-                        } else if (data.estado === 'amarillo') {
-                            div.style.background = '#FFC107';
-                            div.style.color = '#333';
-                            div.title = `${tooltipText}\n⚠️ Algunas horas disponibles`;
-                        } else if (data.estado === 'rojo') {
-                            div.style.background = '#EF4444';
-                            div.style.color = 'white';
-                            div.title = `${tooltipText}\n❌ Sin horarios disponibles`;
-                        } else {
-                            div.style.background = '#f0f0f0';
-                            div.style.color = '#ccc';
-                        }
+// 3. Aplicación de Estados y Colores
+if (esBloqueado) {
+    div.style.background = '#d1d5db';
+    div.style.color = '#9ca3af';
+    div.style.cursor = 'not-allowed';
+    div.style.opacity = '0.5';
+    div.title = 'No disponible para reagendar';
+    div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
+} else {
+    // Colores según disponibilidad de DentalConnect
+    if (data.estado === 'verde') {
+        div.style.background = '#32D74B';
+        div.style.color = 'white';
+    } else if (data.estado === 'amarillo') {
+        div.style.background = '#FFC107';
+        div.style.color = '#333';
+    } else if (data.estado === 'rojo') {
+        div.style.background = '#EF4444';
+        div.style.color = 'white';
+        div.style.cursor = 'not-allowed';
+        div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.`);
+    } else {
+        div.style.background = '#f0f0f0';
+        div.style.color = '#ccc';
+    }
 
-                        if (!esBloqueado && data.clickable) {
-                            div.style.cursor = 'pointer';
-                            div.onclick = () => abrirModalAgendar(dia, mes, anio, data.hora_inicio, data.hora_fin);
-                            div.onmouseover = () => div.style.transform = 'scale(1.1)';
-                            div.onmouseout = () => div.style.transform = 'scale(1)';
-                        } else if (!esBloqueado && data.estado === 'rojo') {
-                            div.style.cursor = 'not-allowed';
-                            div.onclick = () => alert(`❌ Este día (${dia}) no tiene horarios disponibles.`);
-                        } else if (esBloqueado) {
-                            div.onclick = () => alert('No puedes reagendar antes de un día anterior a la cita actual.');
-                        }
-                        grid.appendChild(div);
-                    }
+    // 4. Interacción (Solo si es clickable y no está en rojo)
+    if (data.clickable && data.estado !== 'rojo') {
+        div.style.cursor = 'pointer';
+        div.onclick = () => {
+            // Quitar selección previa de otros días
+            document.querySelectorAll('.cal-day-item').forEach(el => el.style.outline = 'none');
+            // Marcar este como seleccionado
+            div.style.outline = '2px solid #000';
+            div.style.outlineOffset = '2px';
+            
+            abrirModalAgendar(dia, mes, anio, data.hora_inicio, data.hora_fin);
+        };
+    }
+}
+
+grid.appendChild(div);
                 })
                 .catch(err => console.error("Error en disponibilidad:", err));
         }
