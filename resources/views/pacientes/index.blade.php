@@ -1091,26 +1091,27 @@
             });
         });
         // --- UBICACIÓN: Después del Buscador y antes de verPerfil ---
-document.getElementById('form-add-cita').addEventListener('submit', function(e) {
-    const fecha = document.getElementById('input-reserva-fecha').value;
-    const hora = document.getElementById('input-reserva-hora').value;
+        document.getElementById('form-add-cita').addEventListener('submit', function(e) {
+            const fecha = document.getElementById('input-reserva-fecha').value;
+            const hora = document.getElementById('input-reserva-hora').value;
 
-    if (!fecha || !hora) {
-        e.preventDefault(); 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Atención',
-            text: 'Por favor, selecciona un día y una hora en el calendario.',
-            confirmButtonColor: '#00b4d8'
+            if (!fecha || !hora) {
+                e.preventDefault(); 
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: 'Por favor, selecciona un día y una hora en el calendario.',
+                    confirmButtonColor: '#00b4d8'
+                });
+                return;
+            }
+
+            const btn = document.getElementById('btn-confirmar-cita');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+            btn.style.opacity = '0.7';
+            // PREVENIR BUCLE: Solo desactivar visualmente, o hacerlo asíncrono para que el submit nativo se dispare
+            btn.style.pointerEvents = 'none';
         });
-        return;
-    }
-
-    const btn = document.getElementById('btn-confirmar-cita');
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-    btn.style.pointerEvents = 'none';
-    btn.style.opacity = '0.7';
-});
 
         // ─── Perfil del Paciente ────────────────────────────────────────────────
         function verPerfil(paciente) {
@@ -1419,15 +1420,8 @@ document.getElementById('form-add-cita').addEventListener('submit', function(e) 
         }
 
         // ─── Protección anti doble submit en el formulario de cita ───────────
-        document.getElementById('form-add-cita').addEventListener('submit', function () {
-            const btn = document.getElementById('btn-confirmar-cita');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-                btn.style.opacity = '0.7';
-                btn.style.cursor = 'not-allowed';
-            }
-        });
+        // Este bloque fue eliminado porque causaba que se cancelara el evento submit 
+        // nativo y la página se quedara congelada. La lógica se combinó arriba.
         // ─────────────────────────────────────────────
         // SOLO LETRAS (bloquea números en tiempo real)
         // ─────────────────────────────────────────────
@@ -1588,12 +1582,13 @@ document.getElementById('form-add-cita').addEventListener('submit', function(e) 
             let fechaBonita = fechaObj.toLocaleDateString('es-MX', opciones);
             document.getElementById('lbl-fecha-seleccionada').innerHTML = `<span style="color:var(--primary-color);">Fecha:</span> ${fechaBonita}`;
 
-            generarHorasReserva(fechaString, "08:00", "20:00");
+            // Llamar usando los horarios dinámicos de la API de disponibilidad en vez de fijos
+            generarHorasReserva(fechaString, horaInicio || "08:00", horaFin || "20:00");
         }
 
         function generarHorasReserva(fecha, horaInicioStr, horaFinStr) {
             const contenedor = document.getElementById('reserva-contenedor-horarios');
-            contenedor.innerHTML = '';
+            contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--primary-color); padding: 40px 20px;"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i></div>';
 
             let horariosClinica = [];
 
@@ -1624,63 +1619,94 @@ document.getElementById('form-add-cita').addEventListener('submit', function(e) 
                 return;
             }
 
-            horariosClinica.forEach(hora => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'reserva-hora-btn';
+            // Consultar base de datos para ver qué horas están realmente ocupadas para esta fecha
+            fetch(`/api/calendario/horas-ocupadas?fecha=${fecha}`)
+                .then(res => res.json())
+                .then(data => {
+                    const horasOcupadasAPI = data.horas_ocupadas || [];
+                    contenedor.innerHTML = ''; // Limpiar loader
 
-                // Formato 12 hrs
-                const [h, m] = hora.split(':');
-                const ampm = h >= 12 ? 'PM' : 'AM';
-                const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
-                btn.innerText = hora12;
+                    horariosClinica.forEach(hora => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'reserva-hora-btn';
+                        
+                        // Validar si esta hora está ocupada o ya pasó (si es hoy)
+                        const esHoy = fecha === new Date().toISOString().split('T')[0];
+                        const [h, m] = hora.split(':');
+                        const horaSlotObj = new Date();
+                        horaSlotObj.setHours(parseInt(h), parseInt(m), 0, 0);
+                        
+                        const yaPaso = esHoy && horaSlotObj < new Date();
+                        const estaOcupada = horasOcupadasAPI.includes(hora) || yaPaso;
 
-                // Estilo de las píldoras
-                btn.style.padding = '12px 0';
-                btn.style.background = '#fff';
-                btn.style.border = '1px solid #ccc';
-                btn.style.borderRadius = '10px';
-                btn.style.color = '#333';
-                btn.style.fontWeight = '700';
-                btn.style.cursor = 'pointer';
-                btn.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+                        // Formato 12 hrs
+                        const ampm = h >= 12 ? 'PM' : 'AM';
+                        const hora12 = (h % 12 || 12) + ':' + m + ' ' + ampm;
+                        btn.innerText = hora12;
 
-                btn.onmouseover = () => {
-                    if (document.getElementById('input-reserva-hora').value !== hora) {
-                        btn.style.borderColor = 'var(--primary-color)';
-                        btn.style.color = 'var(--primary-color)';
-                    }
-                };
-                btn.onmouseout = () => {
-                    if (document.getElementById('input-reserva-hora').value !== hora) {
-                        btn.style.borderColor = '#ccc';
+                        // Estilo de las píldoras
+                        btn.style.padding = '12px 0';
+                        btn.style.background = '#fff';
+                        btn.style.border = '1px solid #ccc';
+                        btn.style.borderRadius = '10px';
                         btn.style.color = '#333';
-                    }
-                };
+                        btn.style.fontWeight = '700';
+                        btn.style.cursor = 'pointer';
+                        btn.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+                        
+                        if (estaOcupada) {
+                            btn.style.background = '#f3f4f6';
+                            btn.style.color = '#9ca3af';
+                            btn.style.borderColor = '#e5e7eb';
+                            btn.style.textDecoration = 'line-through';
+                            btn.style.cursor = 'not-allowed';
+                            btn.disabled = true;
+                            // Optionally attach a tooltip info here
+                            btn.title = "No disponible";
+                        } else {
+                            btn.onmouseover = () => {
+                                if (document.getElementById('input-reserva-hora').value !== hora) {
+                                    btn.style.borderColor = 'var(--primary-color)';
+                                    btn.style.color = 'var(--primary-color)';
+                                }
+                            };
+                            btn.onmouseout = () => {
+                                if (document.getElementById('input-reserva-hora').value !== hora) {
+                                    btn.style.borderColor = '#ccc';
+                                    btn.style.color = '#333';
+                                }
+                            };
 
-                btn.onclick = () => {
-                    // Reiniciar todos al estilo original
-                    document.querySelectorAll('.reserva-hora-btn').forEach(b => {
-                        b.style.background = '#fff';
-                        b.style.color = '#333';
-                        b.style.borderColor = '#ccc';
-                        b.style.boxShadow = 'none';
-                        b.style.transform = 'scale(1)';
+                            btn.onclick = () => {
+                                // Reiniciar todos al estilo original
+                                document.querySelectorAll('.reserva-hora-btn:not(:disabled)').forEach(b => {
+                                    b.style.background = '#fff';
+                                    b.style.color = '#333';
+                                    b.style.borderColor = '#ccc';
+                                    b.style.boxShadow = 'none';
+                                    b.style.transform = 'scale(1)';
+                                });
+
+                                // Estilo ACTIVO
+                                btn.style.background = 'var(--primary-color)';
+                                btn.style.color = 'white';
+                                btn.style.borderColor = 'var(--primary-color)';
+                                btn.style.boxShadow = '0 6px 15px rgba(0, 209, 255, 0.3)';
+                                btn.style.transform = 'scale(1.05)';
+
+                                // Asignar valor para el backend
+                                document.getElementById('input-reserva-hora').value = hora;
+                            };
+                        }
+
+                        contenedor.appendChild(btn);
                     });
-
-                    // Estilo ACTIVO
-                    btn.style.background = 'var(--primary-color)';
-                    btn.style.color = 'white';
-                    btn.style.borderColor = 'var(--primary-color)';
-                    btn.style.boxShadow = '0 6px 15px rgba(0, 209, 255, 0.3)';
-                    btn.style.transform = 'scale(1.05)';
-
-                    // Asignar valor para el backend
-                    document.getElementById('input-reserva-hora').value = hora;
-                };
-
-                contenedor.appendChild(btn);
-            });
+                })
+                .catch(err => {
+                    console.error('Error cargando horas ocupadas:', err);
+                    contenedor.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #ef4444;">Error de red. Intenta nuevamente.</p>';
+                });
         }
     </script>
 @endsection

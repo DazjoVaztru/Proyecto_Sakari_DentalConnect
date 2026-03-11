@@ -56,18 +56,26 @@ class CitaController extends Controller
                 ->where('usuarios_sistema.id_clinica', $idClinica)
                 ->value('doctores.id_doctor') ?? 1;
 
-            // ── Verificar duplicado exacto ────────────────────────────────
-            // Si ya existe una cita pendiente para este paciente en la misma fecha y hora (mismo minuto),
-            // rechazar la solicitud para evitar duplicados por clicks múltiples.
-            $duplicado = Cita::where('id_paciente', $request->id_paciente)
-                ->where('id_clinica', $idClinica)
-                ->where('estado_cita', 'pendiente')
-                ->where('fecha_hora_inicio', $fechaHora)
+            // ── Verificar duplicado/superposición ────────────────────────────────
+            // Si ya existe una cita para el mismo doctor que se solape con este nuevo horario
+            // rechazar la solicitud para evitar empalmes.
+            $finHora = clone $fechaHora;
+            $finHora->addMinutes(60); // Asumimos 1h o usar la duración real del servicio
+
+            $empalme = Cita::where('id_clinica', $idClinica)
+                ->where('id_doctor', $idDoctor)
+                ->whereIn('estado_cita', ['pendiente', 'confirmada'])
+                ->where(function($query) use ($fechaHora, $finHora) {
+                    $query->where(function($q) use ($fechaHora, $finHora) {
+                        $q->where('fecha_hora_inicio', '<', $finHora)
+                          ->where('fecha_hora_fin', '>', $fechaHora);
+                    });
+                })
                 ->exists();
 
-            if ($duplicado) {
+            if ($empalme) {
                 return redirect()->route('pacientes.index')
-                    ->with('error', 'Ya existe una cita pendiente para este paciente en la misma fecha y hora.')
+                    ->with('error', 'El horario seleccionado ya no está disponible o se empalma con otra cita.')
                     ->withInput();
             }
 
