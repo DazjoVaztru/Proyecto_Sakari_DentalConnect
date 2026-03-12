@@ -694,8 +694,19 @@
             } catch (e) {
                 console.warn("Aviso: No se pudo establecer la fecha de la cita anterior.");
             }
-            calMesActual = data.fecha_cita.mes || new Date().getMonth() + 1;
-            calAnioActual = data.fecha_cita.anio || new Date().getFullYear();
+            // Calculamos exactamente un mes después de la cita actual (o de hoy)
+            let fechaParaAgendar = new Date(); 
+            if (fechaCitaActual) {
+                // Forzamos la zona horaria para evitar desfaces
+                fechaParaAgendar = new Date(fechaCitaActual + 'T12:00:00'); 
+            }
+            
+            // Magia de JS: suma 1 mes. Si es Diciembre, cambia a Enero del prox año automáticamente
+            fechaParaAgendar.setMonth(fechaParaAgendar.getMonth() + 1);
+
+            calMesActual = fechaParaAgendar.getMonth() + 1;
+            calAnioActual = fechaParaAgendar.getFullYear();
+            
             cargarCalendarioFuncional(calMesActual, calAnioActual);
         }
 

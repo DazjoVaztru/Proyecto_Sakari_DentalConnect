@@ -1359,9 +1359,13 @@
             document.getElementById('lbl-fecha-seleccionada').innerHTML = 'Selecciona un día en el calendario primero.';
             document.getElementById('reserva-contenedor-horarios').innerHTML = '<div style="grid-column: 1 / -1; background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: #aaa; font-weight: 600; text-align: center; height: 100%;"><p>Esperando selección de fecha...</p></div>';
 
-            // Inicializar calendario al mes actual
-            reservaMes = new Date().getMonth() + 1;
-            reservaAnio = new Date().getFullYear();
+            // Inicializar calendario automáticamente un mes después de hoy
+            let fechaSiguienteMes = new Date();
+            fechaSiguienteMes.setMonth(fechaSiguienteMes.getMonth() + 1);
+            
+            reservaMes = fechaSiguienteMes.getMonth() + 1;
+            reservaAnio = fechaSiguienteMes.getFullYear();
+            
             cargarCalendarioReserva(reservaMes, reservaAnio);
 
             openModal('modal-add-cita');
