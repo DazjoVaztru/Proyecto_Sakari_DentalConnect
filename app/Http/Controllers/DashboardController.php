@@ -201,6 +201,7 @@ class DashboardController extends Controller
     {
 
         $cita = Cita::findOrFail($idCita);
+        $idClinica = Auth::user()->id_clinica;
 
         if($request->filled('estado_cita')){
             $cita->estado_cita=$request->estado_cita;
@@ -216,8 +217,26 @@ class DashboardController extends Controller
                 ? $request->nueva_hora
                 : Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
 
-            $cita->fecha_hora_inicio=$request->nueva_fecha.' '.$hora;
-            $cita->fecha_hora_fin=Carbon::parse($cita->fecha_hora_inicio)->addHour();
+            $duracionMinutos = (int) $request->input('nueva_duracion_minutos', 30);
+            if (!in_array($duracionMinutos, [15, 30], true)) {
+                $duracionMinutos = 30;
+            }
+
+            $nuevoInicio = Carbon::createFromFormat('Y-m-d H:i', $request->nueva_fecha.' '.$hora);
+            $nuevoFin = $nuevoInicio->copy()->addMinutes($duracionMinutos);
+
+            $idDoctorDisponible = $this->buscarDoctorDisponible($idClinica, $nuevoInicio, $nuevoFin, (int) $cita->id_cita);
+
+            if (!$idDoctorDisponible) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay doctores disponibles para ese horario y duración.'
+                ], 422);
+            }
+
+            $cita->id_doctor = $idDoctorDisponible;
+            $cita->fecha_hora_inicio=$nuevoInicio;
+            $cita->fecha_hora_fin=$nuevoFin;
 
         }
 
@@ -296,32 +315,14 @@ class DashboardController extends Controller
         $idClinica=Auth::user()->id_clinica;
 
         $diasDelMes=Carbon::createFromDate($anio,$mes,1)->daysInMonth;
-
         $eventos=[];
-        
-        // Obtener horarios de la clínica (0 = Domingo ... 6 = Sábado)
-        $horariosClinica = \App\Models\HorarioClinica::where('id_clinica', $idClinica)->get()->keyBy('dia_semana');
-        
-        // Obtener ID del primer doctor de la clínica para horarios bloqueados (idealmente, esto debería venir del request si hay varios doctores)
-        $idDoctor = DB::table('doctores')
-            ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
-            ->where('usuarios_sistema.id_clinica', $idClinica)
-            ->value('doctores.id_doctor');
 
-        // Obtener días bloqueados enteros para todo el mes (simplificación: si hay un bloqueo que cubre el día)
-        $bloqueosDelMes = \App\Models\HorarioBloqueado::where('id_doctor', $idDoctor)
-            ->where('estatus_horario', 'activo')
-            ->where(function ($query) use ($anio, $mes) {
-                $query->whereMonth('fecha_inicio', $mes)->whereYear('fecha_inicio', $anio)
-                      ->orWhereMonth('fecha_fin', $mes)->whereYear('fecha_fin', $anio);
-            })->get();
+        $horariosClinica = \App\Models\HorarioClinica::where('id_clinica', $idClinica)->get()->keyBy('dia_semana');
 
         for($i=1;$i<=$diasDelMes;$i++){
 
             $fecha=Carbon::createFromDate($anio,$mes,$i);
-            // dayOfWeek devuelve 0 para domingo, 6 para sábado (igual que nuestro HorarioClinica)
             $diaSemana = $fecha->dayOfWeek;
-            
             $horarioDia = $horariosClinica->get($diaSemana);
             $clinicaAbierta = $horarioDia && $horarioDia->activo;
 
@@ -329,45 +330,24 @@ class DashboardController extends Controller
             $clickable=true;
             $horaInicioModal = '08:00';
             $horaFinModal = '20:00';
-            
-            if ($clinicaAbierta) {
-                $hInicioOriginal = $horarioDia->hora_inicio ?: '08:00:00';
-                $hFinOriginal = $horarioDia->hora_fin ?: '20:00:00';
-                $horaInicioModal = Carbon::parse($hInicioOriginal)->format('H:i');
-                $horaFinModal = Carbon::parse($hFinOriginal)->format('H:i');
-                
-                // Calcular slots disponibles apróximados (cada 60 min), fallback a 8 por seguridad
-                $minutosTotales = Carbon::parse($hFinOriginal)->diffInMinutes(Carbon::parse($hInicioOriginal));
-                $slotsCalculados = floor($minutosTotales / 60);
-                $slotsDisponiblesPorDia = $slotsCalculados > 0 ? $slotsCalculados : 8;
+
+            if (!$clinicaAbierta) {
+                $estado='rojo';
+                $clickable=false;
             } else {
-                $slotsDisponiblesPorDia = 0;
-            }
+                $horaInicioModal = Carbon::parse($horarioDia->hora_inicio ?: '08:00:00')->format('H:i');
+                $horaFinModal = Carbon::parse($horarioDia->hora_fin ?: '20:00:00')->format('H:i');
 
-            $totalCitas=Cita::where('id_clinica',$idClinica)
-                ->whereDate('fecha_hora_inicio',$fecha)
-                ->whereIn('estado_cita',['pendiente', 'confirmada']) // Incluir confirmadas 
-                ->count();
-                
-            // Verificar si el día está bloqueado por el doctor
-            $diaBloqueado = false;
-            foreach ($bloqueosDelMes as $bloqueo) {
-                $inicioBloqueo = Carbon::parse($bloqueo->fecha_inicio)->startOfDay();
-                $finBloqueo = Carbon::parse($bloqueo->fecha_fin)->endOfDay();
-                if ($fecha->between($inicioBloqueo, $finBloqueo)) {
-                    $diaBloqueado = true;
-                    break;
+                $resumen = $this->calcularSlotsOcupadosPorCapacidad($idClinica, $fecha->toDateString(), $horaInicioModal, $horaFinModal, 15);
+                $totalSlots = $resumen['total_slots'];
+                $slotsOcupados = count($resumen['horas_ocupadas']);
+
+                if ($totalSlots <= 0 || $slotsOcupados >= $totalSlots) {
+                    $estado='rojo';
+                    $clickable=false;
+                } elseif ($slotsOcupados > 0) {
+                    $estado='amarillo';
                 }
-            }
-
-            if (!$clinicaAbierta || $diaBloqueado) {
-                $estado='rojo';
-                $clickable=false;
-            } elseif ($totalCitas>0 && $totalCitas<$slotsDisponiblesPorDia){
-                $estado='amarillo';
-            } elseif($totalCitas>=$slotsDisponiblesPorDia){
-                $estado='rojo';
-                $clickable=false;
             }
 
             if($fecha->isPast() && !$fecha->isToday()){
@@ -407,58 +387,27 @@ class DashboardController extends Controller
             
             $idClinica = $user->id_clinica;
 
-            // Obtener el ID del doctor actual
-            $idDoctor = DB::table('doctores')
-                ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
-                ->where('usuarios_sistema.id_clinica', $idClinica)
-                ->value('doctores.id_doctor');
+            $horarioDia = \App\Models\HorarioClinica::where('id_clinica', $idClinica)
+                ->where('dia_semana', Carbon::parse($fecha)->dayOfWeek)
+                ->first();
 
-            if (!$idDoctor) {
-                return response()->json(['horas_ocupadas' => []]);
+            if (!$horarioDia || !$horarioDia->activo) {
+                return response()->json([
+                    'horas_ocupadas' => [],
+                    'intervalo_minutos' => 15,
+                    'duraciones_permitidas' => [15, 30]
+                ]);
             }
 
-            // Buscar las citas del día (Pendientes Y Confirmadas)
-            $citas = Cita::where('id_clinica', $idClinica)
-                ->where('id_doctor', $idDoctor)
-                ->whereDate('fecha_hora_inicio', $fecha)
-                ->whereIn('estado_cita', ['pendiente', 'confirmada']) // Fundamental para detectar tu cita de las 5:30
-                ->get();
+            $horaInicio = Carbon::parse($horarioDia->hora_inicio ?: '08:00:00')->format('H:i');
+            $horaFin = Carbon::parse($horarioDia->hora_fin ?: '20:00:00')->format('H:i');
 
-            // Formatear exactamente a 'H:i'
-            $horasOcupadas = $citas->map(function ($cita) {
-                return Carbon::parse($cita->fecha_hora_inicio)->format('H:i');
-            })->toArray();
-            
-            // También agregar horas ocupadas por bloqueos específicos (si no cubren todo el día)
-            $fechaObj = Carbon::parse($fecha);
-            $bloqueos = \App\Models\HorarioBloqueado::where('id_doctor', $idDoctor)
-                ->where('estatus_horario', 'activo')
-                ->where(function ($query) use ($fechaObj) {
-                    $query->whereDate('fecha_inicio', '<=', $fechaObj)
-                          ->whereDate('fecha_fin', '>=', $fechaObj);
-                })->get();
-                
-            foreach ($bloqueos as $bloqueo) {
-                $inicio = Carbon::parse($bloqueo->fecha_inicio);
-                $fin = Carbon::parse($bloqueo->fecha_fin);
-                
-                // Si el bloqueo cubre este día entero, ya está marcado rojo en disponibilidadMes, 
-                // pero si es parcial o queremos estar seguros, añadimos los slots de 30 min a horas ocupadas
-                $inicioDia = $inicio->isSameDay($fechaObj) ? $inicio : $fechaObj->copy()->startOfDay();
-                $finDia = $fin->isSameDay($fechaObj) ? $fin : $fechaObj->copy()->endOfDay();
-                
-                $currentSlot = $inicioDia->copy();
-                while ($currentSlot < $finDia) {
-                    $horasOcupadas[] = $currentSlot->format('H:i');
-                    $currentSlot->addMinutes(30);
-                }
-            }
-
-            // Filtrar duplicados y reindexar
-            $horasOcupadas = array_values(array_unique($horasOcupadas));
+            $resumen = $this->calcularSlotsOcupadosPorCapacidad($idClinica, $fecha, $horaInicio, $horaFin, 15);
 
             return response()->json([
-                'horas_ocupadas' => $horasOcupadas
+                'horas_ocupadas' => $resumen['horas_ocupadas'],
+                'intervalo_minutos' => 15,
+                'duraciones_permitidas' => [15, 30]
             ]);
 
         } catch (\Exception $e) {
@@ -467,6 +416,126 @@ class DashboardController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    private function buscarDoctorDisponible(int $idClinica, Carbon $inicio, Carbon $fin, ?int $excludeCitaId = null): ?int
+    {
+        $doctores = DB::table('doctores')
+            ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
+            ->where('usuarios_sistema.id_clinica', $idClinica)
+            ->pluck('doctores.id_doctor');
+
+        foreach ($doctores as $idDoctor) {
+            $tieneBloqueo = DB::table('horarios_bloqueados')
+                ->where('id_doctor', $idDoctor)
+                ->where('estatus_horario', 'activo')
+                ->where('fecha_inicio', '<', $fin)
+                ->where('fecha_fin', '>', $inicio)
+                ->exists();
+
+            if ($tieneBloqueo) {
+                continue;
+            }
+
+            $query = Cita::where('id_clinica', $idClinica)
+                ->where('id_doctor', $idDoctor)
+                ->whereIn('estado_cita', ['pendiente', 'confirmada'])
+                ->where('fecha_hora_inicio', '<', $fin)
+                ->where('fecha_hora_fin', '>', $inicio);
+
+            if (!is_null($excludeCitaId)) {
+                $query->where('id_cita', '!=', $excludeCitaId);
+            }
+
+            if (!$query->exists()) {
+                return (int) $idDoctor;
+            }
+        }
+
+        return null;
+    }
+
+    private function calcularSlotsOcupadosPorCapacidad(int $idClinica, string $fecha, string $horaInicio, string $horaFin, int $intervaloMinutos): array
+    {
+        $fechaObj = Carbon::parse($fecha);
+        $inicioDia = Carbon::createFromFormat('Y-m-d H:i', $fechaObj->format('Y-m-d').' '.$horaInicio);
+        $finDia = Carbon::createFromFormat('Y-m-d H:i', $fechaObj->format('Y-m-d').' '.$horaFin);
+
+        if ($inicioDia >= $finDia) {
+            return ['horas_ocupadas' => [], 'total_slots' => 0];
+        }
+
+        $doctorIds = DB::table('doctores')
+            ->join('usuarios_sistema', 'doctores.id_usuario', '=', 'usuarios_sistema.id_usuario')
+            ->where('usuarios_sistema.id_clinica', $idClinica)
+            ->pluck('doctores.id_doctor')
+            ->map(fn($id) => (int) $id)
+            ->all();
+
+        $doctoresTotal = count($doctorIds);
+        if ($doctoresTotal <= 0) {
+            $doctoresTotal = 1;
+        }
+
+        $citas = Cita::where('id_clinica', $idClinica)
+            ->whereIn('estado_cita', ['pendiente', 'confirmada'])
+            ->whereDate('fecha_hora_inicio', $fechaObj->toDateString())
+            ->get(['id_doctor', 'fecha_hora_inicio', 'fecha_hora_fin']);
+
+        $bloqueos = \App\Models\HorarioBloqueado::where('estatus_horario', 'activo')
+            ->whereIn('id_doctor', $doctorIds)
+            ->where('fecha_inicio', '<', $finDia)
+            ->where('fecha_fin', '>', $inicioDia)
+            ->get(['id_doctor', 'fecha_inicio', 'fecha_fin']);
+
+        $horasOcupadas = [];
+        $totalSlots = 0;
+
+        $slotInicio = $inicioDia->copy();
+        while ($slotInicio < $finDia) {
+            $slotFin = $slotInicio->copy()->addMinutes($intervaloMinutos);
+            $totalSlots++;
+
+            $doctoresBloqueados = [];
+            foreach ($bloqueos as $bloqueo) {
+                $bloqueoInicio = Carbon::parse($bloqueo->fecha_inicio);
+                $bloqueoFin = Carbon::parse($bloqueo->fecha_fin);
+                if ($bloqueoInicio < $slotFin && $bloqueoFin > $slotInicio) {
+                    $doctoresBloqueados[(int) $bloqueo->id_doctor] = true;
+                }
+            }
+
+            $doctoresDisponibles = $doctoresTotal - count($doctoresBloqueados);
+            if ($doctoresDisponibles <= 0) {
+                $horasOcupadas[] = $slotInicio->format('H:i');
+                $slotInicio->addMinutes($intervaloMinutos);
+                continue;
+            }
+
+            $ocupacionSlot = 0;
+            foreach ($citas as $cita) {
+                if (isset($doctoresBloqueados[(int) $cita->id_doctor])) {
+                    continue;
+                }
+
+                $citaInicio = Carbon::parse($cita->fecha_hora_inicio);
+                $citaFin = Carbon::parse($cita->fecha_hora_fin);
+                if ($citaInicio < $slotFin && $citaFin > $slotInicio) {
+                    $ocupacionSlot++;
+                }
+            }
+
+            if ($ocupacionSlot >= $doctoresDisponibles) {
+                $horasOcupadas[] = $slotInicio->format('H:i');
+            }
+
+            $slotInicio->addMinutes($intervaloMinutos);
+        }
+
+        return [
+            'horas_ocupadas' => array_values(array_unique($horasOcupadas)),
+            'total_slots' => $totalSlots,
+        ];
     }
 
 }

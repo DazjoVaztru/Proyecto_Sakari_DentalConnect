@@ -343,7 +343,17 @@
                             <input type="date" name="nueva_fecha" id="input-nueva-fecha"
                                 style="padding: 14px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1.1rem; 
                                                                                background: rgba(255, 255, 255, 0.9); outline: none; color: #333; font-weight: 600;"
-                                onchange="generarHorariosDisponibles(this.value)">
+                                onchange="recalcularHorariosWidget()">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: #333;">Duración de la cita</label>
+                            <select name="nueva_duracion_minutos" id="input-nueva-duracion"
+                                style="padding: 12px; border: 2px solid rgba(0, 209, 255, 0.2); border-radius: 12px; font-size: 1rem; background: rgba(255, 255, 255, 0.9); color: #333; font-weight: 600;"
+                                onchange="recalcularHorariosWidget()">
+                                <option value="15">15 minutos</option>
+                                <option value="30" selected>30 minutos</option>
+                            </select>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -732,6 +742,13 @@ let horasOcupadas = [];
 let calMesActual = new Date().getMonth() + 1;
 let calAnioActual = new Date().getFullYear();
 let fechaCitaActual = null;
+let contextoHorarioWidget = {
+    fecha: null,
+    horaInicio: '09:00',
+    horaFin: '18:00',
+    horasOcupadas: [],
+    intervaloMinutos: 15
+};
 
 const monthNames = [
 "Enero","Febrero","Marzo","Abril","Mayo","Junio",
@@ -897,7 +914,9 @@ function generarHorariosDisponibles(
     fechaSeleccionada,
     horaInicioStr='09:00',
     horaFinStr='18:00',
-    horasOcupadas=[]
+    horasOcupadas=[],
+    intervaloMinutos=15,
+    duracionMinutos=30
 ){
 
     const contenedor = document.getElementById('contenedor-horarios');
@@ -925,9 +944,12 @@ function generarHorariosDisponibles(
 
         horariosClinica.push(`${h}:${m}`);
 
-        currentDate.setMinutes(currentDate.getMinutes()+60);
+        currentDate.setMinutes(currentDate.getMinutes()+intervaloMinutos);
 
     }
+
+    const horasOcupadasSet = new Set(horasOcupadas);
+    const bloquesNecesarios = Math.max(1, Math.ceil(duracionMinutos / intervaloMinutos));
 
     contenedor.innerHTML='';
 
@@ -941,7 +963,18 @@ function generarHorariosDisponibles(
 
         btn.innerText=hora;
 
-        if(horasOcupadas.includes(hora)){
+        const indiceActual = horariosClinica.indexOf(hora);
+        let puedeIniciar = true;
+
+        for (let i = 0; i < bloquesNecesarios; i++) {
+            const slot = horariosClinica[indiceActual + i];
+            if (!slot || horasOcupadasSet.has(slot)) {
+                puedeIniciar = false;
+                break;
+            }
+        }
+
+        if(!puedeIniciar){
 
             btn.disabled=true;
             btn.style.background="#ef4444";
@@ -971,6 +1004,42 @@ function generarHorariosDisponibles(
 
 }
 
+function recalcularHorariosWidget() {
+    const inputFecha = document.getElementById('input-nueva-fecha');
+    const nuevaFecha = inputFecha ? inputFecha.value : null;
+    if (!nuevaFecha) return;
+
+    if (contextoHorarioWidget.fecha !== nuevaFecha) {
+        fetch(`/api/calendario/horas-ocupadas?fecha=${nuevaFecha}`)
+            .then(res => res.ok ? res.json() : { horas_ocupadas: [], intervalo_minutos: 15 })
+            .then(data => {
+                contextoHorarioWidget.fecha = nuevaFecha;
+                contextoHorarioWidget.horasOcupadas = (data.horas_ocupadas || []).map(hora => hora.substring(0, 5));
+                contextoHorarioWidget.intervaloMinutos = parseInt(data.intervalo_minutos || 15, 10);
+                recalcularHorariosWidget();
+            })
+            .catch(() => {
+                contextoHorarioWidget.fecha = nuevaFecha;
+                contextoHorarioWidget.horasOcupadas = [];
+                contextoHorarioWidget.intervaloMinutos = 15;
+                recalcularHorariosWidget();
+            });
+        return;
+    }
+
+    const duracionSelect = document.getElementById('input-nueva-duracion');
+    const duracionMinutos = parseInt(duracionSelect ? duracionSelect.value : '30', 10);
+
+    generarHorariosDisponibles(
+        contextoHorarioWidget.fecha,
+        contextoHorarioWidget.horaInicio,
+        contextoHorarioWidget.horaFin,
+        contextoHorarioWidget.horasOcupadas,
+        contextoHorarioWidget.intervaloMinutos,
+        duracionMinutos
+    );
+}
+
 
 
     function abrirModalAgendar(dia,mes,anio,horaInicio,horaFin){
@@ -986,6 +1055,7 @@ function generarHorariosDisponibles(
 
             // 1. Forzamos el formato 'HH:mm' recortando los segundos de lo que mande el servidor
             horasOcupadas = (data.horas_ocupadas || []).map(hora => hora.substring(0, 5));
+            const intervaloMinutos = parseInt(data.intervalo_minutos || 15, 10);
             
             // Validar si es el día de hoy para deshabilitar también las horas que ya pasaron
             const esHoy = fechaString === new Date().toISOString().split('T')[0];
@@ -993,30 +1063,42 @@ function generarHorariosDisponibles(
                 const now = new Date();
                 // Si llamamos generarHorariosDisponibles, podemos mandarle las "horas ocupadas"
                 // Pero es más fácil inyectar las horas vencidas aquí
-                let hInicio = parseInt(horaInicio ? horaInicio.split(':')[0] : '8');
-                let nowH = now.getHours();
-                let nowM = now.getMinutes();
-                for (let h = hInicio; h <= nowH; h++) {
-                    let hStr = String(h).padStart(2, '0');
-                    if (h < nowH || (h === nowH && nowM > 0)) {
-                        if (!horasOcupadas.includes(`${hStr}:00`)) horasOcupadas.push(`${hStr}:00`);
-                    }
+                const [startH, startM] = (horaInicio || '08:00').split(':').map(Number);
+                const inicio = new Date();
+                inicio.setHours(startH, startM, 0, 0);
+                const corte = new Date(now);
+                while (inicio < corte) {
+                    const hStr = String(inicio.getHours()).padStart(2, '0');
+                    const mStr = String(inicio.getMinutes()).padStart(2, '0');
+                    const slot = `${hStr}:${mStr}`;
+                    if (!horasOcupadas.includes(slot)) horasOcupadas.push(slot);
+                    inicio.setMinutes(inicio.getMinutes() + intervaloMinutos);
                 }
             }
 
-            generarHorariosDisponibles(
-                fechaString,
-                horaInicio || '09:00',
-                horaFin || '18:00',
-                horasOcupadas
-            );
+            contextoHorarioWidget = {
+                fecha: fechaString,
+                horaInicio: horaInicio || '09:00',
+                horaFin: horaFin || '18:00',
+                horasOcupadas: horasOcupadas,
+                intervaloMinutos: intervaloMinutos
+            };
+
+            recalcularHorariosWidget();
 
             openWidget('widget-horario');
 
         })
         .catch(err => {
             console.error('Error cargando horas:', err);
-            generarHorariosDisponibles(fechaString, horaInicio || '09:00', horaFin || '18:00', []);
+            contextoHorarioWidget = {
+                fecha: fechaString,
+                horaInicio: horaInicio || '09:00',
+                horaFin: horaFin || '18:00',
+                horasOcupadas: [],
+                intervaloMinutos: 15
+            };
+            recalcularHorariosWidget();
             openWidget('widget-horario');
         });
 

@@ -872,6 +872,15 @@
                             Selecciona un día en el calendario primero.
                         </p>
 
+                        <div style="margin-bottom: 15px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:700; color:#444;">Duración</label>
+                            <select name="duracion_minutos" id="input-reserva-duracion" class="modern-input"
+                                style="max-width: 220px;" onchange="recalcularHorasReserva()">
+                                <option value="15">15 minutos</option>
+                                <option value="30" selected>30 minutos</option>
+                            </select>
+                        </div>
+
                         {{-- Inputs ocultos compatibles con CitaController --}}
                         <input type="hidden" name="fecha" id="input-reserva-fecha" required>
                         <input type="hidden" name="hora" id="input-reserva-hora" required>
@@ -1590,13 +1599,22 @@
             generarHorasReserva(fechaString, horaInicio || "08:00", horaFin || "20:00");
         }
 
+        function recalcularHorasReserva() {
+            const fecha = document.getElementById('input-reserva-fecha').value;
+            if (!fecha) return;
+
+            const contexto = window.reservaContextoHorarios || { horaInicio: '08:00', horaFin: '20:00' };
+            generarHorasReserva(fecha, contexto.horaInicio || '08:00', contexto.horaFin || '20:00');
+        }
+
         function generarHorasReserva(fecha, horaInicioStr, horaFinStr) {
             const contenedor = document.getElementById('reserva-contenedor-horarios');
             contenedor.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--primary-color); padding: 40px 20px;"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i></div>';
+            window.reservaContextoHorarios = { horaInicio: horaInicioStr, horaFin: horaFinStr };
 
             let horariosClinica = [];
 
-            // Generar slots de 30 min desde horaInicioStr hasta horaFinStr
+            // Generar slots por intervalo dinámico (15 min por defecto)
             if (horaInicioStr && horaFinStr) {
                 let [hInicio, mInicio] = horaInicioStr.split(':').map(Number);
                 let [hFin, mFin] = horaFinStr.split(':').map(Number);
@@ -1608,13 +1626,12 @@
                 endDate.setHours(hFin, mFin, 0, 0);
 
                 // Prevenir loop infinito si la configuración es rara
-                while (currentDate < endDate && horariosClinica.length < 48) {
+                while (currentDate < endDate && horariosClinica.length < 96) {
                     let h = String(currentDate.getHours()).padStart(2, '0');
                     let m = String(currentDate.getMinutes()).padStart(2, '0');
                     horariosClinica.push(`${h}:${m}`);
 
-                    // Añadir 60 mins (antes 30)
-                    currentDate.setMinutes(currentDate.getMinutes() + 60);
+                    currentDate.setMinutes(currentDate.getMinutes() + 15);
                 }
             }
 
@@ -1627,13 +1644,43 @@
             fetch(`/api/calendario/horas-ocupadas?fecha=${fecha}`)
                 .then(res => res.json())
                 .then(data => {
-                    const horasOcupadasAPI = data.horas_ocupadas || [];
+                    const intervaloMinutos = parseInt(data.intervalo_minutos || 15, 10);
+                    const horasOcupadasAPI = (data.horas_ocupadas || []).map(h => h.substring(0, 5));
+                    const horasOcupadasSet = new Set(horasOcupadasAPI);
+                    const duracion = parseInt(document.getElementById('input-reserva-duracion')?.value || '30', 10);
+                    const bloquesNecesarios = Math.max(1, Math.ceil(duracion / intervaloMinutos));
+
+                    // Regenerar slots con intervalo informado por backend para mantener consistencia
+                    horariosClinica = [];
+                    let [hInicio, mInicio] = horaInicioStr.split(':').map(Number);
+                    let [hFin, mFin] = horaFinStr.split(':').map(Number);
+                    let currentDate = new Date();
+                    currentDate.setHours(hInicio, mInicio, 0, 0);
+                    let endDate = new Date();
+                    endDate.setHours(hFin, mFin, 0, 0);
+                    while (currentDate < endDate && horariosClinica.length < 96) {
+                        let h = String(currentDate.getHours()).padStart(2, '0');
+                        let m = String(currentDate.getMinutes()).padStart(2, '0');
+                        horariosClinica.push(`${h}:${m}`);
+                        currentDate.setMinutes(currentDate.getMinutes() + intervaloMinutos);
+                    }
+
                     contenedor.innerHTML = ''; // Limpiar loader
 
                     horariosClinica.forEach(hora => {
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'reserva-hora-btn';
+
+                        const indiceActual = horariosClinica.indexOf(hora);
+                        let puedeIniciar = true;
+                        for (let i = 0; i < bloquesNecesarios; i++) {
+                            const slot = horariosClinica[indiceActual + i];
+                            if (!slot || horasOcupadasSet.has(slot)) {
+                                puedeIniciar = false;
+                                break;
+                            }
+                        }
                         
                         // Validar si esta hora está ocupada o ya pasó (si es hoy)
                         const esHoy = fecha === new Date().toISOString().split('T')[0];
@@ -1642,7 +1689,7 @@
                         horaSlotObj.setHours(parseInt(h), parseInt(m), 0, 0);
                         
                         const yaPaso = esHoy && horaSlotObj < new Date();
-                        const estaOcupada = horasOcupadasAPI.includes(hora) || yaPaso;
+                        const estaOcupada = !puedeIniciar || yaPaso;
 
                         // Formato 12 hrs
                         const ampm = h >= 12 ? 'PM' : 'AM';
