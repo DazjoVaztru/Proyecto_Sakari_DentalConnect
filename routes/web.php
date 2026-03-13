@@ -88,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/calendario/horas-ocupadas', [DashboardController::class, 'horasOcupadas'])->name('api.calendario.horas');
     Route::get('/api/pacientes/{id}/odontograma', [OdontogramaController::class, 'index'])->name('api.odontograma.paciente');
     Route::post('/api/pacientes/{id}/odontograma', [OdontogramaController::class, 'store'])->name('api.odontograma.update');
+    Route::delete('/api/odontograma/{id_odontograma}', [OdontogramaController::class, 'destroy'])->name('api.odontograma.delete');
     
 
     // Citas

@@ -484,6 +484,10 @@
                                 <input type="radio" name="tipo_registro" value="tratamiento" id="tipo-tratamiento">
                                 <span style="color: red; font-weight: 700;">Plan/Realizado (Rojo)</span>
                             </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="tipo_registro" value="borrar" id="tipo-borrar">
+                                <span style="color: #444; font-weight: 700;">Borrar marca</span>
+                            </label>
                         </div>
                     </div>
 
@@ -673,6 +677,9 @@
         if(document.getElementById('odontograma-paciente-edad')) {
             document.getElementById('odontograma-paciente-edad').value = data.paciente.edad_numero;
             document.dispatchEvent(new CustomEvent('odontograma:edadCargada', { detail: { edad: data.paciente.edad_numero } }));
+        }
+        if (typeof window.pintarOdontogramaDesdeRegistros === 'function' && Array.isArray(data.odontograma)) {
+            window.pintarOdontogramaDesdeRegistros(data.odontograma);
         }
 
         // Calendario
@@ -1110,6 +1117,55 @@ function confirmarHorario(){
             renderizarFila('fila-temp-inf', dientesTempInf, 'inferior');
             renderizarFila('fila-perm-inf', dientesPermInf, 'inferior');
 
+            function claveCara(numeroDiente, nombreCara) {
+                return `${numeroDiente}-${nombreCara}`;
+            }
+
+            function limpiarMarcasOdontograma() {
+                document.querySelectorAll('.cara-diente').forEach(cara => {
+                    cara.style.fill = '#ffffff';
+                    delete cara.dataset.odontogramaId;
+                });
+            }
+
+            function pintarOdontogramaDesdeRegistros(registros) {
+                limpiarMarcasOdontograma();
+
+                const ultimaMarcaPorCara = {};
+                (registros || []).forEach(registro => {
+                    const key = claveCara(String(registro.numero_diente), registro.cara_diente);
+                    if (!ultimaMarcaPorCara[key]) {
+                        ultimaMarcaPorCara[key] = registro;
+                    }
+                });
+
+                Object.values(ultimaMarcaPorCara).forEach(registro => {
+                    const selector = `.diente[data-diente="${registro.numero_diente}"] .cara-diente[data-cara="${registro.cara_diente}"]`;
+                    const cara = document.querySelector(selector);
+                    if (!cara) return;
+
+                    cara.style.fill = registro.estado_diente === 'hallazgo' ? 'blue' : 'red';
+                    cara.dataset.odontogramaId = registro.id_odontograma;
+                });
+            }
+
+            function recargarOdontogramaPaciente(idPaciente) {
+                return fetch(`/api/pacientes/${idPaciente}/odontograma`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            pintarOdontogramaDesdeRegistros(data.data || []);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error recargando odontograma:', error);
+                    });
+            }
+
+            window.pintarOdontogramaDesdeRegistros = pintarOdontogramaDesdeRegistros;
+
             // Mostrar/Ocultar filas según la edad informada por AJAX
             document.addEventListener('odontograma:edadCargada', function (e) {
                 const edad = parseInt(e.detail.edad);
@@ -1139,6 +1195,47 @@ function confirmarHorario(){
                     const numeroDiente = dienteWrapper.getAttribute('data-diente');
                     const nombreCara = cara.getAttribute('data-cara');
                     const selectElement = document.getElementById('select-servicio');
+                    const tipoRegistro = document.querySelector('input[name="tipo_registro"]:checked').value;
+
+                    const idPaciente = document.getElementById('odontograma-paciente-id').value;
+                    if (!idPaciente) {
+                        alert('No se pudo identificar el paciente del odontograma.');
+                        cara.style.fill = 'white';
+                        return;
+                    }
+
+                    if (tipoRegistro === 'borrar') {
+                        const idOdontograma = cara.dataset.odontogramaId;
+
+                        if (!idOdontograma) {
+                            alert('Esa cara del diente no tiene una marca registrada para borrar.');
+                            return;
+                        }
+
+                        const confirmar = confirm('¿Deseas borrar esta marca del odontograma?');
+                        if (!confirmar) return;
+
+                        fetch(`/api/odontograma/${idOdontograma}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    recargarOdontogramaPaciente(idPaciente);
+                                } else {
+                                    alert('No se pudo borrar la marca: ' + (data.message || 'Desconocido'));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error al borrar marca:', error);
+                                alert('Ocurrió un error al borrar la marca.');
+                            });
+                        return;
+                    }
 
                     if (!selectElement || !selectElement.value) {
                         alert("Por favor, selecciona un tratamiento primero.");
@@ -1146,17 +1243,9 @@ function confirmarHorario(){
                     }
 
                     const idServicio = selectElement.value;
-                    const tipoRegistro = document.querySelector('input[name="tipo_registro"]:checked').value;
                     const color = (tipoRegistro === 'hallazgo') ? 'blue' : 'red';
 
                     cara.style.fill = color;
-                    const idPaciente = document.getElementById('odontograma-paciente-id').value;
-
-                    if (!idPaciente) {
-                        alert('No se pudo identificar el paciente del odontograma.');
-                        cara.style.fill = 'white';
-                        return;
-                    }
 
                     fetch(`/api/pacientes/${idPaciente}/odontograma`, {
                         method: 'POST',
@@ -1177,6 +1266,9 @@ function confirmarHorario(){
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
+                                if (data.data && data.data.id_odontograma) {
+                                    cara.dataset.odontogramaId = data.data.id_odontograma;
+                                }
                                 console.log('Odontograma actualizado en BD', data);
                             } else {
                                 alert("Error al guardar: " + (data.message || "Desconocido"));
