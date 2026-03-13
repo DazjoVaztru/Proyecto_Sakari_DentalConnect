@@ -668,6 +668,22 @@ Incluye:
                 </a>
             </li>
 
+            <li class="nav-item {{ request()->routeIs('suscripciones.show') ? 'active' : '' }}">
+                <a href="{{ route('suscripciones.show') }}" class="nav-content">
+                    <span class="icon"><i class="fa-solid fa-crown"></i></span>
+                    <span class="text">Suscripción</span>
+                </a>
+            </li>
+
+            @if(auth()->check() && auth()->user()->rol === 'administrador')
+                <li class="nav-item {{ request()->routeIs('admin.panel') ? 'active' : '' }}">
+                    <a href="{{ route('admin.panel') }}" class="nav-content">
+                        <span class="icon"><i class="fa-solid fa-shield-halved"></i></span>
+                        <span class="text">Admin SaaS</span>
+                    </a>
+                </li>
+            @endif
+
             <li class="nav-item">
                 <form action="{{ route('logout') }}" method="POST" id="logout-form">
                     @csrf

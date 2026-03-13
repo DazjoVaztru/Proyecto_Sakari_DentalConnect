@@ -8,6 +8,9 @@ use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\PublicidadController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\CitaController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\SuscripcionController;
+use App\Http\Controllers\AdminPanelController;
 use App\Http\Controllers\Api\OdontogramaController;
 use App\Http\Controllers\Api\PacienteHistorialController;
 
@@ -39,10 +42,11 @@ Route::get('/recuperar-password', function () {
     return view('auth.reset-password');
 })->name('password.reset');
 
-// Redirigir la raíz al dashboard o login según corresponda
-Route::get('/', function () {
-    return redirect()->route('dashboard');
-});
+// Landing SaaS pública
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+
+// Webhook de Stripe (sin CSRF, configurado en bootstrap/app.php)
+Route::post('/stripe/webhook', [SuscripcionController::class, 'webhook'])->name('stripe.webhook');
 
 /**
  * Rutas Privadas / Protegidas.
@@ -53,6 +57,12 @@ Route::get('/', function () {
 // Rutas Privadas (Requieren Login)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Suscripciones SaaS
+    Route::get('/suscripciones', [SuscripcionController::class, 'show'])->name('suscripciones.show');
+    Route::post('/suscripciones/checkout/{planSlug}', [SuscripcionController::class, 'checkout'])->name('suscripciones.checkout');
+    Route::get('/suscripciones/success', [SuscripcionController::class, 'success'])->name('suscripciones.success');
+    Route::get('/suscripciones/cancel', [SuscripcionController::class, 'cancel'])->name('suscripciones.cancel');
 
     // Pacientes
     Route::resource('pacientes', PacienteController::class);
@@ -66,8 +76,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/citas/{id}/actualizar', [DashboardController::class, 'actualizarCita'])->name('citas.actualizar');
 
     // Publicidad
-
-    Route::resource('publicidad', App\Http\Controllers\PublicidadController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('publicidad', App\Http\Controllers\PublicidadController::class)
+        ->only(['index', 'store', 'destroy'])
+        ->middleware('plan:premium');
     // Configuración
     Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion.index');
     Route::post('/configuracion/clinica', [ConfiguracionController::class, 'updateClinica'])->name('configuracion.updateClinica');
@@ -97,4 +108,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Citas
     Route::post('/citas', [CitaController::class, 'store'])->name('citas.store');
+
+    // Panel global para administración SaaS (clientes + marketing)
+    Route::middleware('role:administrador')->group(function () {
+        Route::get('/admin/panel', [AdminPanelController::class, 'index'])->name('admin.panel');
+    });
 });
