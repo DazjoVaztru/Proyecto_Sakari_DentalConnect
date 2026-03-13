@@ -86,8 +86,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/citas/{id}/completar', [DashboardController::class, 'completarCita'])->name('api.cita.completar');
     Route::get('/api/calendario/disponibilidad', [DashboardController::class, 'obtenerDisponibilidadMes'])->name('api.calendario');
     Route::get('/api/calendario/horas-ocupadas', [DashboardController::class, 'horasOcupadas'])->name('api.calendario.horas');
-    Route::get('/api/pacientes/{id}/odontograma', [OdontogramaController::class, 'getOdontograma'])->name('api.odontograma.paciente');
-    Route::post('/api/pacientes/{id}/odontograma', [OdontogramaController::class, 'updateOdontograma'])->name('api.odontograma.update');
+    Route::get('/api/pacientes/{id}/odontograma', [OdontogramaController::class, 'index'])->name('api.odontograma.paciente');
+    Route::post('/api/pacientes/{id}/odontograma', [OdontogramaController::class, 'store'])->name('api.odontograma.update');
     
 
     // Citas

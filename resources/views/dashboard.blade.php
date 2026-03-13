@@ -1152,7 +1152,13 @@ function confirmarHorario(){
                     cara.style.fill = color;
                     const idPaciente = document.getElementById('odontograma-paciente-id').value;
 
-                    fetch('/api/odontograma', {
+                    if (!idPaciente) {
+                        alert('No se pudo identificar el paciente del odontograma.');
+                        cara.style.fill = 'white';
+                        return;
+                    }
+
+                    fetch(`/api/pacientes/${idPaciente}/odontograma`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
