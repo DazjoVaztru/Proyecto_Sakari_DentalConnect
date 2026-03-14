@@ -705,7 +705,9 @@ Incluye:
 
     <script>
         // --- Modal System ---
+        // Abre un modal por id reutilizable en todas las secciones del panel.
         function openModal(id) { document.getElementById(id).classList.add('active'); }
+        // Cierra un modal por id reutilizable en todas las secciones del panel.
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         window.onclick = function (event) {
             if (event.target.classList.contains('modal-overlay')) {
@@ -714,6 +716,7 @@ Incluye:
         }
 
         // --- Tabs Logic ---
+        // Alterna tabs en el modal activo (comportamiento global compartido).
         function switchTab(tabId) {
             // Encuentra el contenedor padre (modal) de este botón
             const parent = document.querySelector('.modal-overlay.active .modal-glass') || document;
@@ -733,8 +736,10 @@ Incluye:
 
         // --- Odontograma Logic (Global) ---
         let herramientaActual = 'caries';
+        // Cambia herramienta activa de pintura en odontograma simple.
         function setHerramienta(h) { herramientaActual = h; }
 
+        // Crea el HTML de un diente con sus cinco zonas interactivas.
         function renderizarDiente(numero) {
             return `
                 <div class="diente-wrapper">
@@ -749,6 +754,7 @@ Incluye:
                 </div>`;
         }
 
+        // Aplica visualmente el estado seleccionado sobre una cara del diente.
         function marcarZona(elemento, idDiente, zona) {
             elemento.classList.remove('estado-caries', 'estado-realizado');
             if (herramientaActual === 'caries') elemento.classList.add('estado-caries');
@@ -756,6 +762,7 @@ Incluye:
         }
 
         // Inicializar Odontogramas cuando se abren los modales
+        // Inicializa una plantilla de odontograma solo una vez por contenedor.
         function initOdontogram(containerId) {
             const contenedor = document.getElementById(containerId);
             if (!contenedor || contenedor.innerHTML !== '') return;

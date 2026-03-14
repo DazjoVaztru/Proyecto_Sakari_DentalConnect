@@ -2,7 +2,19 @@
 
 @section('titulo', 'Panel Principal')
 
+{{-- =====================================================================
+IDX-00 | VISTA DASHBOARD
+Resumen de secciones:
+- IDX-01: Encabezado y metricas rapidas
+- IDX-02: Lista de citas pendientes
+- IDX-03: Modal principal de detalle de cita
+- IDX-04: Widgets internos (horario, seguimiento, pago)
+- IDX-05: Tab odontograma
+- IDX-06: Script principal (calendario, modal, odontograma, paginacion)
+====================================================================== --}}
+
 @section('contenido')
+    {{-- IDX-01 | Encabezado y métricas rápidas --}}
     <h2 class="page-title">Panel Principal</h2>
 
     {{-- =====================================================================
@@ -57,7 +69,8 @@
 </div>
 
 </div>
-       {{-- Tarjeta Principal: Citas --}}
+    {{-- IDX-02 | Tarjeta principal de citas pendientes --}}
+    {{-- Tarjeta Principal: Citas --}}
 <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: var(--shadow);">
     <h3 style="margin-bottom: 20px; color: #333; font-weight: 700;">Próximas Citas Pendientes</h3>
     
@@ -133,6 +146,7 @@
     </div>
 </div>
 
+    {{-- IDX-03 | Modal principal de detalle de cita --}}
     <div class="modal-overlay" id="modal-detalle-cita">
         <div class="modal-glass modal-xl"
             style="background: #F8FDFF; padding: 0; max-width: 1750px; width: 98vw; height: 95vh; display: flex; overflow: hidden; border-radius: 20px; border: 1px solid #dceeef;">
@@ -323,6 +337,7 @@
                     <input type="hidden" id="raw-total-abonado" value="0">
                 </div>
 
+                <!-- IDX-04A | Widget de horario (reprogramacion) -->
                 <!-- WIDGET 2: HORARIO (Aparece sobre Resumen/Odontograma) -->
                 <div id="widget-horario" class="inner-widget"
                     style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
@@ -383,6 +398,7 @@
                     </div>
                 </div>
 
+                <!-- IDX-04B | Widget de seguimiento clinico -->
                 <!-- WIDGET 3: SEGUIMIENTO -->
                 <div id="widget-seguimiento" class="inner-widget"
                     style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; width: 80%; max-width: 600px;">
@@ -402,6 +418,7 @@
                         onclick="closeWidgets()">Confirmar / Volver</button>
                 </div>
 
+                <!-- IDX-04C | Widget de pago del dia -->
                 <!-- WIDGET 4: PAGO -->
                 <div id="widget-pago" class="inner-widget"
                     style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 100; width: 80%; max-width: 400px;">
@@ -422,6 +439,7 @@
                         onclick="closeWidgets()">Confirmar / Volver</button>
                 </div>
 
+                <!-- IDX-05 | Tab Odontograma -->
                 <!-- TAB O: ODONTOGRAMA -->
                 <div id="tab-odontograma" class="tab-content" style="display: none; height: 100%;">
                     <div
@@ -606,14 +624,30 @@
 
 @endsection
 
-//
 @section('scripts')
 <script>
+    // =====================================================================
+    // IDX-06 | Script principal del dashboard
+    // Mapa rapido de bloques JS:
+    // - IDX-JS-01: Estado global
+    // - IDX-JS-02: Modal de cita (carga y render)
+    // - IDX-JS-03: Calendario mensual
+    // - IDX-JS-04: Horarios y reagendado
+    // - IDX-JS-05: Odontograma interactivo
+    // - IDX-JS-06: Guardado de cambios (AJAX)
+    // - IDX-JS-07: Utilidades UI (tabs/widgets/saldo)
+    // - IDX-JS-08: Completar cita
+    // - IDX-JS-09: Paginacion historial
+    // =====================================================================
+
+    // IDX-JS-01 | Estado global de paginacion
     // --- VARIABLES GLOBALES DE PAGINACIÓN ---
     window.todasLasFilas = [];
     window.paginaActual = 1;
     window.filasPorPagina = 4; // Ajustamos a 4 para que se vea bien en el modal
 
+    // IDX-JS-02 | Carga integral de datos en modal de cita
+    // Flujo principal del modal: carga datos de cita/paciente y prepara widgets.
     function cargarModalCita(idCita){
         console.log("Abrir cita:", idCita);
 
@@ -734,6 +768,7 @@
 
 }
 
+// IDX-JS-03 | Calendario mensual de disponibilidad
 // ==========================================
 // CALENDARIO
 // ==========================================
@@ -755,6 +790,7 @@ const monthNames = [
 "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
 ];
 
+// Dibuja el calendario mensual de disponibilidad con semaforizacion por dia.
 function cargarCalendarioFuncional(mes, anio){
 
     const titulo = document.getElementById('cal-mes-anio');
@@ -886,6 +922,7 @@ function cargarCalendarioFuncional(mes, anio){
 
 
 
+// Navegacion de mes en el calendario del modal.
 function cambiarMes(delta){
 
     calMesActual += delta;
@@ -906,10 +943,12 @@ function cambiarMes(delta){
 
 
 
+// IDX-JS-04 | Motor de horarios y reprogramacion
 // ==========================================
 // HORARIOS
 // ==========================================
 
+// Genera botones de horarios segun jornada, ocupacion y duracion elegida.
 function generarHorariosDisponibles(
     fechaSeleccionada,
     horaInicioStr='09:00',
@@ -1004,6 +1043,7 @@ function generarHorariosDisponibles(
 
 }
 
+// Recalcula slots del widget cuando cambia fecha, ocupacion o duracion.
 function recalcularHorariosWidget() {
     const inputFecha = document.getElementById('input-nueva-fecha');
     const nuevaFecha = inputFecha ? inputFecha.value : null;
@@ -1042,6 +1082,7 @@ function recalcularHorariosWidget() {
 
 
 
+    // Abre widget de horario para un dia especifico y consulta horas ocupadas.
     function abrirModalAgendar(dia,mes,anio,horaInicio,horaFin){
 
         const fechaString =
@@ -1110,6 +1151,7 @@ function recalcularHorariosWidget() {
 // CONFIRMAR HORARIO
 // ==========================================
 
+// Valida que exista hora seleccionada antes de cerrar el widget.
 function confirmarHorario(){
 
     const hora =
@@ -1129,6 +1171,7 @@ function confirmarHorario(){
 
 
 
+        // IDX-JS-05 | Odontograma interactivo (render, pintar, guardar, borrar)
         // ==========================================
         // LÓGICA INTERACTIVA ODONTOGRAMA (Dinámica)
         // ==========================================
@@ -1148,6 +1191,7 @@ function confirmarHorario(){
                                                                                                                                                                 <circle class="cara-diente" data-cara="oclusal" cx="50" cy="50" r="25" />
                                                                                                                                                             </svg>
                                                                                                                                                         `;
+            // Mapea numero FDI de diente al SVG anatomico correspondiente.
             function obtenerIdAnatomia(numero) {
                 const numStr = numero.toString();
                 const ultimoDigito = parseInt(numStr[numStr.length - 1]);
@@ -1167,6 +1211,7 @@ function confirmarHorario(){
                 return '#tooth-incisor'; // Fallback
             }
 
+            // Renderiza una fila completa de dientes (permanentes o temporales).
             function renderizarFila(contenedorId, arrayDientes, orientacion) {
                 const contenedor = document.getElementById(contenedorId);
                 contenedor.innerHTML = '';
@@ -1199,10 +1244,12 @@ function confirmarHorario(){
             renderizarFila('fila-temp-inf', dientesTempInf, 'inferior');
             renderizarFila('fila-perm-inf', dientesPermInf, 'inferior');
 
+            // Llave unica para identificar una cara concreta de un diente.
             function claveCara(numeroDiente, nombreCara) {
                 return `${numeroDiente}-${nombreCara}`;
             }
 
+            // Limpia color/metadata para repintar odontograma desde servidor.
             function limpiarMarcasOdontograma() {
                 document.querySelectorAll('.cara-diente').forEach(cara => {
                     cara.style.fill = '#ffffff';
@@ -1210,6 +1257,7 @@ function confirmarHorario(){
                 });
             }
 
+            // Pinta el odontograma con los ultimos registros de cada cara dental.
             function pintarOdontogramaDesdeRegistros(registros) {
                 limpiarMarcasOdontograma();
 
@@ -1231,6 +1279,7 @@ function confirmarHorario(){
                 });
             }
 
+            // Refresca en caliente el odontograma tras crear/borrar una marca.
             function recargarOdontogramaPaciente(idPaciente) {
                 return fetch(`/api/pacientes/${idPaciente}/odontograma`, {
                     headers: { 'Accept': 'application/json' }
@@ -1365,6 +1414,7 @@ function confirmarHorario(){
             });
         });
 
+        // IDX-JS-06 | Envio AJAX de formulario principal
         // ==========================================
         // AJAX FORM SUBMISSION
         // ==========================================
@@ -1453,7 +1503,9 @@ function confirmarHorario(){
         });
 
 
+    // IDX-JS-07 | Utilidades de interfaz (tabs, widgets, calculos)
 
+        // Cambia entre tabs principales del modal (resumen/odontograma).
         function switchTab(tabId) {
             // Ocultar todos los tabs que NO sean inner-widgets
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1471,6 +1523,7 @@ function confirmarHorario(){
         }
 
         // --- MANEJO DE WIDGETS EMERGENTES ---
+        // Abre un widget interno flotante dentro del modal.
         function openWidget(widgetId) {
             document.getElementById('internal-widget-overlay').style.display = 'block';
             document.querySelectorAll('.inner-widget').forEach(w => w.style.display = 'none'); // Cierra otros posibles widgets abiertos
@@ -1482,6 +1535,7 @@ function confirmarHorario(){
             }
         }
 
+        // Cierra todos los widgets internos y oculta overlay.
         function closeWidgets() {
             document.getElementById('internal-widget-overlay').style.display = 'none';
             document.querySelectorAll('.inner-widget').forEach(w => w.style.display = 'none');
@@ -1491,6 +1545,7 @@ function confirmarHorario(){
         document.getElementById('internal-widget-overlay').addEventListener('click', closeWidgets);
 
         // --- CALCULO MATEMATICO EN TIEMPO REAL ---
+        // Recalcula saldo restante en tiempo real segun abono ingresado.
         function calcularVueltoReal() {
             const costoTotalBase = parseFloat(document.getElementById('raw-costo-total').value) || 0;
             const abonoAnterior = parseFloat(document.getElementById('raw-total-abonado').value) || 0;
@@ -1504,9 +1559,11 @@ function confirmarHorario(){
             document.getElementById('lbl-restante').innerText = restanteVirtual.toFixed(2);
         }
 
+        // IDX-JS-08 | Cambio de estado de cita a completada
         // ==========================================
         // MARCAR CITA COMO COMPLETADA
         // ==========================================
+        // Marca cita como completada desde la tarjeta rapida del dashboard.
         function completarCita(idCita) {
             const btn = document.getElementById('btn-completar-' + idCita);
 
@@ -1579,9 +1636,11 @@ function confirmarHorario(){
                 });
         }
 
+        // IDX-JS-09 | Paginacion del historial de citas del paciente
         // ==========================================
         // FUNCIONES DE PAGINACIÓN
         // ==========================================
+        // Renderiza pagina actual de historial de citas en tabla paginada.
         function renderizarPagina() {
             const tbody = document.getElementById('cita-tabla-body');
             if (!tbody || !window.todasLasFilas) return;
@@ -1622,6 +1681,7 @@ function confirmarHorario(){
             }
         }
 
+        // Navega entre paginas del historial manteniendo limites validos.
         function cambiarPagina(direccion) {
             if (!window.todasLasFilas) return;
 

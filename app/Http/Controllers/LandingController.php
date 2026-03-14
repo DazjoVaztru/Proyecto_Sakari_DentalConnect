@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\Auth;
 
 class LandingController extends Controller
 {
+    /**
+     * Renderiza la landing comercial del SaaS.
+     *
+     * Carga planes activos, anuncios de publicidad y, si hay sesion,
+     * muestra tambien el estado de suscripcion de la clinica.
+     */
     public function index()
     {
         $planes = PlanSaas::where('activo', true)->orderBy('nivel')->get();

@@ -19,7 +19,10 @@ class DashboardController extends Controller
 {
 
     /**
-     * Dashboard principal
+    * Construye el dashboard principal de la clinica autenticada.
+    *
+    * Recolecta metricas rapidas y lista de citas pendientes para pintar
+    * la vista inicial del panel operativo.
      */
     public function index()
     {
@@ -97,7 +100,10 @@ class DashboardController extends Controller
 
 
     /**
-     * Obtener datos del modal
+        * Retorna toda la data del modal de detalle de cita en formato JSON.
+        *
+        * Incluye informacion clinica del paciente, historial paginado,
+        * resumen financiero y registros del odontograma.
      */
     public function obtenerDatosModal($idCita)
     {
@@ -195,7 +201,10 @@ class DashboardController extends Controller
 
 
     /**
-     * Actualizar cita
+        * Actualiza estado, costo, agenda y notas de una cita.
+        *
+        * Si cambia la fecha/hora, valida disponibilidad real de doctores
+        * antes de persistir para evitar doble asignacion.
      */
     public function actualizarCita(Request $request,$idCita)
     {
@@ -283,7 +292,10 @@ class DashboardController extends Controller
 
 
     /**
-     * Completar cita
+        * Marca una cita como completada.
+        *
+        * Se usa desde el flujo rapido del dashboard para retirar la cita
+        * de pendientes sin abrir formularios adicionales.
      */
     public function completarCita($idCita)
     {
@@ -305,7 +317,10 @@ class DashboardController extends Controller
 
 
     /**
-     * Disponibilidad del mes
+        * Calcula disponibilidad diaria del mes para el mini-calendario.
+        *
+        * Devuelve color y clickabilidad por dia considerando horarios,
+        * capacidad por doctores, bloqueos y fechas pasadas.
      */
     public function obtenerDisponibilidadMes(Request $request)
     {
@@ -371,7 +386,10 @@ class DashboardController extends Controller
 
 
     /**
-     * Horas ocupadas
+        * Devuelve slots ocupados de una fecha especifica.
+        *
+        * Este endpoint alimenta el widget de reagendado para bloquear
+        * horas no disponibles al momento de seleccionar horario.
      */
     public function horasOcupadas(Request $request)
     {
@@ -418,6 +436,11 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Busca un doctor libre en el intervalo solicitado.
+     *
+     * Excluye doctores bloqueados y evita traslapes con otras citas.
+     */
     private function buscarDoctorDisponible(int $idClinica, Carbon $inicio, Carbon $fin, ?int $excludeCitaId = null): ?int
     {
         $doctores = DB::table('doctores')
@@ -455,6 +478,12 @@ class DashboardController extends Controller
         return null;
     }
 
+    /**
+     * Calcula slots ocupados por capacidad total de doctores.
+     *
+     * Si todos los doctores disponibles estan ocupados en un slot,
+     * dicho horario se marca como no seleccionable en UI.
+     */
     private function calcularSlotsOcupadosPorCapacidad(int $idClinica, string $fecha, string $horaInicio, string $horaFin, int $intervaloMinutos): array
     {
         $fechaObj = Carbon::parse($fecha);

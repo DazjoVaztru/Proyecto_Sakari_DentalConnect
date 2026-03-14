@@ -5,12 +5,19 @@
 @section('contenido')
     <div class="header-section" style="margin-bottom: 30px;">
         <h2 class="page-title">Configuración de la Clínica {{ $clinica->nombre_comercial }}</h2>
-        <p style="color: #666;">Gestiona la información de tu consultorio y de tu equipo/p>
+        <p style="color: #666;">Gestiona la información de tu consultorio y de tu equipo</p>
     </div>
 
     @if(session('success'))
         <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <i class="fa-solid fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div style="background: #f8d7da; color: #842029; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {{ $errors->first() }}
         </div>
     @endif
 
