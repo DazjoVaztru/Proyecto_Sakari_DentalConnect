@@ -13,6 +13,8 @@ use App\Http\Controllers\CitaController;
 // Login
 Route::post('/login', [AuthController::class, 'login']);
 
+// AGREGAR ESTA LÍNEA NUEVA PARA ACTIVAR LA CUENTA
+Route::post('/activar', [AuthController::class, 'activarCuenta']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
