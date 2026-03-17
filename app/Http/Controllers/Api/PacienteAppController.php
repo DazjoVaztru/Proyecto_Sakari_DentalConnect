@@ -193,4 +193,138 @@ class PacienteAppController extends Controller
 
         return response()->json(['success' => true, 'publicidad' => $promociones]);
     }
+
+/**
+     * Retorna el catálogo de servicios/tratamientos de la clínica.
+     */
+    public function tratamientos(Request $request)
+    {
+        $idClinica = Auth::user()->id_clinica ?? 1;
+
+        $servicios = \App\Models\Servicio::where('id_clinica', $idClinica)
+            ->select('id_servicio', 'nombre_servicio', 'precio_base', 'categoria')
+            ->get();
+
+        return response()->json($servicios);
+    }
+
+    /**
+     * Agendar una nueva cita desde la aplicación móvil.
+     */
+    public function agendarCita(Request $request)
+    {
+        $request->validate([
+            'id_servicio' => 'required|exists:catalogo_servicios,id_servicio',
+            'fecha' => 'required|date_format:Y-m-d',
+            'hora' => 'required|date_format:H:i',
+        ]);
+
+        try {
+            $user = Auth::user();
+            $idClinica = $user->id_clinica;
+            
+            $paciente = Paciente::where('id_usuario', $user->id_usuario)->first();
+            if (!$paciente) {
+                return response()->json(['success' => false, 'message' => 'Paciente no encontrado.'], 404);
+            }
+
+            $fechaHora = Carbon::createFromFormat('Y-m-d H:i', $request->fecha . ' ' . $request->hora);
+            $finHora = $fechaHora->copy()->addMinutes(30);
+
+            $servicio = \App\Models\Servicio::findOrFail($request->id_servicio);
+
+            $citaController = new \App\Http\Controllers\CitaController();
+            
+            $reflection = new \ReflectionMethod($citaController, 'buscarDoctorDisponible');
+            $reflection->setAccessible(true);
+            $idDoctor = $reflection->invoke($citaController, $idClinica, $fechaHora, $finHora);
+
+            if (!$idDoctor) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'El horario seleccionado ya no está disponible.'
+                ], 400);
+            }
+
+            $cita = Cita::create([
+                'id_clinica' => $idClinica,
+                'id_paciente' => $paciente->id_paciente,
+                'id_doctor' => $idDoctor,
+                'id_servicio' => $request->id_servicio,
+                'fecha_hora_inicio' => $fechaHora,
+                'fecha_hora_fin' => $finHora,
+                'estado_cita' => 'pendiente',
+                'motivo' => $servicio->nombre_servicio,
+                'costo_estimado' => $servicio->precio_base,
+            ]);
+
+            return response()->json([
+                'success' => true, 
+                'message' => '¡Cita agendada correctamente!',
+                'data' => $cita
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al agendar: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Retorna los horarios disponibles de un día específico (ej. 09:00 AM)
+     */
+    public function horasDisponiblesDia(Request $request)
+    {
+        $fecha = $request->query('fecha');
+        $idClinica = Auth::user()->id_clinica ?? 1;
+
+        $citasOcupadas = Cita::where('id_clinica', $idClinica)
+            ->whereDate('fecha_hora_inicio', $fecha)
+            ->whereIn('estado_cita', ['pendiente', 'confirmada'])
+            ->pluck('fecha_hora_inicio')
+            ->map(function ($date) {
+                return Carbon::parse($date)->format('H:i');
+            })->toArray();
+
+        $horarios = [];
+        $inicio = Carbon::parse($fecha . ' 09:00:00');
+        $fin = Carbon::parse($fecha . ' 18:00:00');
+
+        while ($inicio < $fin) {
+            $horaStr = $inicio->format('H:i');
+            if (!in_array($horaStr, $citasOcupadas)) {
+                $horarios[] = $inicio->format('h:i A');
+            }
+            $inicio->addMinutes(30);
+        }
+
+        return response()->json(['success' => true, 'data' => $horarios]);
+    }
+
+    /**
+     * Retorna los tratamientos en los que el paciente está actualmente
+     */
+    public function tratamientosActivos(Request $request)
+    {
+        $paciente = Paciente::where('id_usuario', Auth::id())->first();
+        if (!$paciente) return response()->json(['success' => false, 'data' => []], 404);
+
+        $citas = Cita::with('servicio')
+            ->where('id_paciente', $paciente->id_paciente)
+            ->where('fecha_hora_inicio', '>=', now()->subDays(60))
+            ->orderBy('fecha_hora_inicio', 'desc')
+            ->get()
+            ->unique('id_servicio');
+
+        $activos = [];
+        foreach ($citas as $cita) {
+            if ($cita->servicio) {
+                $activos[] = [
+                    'nombre' => $cita->servicio->nombre_servicio,
+                    'fecha_inicio' => Carbon::parse($cita->fecha_hora_inicio)->format('M Y'),
+                    'estado' => 'Activo'
+                ];
+            }
+        }
+        return response()->json(['success' => true, 'data' => array_values($activos)]);
+    }
 }
